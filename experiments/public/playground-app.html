@@ -1,0 +1,205 @@
+
+<link rel="import" href="bower_components/paper-button/paper-button.html">
+<link rel="import" href="bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="bower_components/polymerfire/polymerfire.html">
+
+<link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
+
+<link rel="import" href="playground-splash.html">
+<link rel="import" href="playground-pingpong.html">
+
+<dom-module id="playground-app">
+
+  <template>
+
+    <style>
+
+    :host {
+      margin: 0px;
+      padding: 0px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.5rem;
+      transition: opacity ease-in 0.2s;
+      line-height: 1.42857143;
+    }
+
+    .toolbar {
+      @apply(--layout-horizontal);
+      @apply(--layout-justified);
+      background-color: transparent;
+      color: black;
+      padding: 1rem;
+      z-index:999;
+    }
+
+    @media (max-width: 640px) {
+      .toolbar{
+          padding: 1m;
+      }
+      h1.brand {
+        font-size: 1rem;
+      }
+      paper-button.signin {
+        font-size: 0.8rem;
+        padding: 5px 16px;
+        line-height: 1.7rem;
+      }
+      paper-button.signout {
+        font-size: 0.8rem;
+        padding: 5px 16px;
+        line-height: 1.7rem;
+      }
+    }
+
+    .brand {
+      font-size: 0.8rem;
+      line-height: 1rem;
+      color: #black;
+      font-weight:500;
+    }
+
+    .cta-primary {
+      background-color: #0168FA;
+      border: none;
+      color: #FFFFFF;
+      padding: 6.25px 15px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 11px;
+      text-transform: uppercase;
+      margin: 0px 0px 0px 0px;
+      line-height: 1.773;
+      font-weight:700;
+    }
+
+    .cta-secondary {
+      background-color: white;
+      border: 1px solid #c0ccda;
+      color: rgba(27, 46, 75, 0.7);
+      padding: 6.25px 15px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 11px;
+      text-transform: uppercase;
+      margin: 0px 0px 0px 0px;
+      line-height: 1.773;
+      font-weight:700;
+    }
+
+    .the404 {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 0px;
+      width: 100%;
+      padding: 10px;
+    }
+
+    .footer a {
+      text-decoration: none;
+      color: grey;
+      padding: 5px;
+      font-size: 10px;
+    }
+
+    .footer-content {
+      text-align: center;
+    }
+
+    a {
+      text-decoration: none;
+      color: #333;
+    }
+
+    </style>
+
+    <div class="toolbar">
+      <a on-tap="navigateSplash">
+        <h1 class="brand">Clarify </h1>
+      </a>
+
+      <a></a>
+      <a></a>
+
+      <paper-button on-tap="signOut" hidden="[[!signedIn]]" class="cta-secondary">Sign Out</paper-button>
+      <paper-button on-tap="signIn" hidden="[[signedIn]]" class="cta-primary"><span>Sign In</span></paper-button>
+
+    </div>
+
+    <firebase-app
+      name="playground"
+      auth-domain="cortical-thickening.firebaseapp.com"
+      database-url="https://cortical-thickening.firebaseio.com"
+      api-key="AIzaSyCQSSQbkXBbqYCy5mSZye9Xlu_Fs4p4imw"
+      project-id="cortical-thickening">
+    </firebase-app>
+
+    <firebase-auth
+      id="auth"
+      app-name="playground"
+      provider="google"
+      signed-in="{{signedIn}}"
+      user="{{user}}">
+    </firebase-auth>
+
+    <playground-splash
+      id="splash"
+      name="splash"
+      signed-in="[[signedIn]]"
+      name="pingpong"
+      uid="[[user.uid]]">
+    </playground-splash>
+
+    <div class="footer">
+      <div class="footer-content">
+        <a href="https://termsfeed.com/terms-conditions/754e6462ef8a3e127909000f26a01250" target="_blank">terms</a>
+        <a href="https://termsfeed.com/terms-conditions/754e6462ef8a3e127909000f26a01250" target="_blank">privacy</a>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'playground-app',
+
+      properties: {
+        page: {
+          type: String,
+          reflectToAttribute: true,
+          value: "splash"
+        },
+        signedIn: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+        menuOpen: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+
+      },
+
+      signIn: function() {
+        this.$.auth.signInWithPopup();
+      },
+
+      signOut: function() {
+        this.$.auth.signOut();
+      },
+
+    });
+
+  </script>
+
+</dom-module>

@@ -1,0 +1,10 @@
+{
+  "service_account": "/home/jovyan/key.json",
+  "project": "clarify",
+  "test_artifacts_root": "gs://clarify-dev/test",
+  "vox_celeb_data_root": "gs://clarify-data/requires-eula/voxceleb2",
+  "test_video_manifest_path": "gs://clarify-dev/test/extract/manifest.csv",
+  "test_cbt_instance": "clarify",
+  "region": "us-central1",
+  "zone": "us-central1-a"
+}
