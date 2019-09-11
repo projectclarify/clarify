@@ -155,8 +155,10 @@ def video_file_to_cbt(remote_file_path, selection, tmp_dir,
 
   # Read a frame iterable
   video = video_utils.Video()
-  video.load_from_file(local_file_path, downsample_size=(96,96))
-  
+  video.load_from_file(local_file_path,
+                       downsample_size=(downsample_xy_dims,
+                                        downsample_xy_dims))
+
   selection.write_av(audio=audio_array,
                      frames=video,
                      shard_id=shard_id,

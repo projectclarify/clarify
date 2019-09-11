@@ -39,6 +39,9 @@ from pcml.utils import augmentation_utils
 from pcml.utils import cbt_utils
 from pcml.utils import audio_utils
 
+from tensor2tensor.layers import modalities
+from tensor2tensor.data_generators import problem
+
 VOX_CELEB_ROOT = "gs://clarify-data/requires-eula/voxceleb2"
 
 import os
@@ -64,13 +67,17 @@ def example_generator(raw_sampler,
                       video_shape,
                       audio_shape,
                       max_examples,
-                      augmentation_hparams):
+                      augmentation_hparams,
+                      skip_subtypes=[]):
 
   ct = 0
 
   for raw_sample in raw_sampler:
 
     for sample_subtype in raw_sample:
+      
+      if sample_subtype in skip_subtypes:
+        continue
 
       if isinstance(max_examples, int) and ct > max_examples:
         break
@@ -89,7 +96,7 @@ def example_generator(raw_sampler,
         video=video,
         **augmentation_hparams["video"]
       ).astype(np.float32)
-      
+
       video = (video - 128.0)/255.0
 
       audio = augmentation_utils.augment_audio(
@@ -100,15 +107,17 @@ def example_generator(raw_sampler,
 
       audio = (audio - 128.0)/255.0
 
-      label = raw_sample[sample_subtype].labels["overlap"]
-      
+      overlap = raw_sample[sample_subtype].labels["overlap"]
+      #same_video = raw_sample[sample_subtype].labels["same_video"]
+
       audio = standardize_audio_array(
         audio=audio, audio_shape=audio_shape)
 
       yield {
         "audio": audio.tolist(),
         "video": video.flatten().tolist(),
-        "targets": [int(label)]
+        #"targets": [int(same_video), int(overlap)]
+        "targets": [int(overlap)]
       }
 
       ct += 1
@@ -143,7 +152,6 @@ class VoxCelebCbt(problem.Problem):
     return None
 
   def sampling_generator(self, source_selection):
-    """A trivial example generator that just yields sampled video segments."""
 
     sample_generator = source_selection.sample_av_correspondence_examples(
       frames_per_video=self.video_shape[0])
@@ -217,10 +225,20 @@ class VoxCelebCbt(problem.Problem):
               partition_id=0,
               num_partitions=1,
               shuffle_buffer_size=16,
-              max_records=-1):
+              max_records=-1,
+              mode_override=None):
 
     # HACK: Don't shuffle files
     shuffle_files = False
+
+    # HACK
+    # Model predicts NaN's in eval mode because the model is differently configured
+    # in eval mode, not because it's operating on eval instead of training data. It's
+    # important to know exactly what part of this model configuration has this effect
+    # but until then inference can be performed in training mode with eval data by
+    # specifying this `mode_override` parameter when instantiating the tf.data dataset.
+    if mode_override is not None:
+      mode = mode_override
 
     selection = self.dataset_selection(mode=mode)
 
@@ -366,3 +384,56 @@ class VoxCelebCbt(problem.Problem):
 
   def dataset_filename(self):
     return "vox_celeb_problem"
+
+
+@registry.register_problem
+class VoxCelebSingleFrame(VoxCelebCbt):
+
+  @property
+  def video_shape(self):
+    return [1, 96, 96, 3]
+
+  def preprocess_example(self, example, mode, hparams):
+
+    # Reduce the audio data to the required audio shape if it isn't
+    example["audio"] = tf.slice(example["audio"], (0,), (self.audio_shape[0],))
+
+    example["audio"].set_shape((self.audio_shape[0], ))
+    example["video"].set_shape(self.video_shape)
+
+    example["video"] = tf.squeeze(example["video"])
+
+    return example
+
+  def sampling_generator(self, source_selection):
+
+    sample_generator = source_selection.sample_av_correspondence_examples(
+      frames_per_video=self.video_shape[0])
+
+    generator = example_generator(
+      raw_sampler=sample_generator,
+      video_shape=self.video_shape,
+      audio_shape=self.audio_shape,
+      max_examples=self.max_examples,
+      augmentation_hparams=self.augmentation_hparams,
+      skip_subtypes=["negative_different"]
+    )
+
+    return generator
+
+  def hparams(self, defaults, unused_model_hparams):
+    p = defaults
+    p.modality = {"video": modalities.ModalityType.IDENTITY,
+                  "audio": modalities.ModalityType.IDENTITY,
+                  "targets": modalities.ModalityType.IDENTITY}
+
+    p.vocab_size = {"video": 256,
+                    "audio": 256,
+                    "targets": self.num_classes}
+
+    p.batch_size_multiplier = 4
+    p.loss_multiplier = 3.0
+    if self._was_reversed:
+      p.loss_multiplier = 1.0
+    p.input_space_id = problem.SpaceID.IMAGE
+    p.target_space_id = problem.SpaceID.IMAGE_LABEL

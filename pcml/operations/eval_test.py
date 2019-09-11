@@ -119,7 +119,7 @@ class TestEvalJob(tf.test.TestCase):
 
   def tearDown(self):
     """Delete all cron jobs created as part of the test."""
-    
+    pass
 
 if __name__ == "__main__":
   tf.logging.set_verbosity(tf.logging.INFO)

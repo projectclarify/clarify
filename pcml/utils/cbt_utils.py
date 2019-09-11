@@ -363,7 +363,8 @@ def _compose_av_write(table, key, value, column_family, key_tag=None):
   row.set_cell(column_family_id=column_family,
                column=column_family,
                value=value,
-               timestamp=datetime.datetime.utcnow())
+               timestamp=datetime.datetime(1970,1,1))
+               #timestamp=datetime.datetime.utcnow())
 
   return row
 
@@ -394,7 +395,8 @@ class RawVideoSelection(BigTableSelection):
     row.set_cell(column_family_id="meta",
                  column="meta",
                  value=json.dumps(shard_meta.as_dict()),
-                 timestamp=datetime.datetime.utcnow())
+                 timestamp=datetime.datetime(1970,1,1))
+                 #timestamp=datetime.datetime.utcnow())
     self.table.mutate_rows([row])
 
   def lookup_shard_metadata(self, ignore_unfinished=False):
@@ -706,7 +708,8 @@ class TFExampleSelection(BigTableSelection):
       row = table.row(target_key)
       row.set_cell(column_family_id="tfexample",
                    column="example",
-                   value=example)
+                   value=example,
+                   timestamp=datetime.datetime(1970,1,1))
                    # Don't set a timestamp so we set instead of
                    # append cell values.
                    #timestamp=datetime.datetime.utcnow())

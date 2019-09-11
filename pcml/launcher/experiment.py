@@ -45,7 +45,8 @@ from pcml.operations.eval import trigger_eval
 #os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = ""
 
 
-def construct_job_command(remote_app_root, train_args, use_katib=False):
+def construct_job_command(remote_app_root, train_args, use_katib=False, 
+                          vendor_t2t=False):
   """Construct a job command string.
 
   TODO: Consider refactoring as a jinja template.
@@ -101,14 +102,25 @@ def construct_job_command(remote_app_root, train_args, use_katib=False):
   # Decompress code tarball
   cmd.append("cd /tmp; tar -xzvf /tmp/%s" % pcml_fname)
 
+  # Install vendored t2t if requested
+  if vendor_t2t:
+    cmd.append("cd /tmp/pcml-0.0.1; pip install -e vendor/tensor2tensor")
+
   # Install PCML
   cmd.append("cd /tmp/pcml-0.0.1; pip install -e .")
+
+  # ====================
+  # HACK
+  # Experimental patch of tpu_estimator.py in exploration of
+  # https://github.com/tensorflow/tensorflow/issues/30869
+  cmd.append("python -m pcml.utils.patch_tpu_estimator")
+  # ====================
 
   # Print TensorFlow version
   cmd.append("python -c 'import tensorflow as tf; print(tf.__version__)'")
 
   # Verify the GPU is visible by nvidia-smi as well as tf device_lib
-  cmd.append("nvidia-smi")
+  #cmd.append("nvidia-smi")
   cmd.append(
       ("python -c 'from tensorflow.python.client import device_lib; "
        "print(device_lib.list_local_devices())'")
@@ -162,6 +174,7 @@ class T2TKubeExperiment(TFJob):
                num_tpu_cores=0,
                volumes=[],
                use_katib=False,
+               vendor_t2t=False,
                *args, **kwargs):
     """Configure a T2TKubeExperiment object.
 
@@ -196,7 +209,8 @@ class T2TKubeExperiment(TFJob):
                        "integer greater than or equal to zero.")
 
     cmd = construct_job_command(remote_app_root, train_args,
-                                use_katib=use_katib)
+                                use_katib=use_katib,
+                                vendor_t2t=vendor_t2t)
 
     self._remote_app_root = remote_app_root
     self._train_args = train_args
@@ -461,6 +475,8 @@ def configure_experiment(base_name,
                          use_katib=False,
                          selector_labels={},
                          tpu_type="v3",
+                         save_checkpoints_secs=1800,
+                         vendor_t2t=False,
                          **kwargs):
   """Wrapper to construct args object and produce job scripts.
 
@@ -518,7 +534,7 @@ def configure_experiment(base_name,
       "log_device_placement": log_device_placement,
       "worker_gpu": num_gpu_per_worker,
       "ps_gpu": ps_gpu,
-      "save_checkpoints_secs": 1800,
+      "save_checkpoints_secs": save_checkpoints_secs,
       "dbgprofile": dbgprofile,
       "ssd_mount_path": "/mnt/disks/ssd0",
       "tmp_dir": tmp_dir,
@@ -562,7 +578,8 @@ def configure_experiment(base_name,
       "remote_app_root": remote_app_root,
       "volumes": volumes,
       "use_katib": use_katib,
-      "tpu_type": tpu_type
+      "tpu_type": tpu_type,
+      "vendor_t2t": vendor_t2t
   }
 
   experiment_args.update(extra_experiment_args)
@@ -630,7 +647,7 @@ def main(argv):
   # in a background system process.
   if FLAGS.use_tpu :
     p = Process(target=trigger_eval,
-                args=(FLAGS.output_dir,))
+                args=(FLAGS.output_dir, FLAGS.data_dir, FLAGS.eval_steps))
     p.start()
 
   # Run training
@@ -648,5 +665,5 @@ def main(argv):
 
 
 if __name__ == "__main__":
-  tf.logging.set_verbosity(tf.logging.INFO)
+  tf.logging.set_verbosity(tf.logging.DEBUG)
   tf.app.run()

@@ -6,5 +6,8 @@
   "test_video_manifest_path": "gs://clarify-dev/test/extract/manifest.csv",
   "test_cbt_instance": "clarify",
   "region": "us-central1",
-  "zone": "us-central1-a"
+  "zone": "us-central1-a",
+  "firebase_database_url": "https://clarify-32fcf.firebaseio.com",
+  "functions_testing_service_account": "clarify@appspot.gserviceaccount.com",
+  "test_video_path": "gs://clarify-data/requires-eula/voxceleb2/dev/mp4/id00012/21Uxsk56VDQ/00001.mp4"
 }

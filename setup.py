@@ -30,21 +30,29 @@ setup(
         'requests==2.21.0',
         'scipy==1.2.1',
         'six==1.12.0',
-        #'IPython==7.3.0',
         'seaborn==0.9.0',
-        'tensor2tensor @ https://github.com/tensorflow/tensor2tensor/archive/3b38635f12348036ea1e0166857f43a6b971ab07.zip',
         'mne==0.17.1',
         'moviepy==1.0.0',
         'kubernetes==9.0.0',
-        'tensorflow_hub',
         'rfc3339==6.0',
         'dill==0.2.9',
-        'apache_beam==2.11.0',
-        'google-cloud-bigtable'
+        'tensorflow_hub',
+        'google-cloud-bigtable',
+        'google-cloud-pubsub',
+        'firebase-admin',
+        'google-cloud-firestore==0.31.0',
+        'google-auth',
+        'requests',
+        'requests-toolbelt',
+        'sklearn',
+        'faced @ https://github.com/iitzco/faced/archive/31ef0d30e1567a06113f49ff4a1202760d952df2.zip',
+        'tensor2tensor',
+        'google-cloud-logging',
+        'apache-beam[gcp]'
     ],
     extras_require={
         'tensorflow': [
-            'tensorflow>=1.13.1'
+            'tensorflow==1.14.0'
         ],
         'tensorflow-gpu': [
             'tensorflow-gpu>=1.13.1'
@@ -53,7 +61,7 @@ setup(
             'pylint',
             'pytest',
             'pytest-cache',
-            'tensorflow-serving-api>=1.12.0'
+            'tensorflow-serving-api==1.12.0'
         ],
         'serving': [
             'requests_toolbelt'

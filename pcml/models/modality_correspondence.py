@@ -72,6 +72,7 @@ def extend_with_asr_hparams(hparams):
 def extend_with_resnet_hparams(hparams):
 
   hparams.add_hparam("layer_sizes", [3, 4, 6, 3])
+  hparams.add_hparam("bottleneck_ratios", [4, 4, 4, 4])
   hparams.add_hparam("filter_sizes", [64, 64, 128, 256, 512])
   hparams.add_hparam("block_fn", "bottleneck")
   hparams.add_hparam("use_nchw", True)
@@ -79,8 +80,8 @@ def extend_with_resnet_hparams(hparams):
 
   # Targeted dropout
   hparams.add_hparam("use_td", False)
-  hparams.add_hparam("targeting_rate", 0.0)
-  hparams.add_hparam("keep_prob", 1.0)
+  hparams.add_hparam("targeting_rate", None)
+  hparams.add_hparam("keep_prob", None)
 
   hparams.use_nchw = False
     
@@ -93,7 +94,6 @@ def mcl_res_ut():
   hparams = transformer.transformer_base()
   hparams.hidden_size = 1024
   hparams.filter_size = 4096
-  #hparams.filter_size = 2048
   hparams.num_heads = 16
   hparams.layer_prepostprocess_dropout = 0.3
   hparams = universal_transformer.update_hparams_for_universal_transformer(hparams)
@@ -102,9 +102,43 @@ def mcl_res_ut():
 
   hparams.recurrence_type = "basic"
 
-  hparams = extend_with_asr_hparams(hparams)
-  hparams = extend_with_resnet_hparams(hparams)
+  # ===
+  # ASR hparams
+  hparams.add_hparam("audio_preproc_in_bottom", True)
+  hparams.add_hparam("audio_keep_example_waveforms", False)
+  hparams.add_hparam("audio_sample_rate", 16000)
+  hparams.add_hparam("audio_preemphasis", 0.97)
+  hparams.add_hparam("audio_dither", 1.0 / np.iinfo(np.int16).max)
+  hparams.add_hparam("audio_frame_length", 25.0)
+  hparams.add_hparam("audio_frame_step", 10.0)
+  hparams.add_hparam("audio_lower_edge_hertz", 20.0)
+  hparams.add_hparam("audio_upper_edge_hertz", 8000.0)
+  hparams.add_hparam("audio_num_mel_bins", 32)
+  hparams.add_hparam("audio_add_delta_deltas", False)
+  hparams.add_hparam("num_zeropad_frames", 250)
 
+  # =====
+  
+  
+  # =====
+  # Resnet hparams
+  
+  hparams.add_hparam("layer_sizes", [3, 4, 6, 3])
+  hparams.add_hparam("bottleneck_ratios", [4, 4, 4, 4])
+  hparams.add_hparam("filter_sizes", [64, 64, 128, 256, 512])
+  hparams.add_hparam("block_fn", "bottleneck")
+  hparams.add_hparam("use_nchw", True)
+  hparams.add_hparam("is_cifar", False)
+
+  # Targeted dropout
+  hparams.add_hparam("use_td", False)
+  hparams.add_hparam("targeting_rate", None)
+  hparams.add_hparam("keep_prob", None)
+
+  hparams.use_nchw = False
+  
+  # =====
+  
   hparams.add_hparam("multiproblem_task_id", 0)
 
   hparams.batch_size = 24
@@ -218,7 +252,7 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
     return encoder_output, encoder_decoder_attention_bias
 
   def encode_video(self, features, hparams, target_space=1, use_bfloat16=False):
-    
+
     # HACK
     target_space = None
 

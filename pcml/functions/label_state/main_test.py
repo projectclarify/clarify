@@ -26,19 +26,8 @@ class Context(object):
     pass
 
 
-"""
-
-TODO: What I'd like to do here is serve a previously exported model
-locally and validate the integration of the function with that. So
-the test will be relative to whatever exported model is kept around
-but in the future the test infrastructure can be set up to export a
-new version before running this test.
-
-"""
-
-
 @patch('main.client')
-def test_embed_frames(firestore_mock, capsys):
+def test_label_state(firestore_mock, capsys):
 
   firestore_mock.collection = MagicMock(return_value=firestore_mock)
   firestore_mock.document = MagicMock(return_value=firestore_mock)
@@ -49,6 +38,8 @@ def test_embed_frames(firestore_mock, capsys):
   email_string = '%s@%s.com' % (uuid.uuid4(), uuid.uuid4())
   video = np.random.randint(0, 255, (15,96,96,3), dtype=np.uint8)
   video = bytes(video.flatten())
+  audio = np.random.randint(0, 255, (1000,), dtype=np.uint8)
+  audio = bytes(audio.flatten())
 
   data = {
     'uid': user_id,
@@ -56,18 +47,42 @@ def test_embed_frames(firestore_mock, capsys):
     'email': email_string,
     'value': {
       'fields': {
-        'original': {
+        'audioData': {
+          'stringValue': audio
+        },
+        'videoData': {
           'stringValue': video
+        },
+        'audioMeta': {
+          "mapValue": {
+            "fields": {
+              
+            }
+          }
+        },
+        'videoMeta': {
+          "mapValue": {
+            "fields": {
+              
+            }
+          }
+        },
+        'meta': {
+          "mapValue": {
+            "fields": {
+              
+            }
+          }          
         }
       }
     }
   }
 
   context = UserDict()
-  context.resource = '/documents/users/{uid}/modalities/video'
+  context.resource = '/documents/users/{uid}/modalities/av'
 
-  main.embed_frames(data, context)
+  main.label_state(data, context)
 
   out, _ = capsys.readouterr()
 
-  assert 'Received healthy model response.' in out
+  #assert 'Received healthy model response.' in out

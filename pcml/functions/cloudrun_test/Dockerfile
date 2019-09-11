@@ -1,3 +1,4 @@
+# coding=utf-8
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,14 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+FROM python:3.7
 
-from pcml.datasets import celeba
-from pcml.datasets import deap
-from pcml.datasets import vox_celeb_cbt
+COPY requirements.txt ./
 
-from pcml.models import modality_correspondence
+RUN pip install -r requirements.txt
 
-from pcml.models import dev
+ENV APP_HOME /app
+WORKDIR $APP_HOME
+COPY . .
+
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 main:app

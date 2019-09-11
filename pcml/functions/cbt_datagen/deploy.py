@@ -15,39 +15,41 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-import os
 
-from pcml.functions.utils import deployment_utils
-from pcml.utils.fs_utils import get_pcml_root
+from pcml.functions.utils.deployment_utils import deploy_topic_responder
+from pcml.functions.utils.deployment_utils import stage_functions_bundle
 
-FUNCTION_NAME = "embed_frames"
+TRIGGER_TOPIC="cbt-datagen-dev"
+FUNCTION_NAME="cbt_datagen"
 
-SOURCE_PATH = os.path.join(get_pcml_root(),
-                           "pcml", "functions",
-                           FUNCTION_NAME)
+def _deploy(project_id,
+            service_account,
+            staging_root,
+            region="us-central1"):
 
+  source_path = stage_functions_bundle(
+      staging_root, function_code_path="functions/cbt_datagen")
 
-def _deploy(project_id, region, service_account=None,
-            collection="users",
-            document_path="{uid}/modalities/video"):
-
-  return deployment_utils.deploy_firestore_responder(
-        function_name=FUNCTION_NAME,
-        event_type="update",
-        project_id=project,
-        collection=collection,
-        document_path=document_path,
-        service_account=service_account,
-        source=SOURCE_PATH,
-        runtime="python37",
-        region=region)
+  deploy_topic_responder(
+    function_name=FUNCTION_NAME,
+    trigger_topic=TRIGGER_TOPIC,
+    project_id=project_id,
+    service_account=service_account,
+    source=source_path,
+    runtime="python37",
+    region=region,
+    create_topic=True,
+    create_done_topic=True,
+    memory="1024MB",
+    timeout="540s")
 
 
 def main(_):
 
   _deploy(project_id=FLAGS.project,
           service_account=FLAGS.service_account,
-          region=FLAGS.gcp_region)
+          region=FLAGS.gcp_region,
+          staging_root=FLAGS.staging_root)
 
 
 if __name__ == "__main__":
@@ -58,11 +60,14 @@ if __name__ == "__main__":
   flags.DEFINE_string("project", "clarify",
                       "A project ID.")
 
-  flags.DEFINE_string("service_account", None,
+  flags.DEFINE_string("service_account", "clarify@appspot.gserviceaccount.com",
                       "A service acct to allow GCF to r/w GCP resources.")
+
+  flags.DEFINE_string("staging_root", "gs://clarify-dev/tmp/fnstaging",
+                      "GCS bucket to use for staging function bundles.")
 
   flags.DEFINE_string("gcp_region", "us-central1",
                       "A GCP region where the function will be deployed.")
 
-  tf.logging.set_verbosity(tf.logging.INFO)
+  tf.logging.set_verbosity(tf.logging.DEBUG)
   tf.app.run()

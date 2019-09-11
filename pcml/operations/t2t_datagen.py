@@ -157,7 +157,7 @@ def _maybe_please_specify_a(flag):
 def main(_):
 
   for flag in ["data_dir", "num_shards", "shard_id", "problem", "tmp_dir",
-              "shard_type"]:
+               "shard_type"]:
     _maybe_please_specify_a(flag)
 
   if FLAGS.upload_to_bigtable:

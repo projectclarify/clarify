@@ -133,12 +133,10 @@ def _compress_and_stage(local_app_root, remote_app_root):
 
   _ = run_and_output(["python", "setup.py", "sdist"],
                      cwd=local_app_root)
-
-  gz_file = "pcml-0.0.1.tar.gz"
-
-  local_gz_file_path = os.path.join(local_app_root, "dist", gz_file)
+  pcml_gz_file = "pcml-0.0.1.tar.gz"
+  local_pcml_gz_file_path = os.path.join(local_app_root, "dist", pcml_gz_file)
 
   tf.gfile.Copy(
-      local_gz_file_path,
-      os.path.join(remote_app_root, gz_file),
+      local_pcml_gz_file_path,
+      os.path.join(remote_app_root, pcml_gz_file),
       overwrite=True)

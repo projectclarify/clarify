@@ -30,7 +30,7 @@ class ExportJob(PCMLJob):
                memory="6Gi",
                image="gcr.io/clarify/basic-runtime:0.0.4",
                *args, **kwargs):
-  
+
     cmd = "python -m pcml.operations.export "
     cmd += "--output_dir={}".format(output_dir)
 

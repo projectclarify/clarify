@@ -160,7 +160,7 @@ class T2TDevHelper(object):
         self.model_name,
         self.problem_name,
         self.data_dir,
-        train_steps=100,
+        train_steps=10,
         eval_steps=1,
         min_eval_frequency=9,
         use_tpu=use_tpu)
@@ -360,13 +360,13 @@ class T2TDevHelper(object):
     optimizer = tf.train.AdamOptimizer()
 
     for i in range(steps):
-    
+
       example = self.eager_get_example(batch_size=batch_size)
 
       logits, gv = loss_fn(example)
 
       optimizer.apply_gradients(gv)
-      
+
       if save_each_step:
         saved[str(i)] = {"logits": logits, "gv": gv, "example": example}
 

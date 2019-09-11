@@ -185,7 +185,13 @@ def compute_metrics(problem_name, model_name, hparams_name,
   problem_hparams = problem_instance.get_hparams(hparams)
 
   # Build the eval dataset and get the examples
-  eval_dataset = problem_instance.dataset(mode=mode, data_dir=data_dir)
+  eval_dataset = problem_instance.dataset(mode=Modes.EVAL,
+                                          data_dir=data_dir)
+
+  '''eval_dataset = problem_instance.dataset(mode=Modes.TRAIN,
+                                          mode_override=mode,
+                                          data_dir=data_dir)'''
+
   eval_dataset = eval_dataset.repeat(None).batch(eval_batch_size)
   eval_dataset_iterator = tfe.Iterator(eval_dataset)
 
@@ -360,7 +366,8 @@ def log_all_metric_data(predictions, targets, metrics_set, ckpt_dir, global_step
 
 
 def eval_for_ckpt_dir(ckpt_dir, delay_seconds=5, mock_acc=False,
-                      mock_step=False, continuous=True, eval_steps=10):
+                      mock_step=False, continuous=True, eval_steps=10,
+                      data_dir=None):
   """Run Eager-mode eval with the option to repeat periodically."""
 
   tf.logging.set_verbosity(tf.logging.INFO)
@@ -409,7 +416,8 @@ def eval_for_ckpt_dir(ckpt_dir, delay_seconds=5, mock_acc=False,
         ckpt_dir=ckpt_dir,
         extra_hparams=extra_hparams,
         mode=mode,
-        eval_steps=eval_steps)
+        eval_steps=eval_steps,
+        data_dir=data_dir)
 
       report_metrics_summaries(metrics=midpoint_metrics,
                                ckpt_dir=ckpt_dir,
@@ -436,7 +444,7 @@ def eval_for_ckpt_dir(ckpt_dir, delay_seconds=5, mock_acc=False,
     time.sleep(delay_seconds)
 
 
-def trigger_eval(ckpt_dir):
+def trigger_eval(ckpt_dir, data_dir=None, eval_steps=30):
   """Convenience wrapper for triggering functionally."""
 
   if isinstance(ckpt_dir, tuple) or isinstance(ckpt_dir, list):
@@ -456,12 +464,16 @@ def trigger_eval(ckpt_dir):
   """
 
   # Wait 10min before computing first metrics
-  time.sleep(600)
+  time.sleep(300)
 
   while True:
 
     cmd = ("python -m pcml.operations.eval " +
-           "--ckpt_dir={} --continuous=False").format(ckpt_dir)
+           "--ckpt_dir={} --continuous=False " +
+           "--eval_steps={} ").format(ckpt_dir, eval_steps)
+
+    if data_dir:
+      cmd += "--data_dir={}".format(data_dir)
 
     try:
 
@@ -472,7 +484,7 @@ def trigger_eval(ckpt_dir):
       tf.logging.info("Squashing failed eval call, will retry...")
       # ...
     
-    time.sleep(300)
+    time.sleep(60)
 
   return out
 
@@ -485,7 +497,8 @@ def main(_):
   eval_for_ckpt_dir(ckpt_dir=FLAGS.ckpt_dir,
                     delay_seconds=FLAGS.delay_seconds,
                     continuous=FLAGS.continuous,
-                    eval_steps=FLAGS.eval_steps)
+                    eval_steps=FLAGS.eval_steps,
+                    data_dir=FLAGS.data_dir)
 
 
 if __name__ == "__main__":
@@ -506,6 +519,9 @@ if __name__ == "__main__":
   # TODO: Make use of this flag instead of hard coding (currently 60).
   flags.DEFINE_integer('eval_steps', 10,
                        'Number of steps of eval to perform.')
+
+  flags.DEFINE_string('data_dir', None,
+                      'Directory where examples are stored (incl. GCS).')
 
   tf.logging.set_verbosity(tf.logging.INFO)
   tf.app.run()

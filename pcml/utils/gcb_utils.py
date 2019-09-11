@@ -104,7 +104,7 @@ def gcb_build_and_push(image_tag, build_dir,
   if not dry_run:
     tf.logging.info("Triggering build...")
     os.chdir(build_dir)
-    _ = run_and_output(["gcloud", "container", "builds",
+    _ = run_and_output(["gcloud", "builds",
                         "submit", "--config", "build.yaml", "."])
 
   return build_config

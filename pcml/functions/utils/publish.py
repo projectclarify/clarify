@@ -1,3 +1,4 @@
+# coding=utf-8
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,14 +11,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+import json
 
-from pcml.datasets import celeba
-from pcml.datasets import deap
-from pcml.datasets import vox_celeb_cbt
+import tensorflow as tf
 
-from pcml.models import modality_correspondence
+from google.cloud import pubsub_v1
 
-from pcml.models import dev
+
+def publish(message, project, topic):
+  """Convert message object to dict and publish to topic."""
+
+  tf.logging.info("Publishing message: {}".format(
+    message
+  ))
+
+  # Publish the message
+  publisher_client = pubsub_v1.PublisherClient()
+  topic_path = publisher_client.topic_path(
+      project, topic)
+  data = json.dumps(message.__dict__).encode('utf-8')
+  publisher_client.publish(topic_path, data=data).result()

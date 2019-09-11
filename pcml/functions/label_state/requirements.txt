@@ -1,3 +1,6 @@
 google-cloud-firestore==0.31.0
 tensorflow==1.13.1
 numpy
+google-auth
+requests
+requests-toolbelt
