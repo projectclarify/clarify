@@ -25,13 +25,6 @@ Various additional options are available for model deployment that offer lower-l
 
 The tensor2tensor Problem object provides a way to encapsulate the steps and parameters involved in processing raw data into training examples (for a particular problem). These can be sub-classed or combined in the context of multi-problem training. More information is available [here](https://tensorflow.github.io/tensor2tensor/new_problem.html). The PCML codebase includes a growing number of Problem implementations in support of various sub-projects, enumerated here:
 
-
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;margin:0px auto;}
-.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black; text-align: center;}
-.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-@media screen and (max-width: 767px) {.tg {width: auto !important;}.tg col {width: auto !important;}.tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;margin: auto 0px;}}</style>
 <div class="tg-wrap"><table class="tg">
   <tr>
     <th class="tg-0lax">Dataset</th>
