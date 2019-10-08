@@ -11,3 +11,11 @@ The following provides an overview of the computational infrastructure (on the G
 ![](docs/images/infra.png)
 
 Various additional options are available for model deployment that offer lower-latency than the diagrammed option which is the simplest from a research prototyping perspective (enabling cross-platform support for all moderate-latency applications), see also [TFLite](https://www.tensorflow.org/lite), [tfjs](https://www.tensorflow.org/js), and [TFServing](https://www.kubeflow.org/docs/components/serving/tfserving_new/).
+
+
+### Documentation outline (work in progress):
+
+1. Audio/video correspondence learning
+    1. [Extract raw .mp4's to GCS](docs/extract-videos.md)
+2. Facial expression perceptual similarity
+    1. [Preprocess and generate examples](docs/fec.md)
