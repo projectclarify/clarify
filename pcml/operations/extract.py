@@ -36,6 +36,8 @@ import json
 import datetime
 import re
 
+from scipy.signal import resample
+
 import numpy as np
 
 from pcml.launcher.kube import PCMLJob
@@ -133,7 +135,8 @@ class ExtractVideos(PCMLJob):
 
 def video_file_to_cbt(remote_file_path, selection, tmp_dir,
                       shard_id, num_shards, video_id,
-                      downsample_xy_dims=96):
+                      downsample_xy_dims=64, greyscale=True,
+                      resample_every=2, audio_block_size=1000):
   """Extract from input path to target CBT selection."""
 
   tf.logging.info("Loading CBT table {}".format(
@@ -148,6 +151,9 @@ def video_file_to_cbt(remote_file_path, selection, tmp_dir,
 
   audio_array = mp4_to_1d_array(local_file_path)
 
+  # Re-sample every N steps (numpy slicing syntax)
+  audio_array = audio_array[0::resample_every]
+ 
   audio_array = np.clip(
     (audio_array + 0.5)*255.0,
     a_min=0,
@@ -157,12 +163,14 @@ def video_file_to_cbt(remote_file_path, selection, tmp_dir,
   video = video_utils.Video()
   video.load_from_file(local_file_path,
                        downsample_size=(downsample_xy_dims,
-                                        downsample_xy_dims))
+                                        downsample_xy_dims),
+                       greyscale=greyscale)
 
   selection.write_av(audio=audio_array,
                      frames=video,
                      shard_id=shard_id,
-                     video_id=video_id)
+                     video_id=video_id,
+                     audio_block_size=audio_block_size)
 
 
 def _expect_type(obj, t):
@@ -174,7 +182,9 @@ def _expect_type(obj, t):
 
 
 def extract_to_cbt(manifest_path, project, instance, table, tmp_dir,
-                   target_prefix, shard_id=0, num_shards=1):
+                   target_prefix, shard_id=0, num_shards=1,
+                   downsample_xy_dims=64, greyscale=True,
+                   resample_every=2, audio_block_size=1000):
   
   """Data-parallel extraction of input from file path manifest."""
 
@@ -223,7 +233,11 @@ def extract_to_cbt(manifest_path, project, instance, table, tmp_dir,
                       tmp_dir=tmp_dir,
                       shard_id=shard_id,
                       num_shards=num_shards,
-                      video_id=video_id)
+                      video_id=video_id,
+                      downsample_xy_dims=downsample_xy_dims,
+                      greyscale=greyscale,
+                      resample_every=resample_every,
+                      audio_block_size=audio_block_size)
     ct += 1
 
   shard_meta.num_videos = ct

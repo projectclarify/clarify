@@ -22,7 +22,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import base64
+import json
 import tempfile
+
+import tensorflow as tf
 
 from pcml.utils import cbt_utils
 from pcml.operations.extract import video_file_to_cbt
@@ -36,24 +40,30 @@ def extract(event, context):
     raise ValueError("Received event trigger without PubSub message data.")
 
   msg_data_raw = json.loads(base64.b64decode(event['data']).decode('utf-8'))
-  message = ExtractTriggerMessage(**msg_data_raw)
+  msg_data = ExtractTriggerMessage(**msg_data_raw)
 
-  print("Received request: {}".format(msg_data.__dict__))
-  
+  tf.logging.info("Received request: {}".format(msg_data.__dict__))
+
   tmpdir = tempfile.mkdtemp()
 
   selection = cbt_utils.RawVideoSelection(
-    project=message.project,
-    instance=message.bigtable_instance,
-    table=message.target_table_name,
-    prefix=message.prefix)
+    project=msg_data.project,
+    instance=msg_data.bigtable_instance,
+    table=msg_data.target_table_name,
+    prefix=msg_data.prefix)
 
-  video_file_to_cbt(remote_file_path=msg_data.mp4_path,
-                    selection=selection,
-                    tmp_dir=tmpdir,
-                    shard_id=0,
-                    num_shards=1,
-                    video_id=message.video_id,
-                    downsample_xy_dims=96)
+  for i, mp4_path in enumerate(msg_data.mp4_paths):
 
-  print("Finished function.")
+    video_id = msg_data.video_ids[i]
+
+    video_file_to_cbt(
+      remote_file_path=mp4_path,
+      selection=selection,
+      tmp_dir=tmpdir,
+      shard_id=0,
+      num_shards=1,
+      downsample_xy_dims=msg_data.downsample_xy_dims,
+      greyscale=msg_data.greyscale,
+      video_id=video_id)
+
+  tf.logging.info("Finished function.")

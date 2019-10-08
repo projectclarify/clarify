@@ -10,3 +10,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+"""FEC problem definition tests."""
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+import tensorflow as tf
+
+from pcml.datasets import fec
+from tensor2tensor.utils import registry
+
+
+class TestFECProblem(tf.test.TestCase):
+
+  def test_registry_lookups(self):
+
+    problem_names = [
+      "facial_expression_correspondence",
+      "fec_tiny"
+    ]
+
+    for problem_name in problem_names:
+      _ = registry.problem(problem_name)
+
+  def test_tiny_e2e(self):
+    pass
+
+
+if __name__ == "__main__":
+  tf.logging.set_verbosity(tf.logging.INFO)
+  tf.test.main()

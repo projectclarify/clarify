@@ -165,6 +165,13 @@ def mcl_res_ut():
 
 
 @registry.register_hparams
+def mcl_res200():
+  hparams = mcl_res_ut()
+  hparams.layer_sizes = [3, 24, 36, 3]
+  return hparams
+ 
+
+@registry.register_hparams
 def mcl_res_ut_tiny():
   hparams = mcl_res_ut()
   hparams.layer_sizes = [1,1,1,1]

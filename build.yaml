@@ -1,7 +1,15 @@
-images: ['gcr.io/clarify/debug:0.0.1']
+images:
+- gcr.io/clarify/download_fec:1008-2022-bece
 steps:
-- args: [pull, 'tensorflow/tensorflow:1.6.0']
+- args:
+  - pull
+  - tensorflow/tensorflow:1.6.0
   name: gcr.io/cloud-builders/docker
-- args: [build, --cache-from, 'tensorflow/tensorflow:1.6.0', -t, 'gcr.io/clarify/debug:0.0.1',
-    .]
+- args:
+  - build
+  - --cache-from
+  - tensorflow/tensorflow:1.6.0
+  - -t
+  - gcr.io/clarify/download_fec:1008-2022-bece
+  - .
   name: gcr.io/cloud-builders/docker

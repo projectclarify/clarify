@@ -14,3 +14,4 @@ kubernetes
 google-cloud-bigtable
 Pillow==6.0.0
 opencv-python==4.1.0.25
+gast==0.2.2

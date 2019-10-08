@@ -14,6 +14,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import tensorflow as tf
+
 from pcml.functions.utils.deployment_utils import deploy_topic_responder
 from pcml.functions.utils.deployment_utils import stage_functions_bundle
 
@@ -39,7 +41,8 @@ def _deploy(project_id,
     create_topic=True,
     create_done_topic=True,
     memory="1024MB",
-    timeout="540s")
+    timeout="540s",
+    max_instances=100)
 
 
 def main(_):

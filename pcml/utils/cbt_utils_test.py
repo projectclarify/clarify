@@ -36,6 +36,8 @@ from pcml.utils.cfg_utils import Config
 
 TEST_CONFIG = Config()
 
+from pcml.utils.cbt_utils import _lex_index
+
 
 class TestCBTUtils(tf.test.TestCase):
 
@@ -52,15 +54,34 @@ class TestCBTUtils(tf.test.TestCase):
     """Currently these don't enforce types of the nested objects."""
 
     vm = cbt_utils.VideoMeta(video_length=1, audio_length=1,
-                             shard_id=0, video_id=0)
+                             shard_id=0, video_id=0,
+                             audio_block_size=1000)
     vm.as_dict()
+
+    sampling_meta00 = {'frame_skip_size': 0,
+                       'frame_shift': 0,
+                       'frame_sample_bounds': [178, 192],
+                       'audio_sample_bounds': [315056, 341604]}
+
+    abm = {"min_query_block": 1,
+          "max_query_block": 3,
+          "num_query_blocks": 3,
+          "query_start": 100,
+          "query_end": 200}
 
     avcs = cbt_utils.AVCorrespondenceSample(video=np.array([1,2,3]),
                                   audio=np.array([1,2,3]),
                                   labels={"same_video": 1,
                                           "overlap": 0},
                                   meta={"video_source": vm,
-                                        "audio_source": vm})
+                                        "audio_source": vm,
+                                        "video_sample_meta": sampling_meta00,
+                                        "audio_sample_meta": sampling_meta00,
+                                        "audio_keys": ["foo"],
+                                        "frame_keys": ["foo", "foo"],
+                                        "audio_block_meta": abm})
+
+    serialized = avcs.serialize()
 
     vsm = cbt_utils.VideoShardMeta(num_videos=1,
                                    status="started",
@@ -93,9 +114,11 @@ class TestCBTUtils(tf.test.TestCase):
 
     recv_meta = selection.lookup_shard_metadata()
 
-    self.assertTrue("train_meta_0" in recv_meta)
+    train_meta_key = "train_meta_{}".format(_lex_index(0)).encode()
 
-    self.assertEqual(recv_meta["train_meta_0"].as_dict(),
+    self.assertTrue(train_meta_key in recv_meta)
+
+    self.assertEqual(recv_meta[train_meta_key].as_dict(),
                      sent_meta.as_dict())
 
   def test_generate_av_correspondence_examples(self):
@@ -104,6 +127,9 @@ class TestCBTUtils(tf.test.TestCase):
     prefix = "train"
     manifest_path = "gs://clarify-dev/test/extract/manifest.csv"
     frames_per_video = 15
+    downsample_xy_dims = 64
+    greyscale = True
+    num_channels = 1
 
     selection = cbt_utils.RawVideoSelection(
       project=self.project,
@@ -118,11 +144,17 @@ class TestCBTUtils(tf.test.TestCase):
                            instance=self.instance,
                            table=table_tag,
                            target_prefix=prefix,
-                           tmp_dir=tempfile.mkdtemp())
+                           tmp_dir=tempfile.mkdtemp(),
+                           downsample_xy_dims=downsample_xy_dims,
+                           greyscale=greyscale,
+                           resample_every=2,
+                           audio_block_size=1000)
 
     selection_meta = selection.lookup_shard_metadata()
     
-    self.assertTrue(selection_meta["train_meta_0"].num_videos == 1)
+    train_meta_key = "train_meta_{}".format(_lex_index(0)).encode()
+
+    self.assertTrue(selection_meta[train_meta_key].num_videos == 1)
 
     video_meta = selection._get_random_video_meta(selection_meta)
 
@@ -139,10 +171,11 @@ class TestCBTUtils(tf.test.TestCase):
 
     positive_same = sample["positive_same"]
     negative_same = sample["negative_same"]
-    negative_different = sample["negative_different"]
+    #negative_different = sample["negative_different"]
 
     # The expected video and audio shapes
-    video_shape = (frames_per_video, 96, 96, 3)
+    video_shape = (frames_per_video, downsample_xy_dims, downsample_xy_dims,
+                   num_channels)
 
     def _verify(sample, same_video, overlap):
       self.assertEqual(sample.labels["same_video"], same_video)
@@ -156,7 +189,15 @@ class TestCBTUtils(tf.test.TestCase):
 
     _verify(positive_same, 1, 1)
     _verify(negative_same, 1, 0)
-    _verify(negative_different, 0, 0)
+    #_verify(negative_different, 0, 0)
+
+    generator = selection.sample_av_correspondence_examples(
+        frames_per_video=frames_per_video,
+        max_num_samples=1, keys_only=True)
+
+    sample = generator.__next__()
+    
+    serialized = sample["positive_same"].serialize()
 
   def test_tfexampleselection_e2e(self):
 

@@ -391,17 +391,21 @@ class VoxCelebSingleFrame(VoxCelebCbt):
 
   @property
   def video_shape(self):
-    return [1, 96, 96, 3]
+    return [20, 64, 64, 1]
 
   def preprocess_example(self, example, mode, hparams):
 
+    example["targets"] = tf.slice(example["targets"], (0,), (1,))
+
     # Reduce the audio data to the required audio shape if it isn't
-    example["audio"] = tf.slice(example["audio"], (0,), (self.audio_shape[0],))
+    #example["audio"] = tf.slice(example["audio"], (0,), (self.audio_shape[0],))
+    #example["audio"] = (tf.cast(example["audio"], tf.float32) - 128.0) / 256.0    
+    #example["audio"].set_shape((self.audio_shape[0], ))
 
-    example["audio"].set_shape((self.audio_shape[0], ))
-    example["video"].set_shape(self.video_shape)
-
-    example["video"] = tf.squeeze(example["video"])
+    #shape = (1, self.video_shape[1], self.video_shape[2], self.video_shape[3])
+    example["video"] = tf.reshape(example["video"], self.video_shape)
+    #example["video"] = tf.reshape(example["video"], self.video_shape[1:])
+    example["video"] = (tf.cast(example["video"], tf.float32) - 128.0) / 256.0    
 
     return example
 
@@ -437,3 +441,89 @@ class VoxCelebSingleFrame(VoxCelebCbt):
       p.loss_multiplier = 1.0
     p.input_space_id = problem.SpaceID.IMAGE
     p.target_space_id = problem.SpaceID.IMAGE_LABEL
+
+
+  @property
+  def augmentation_hparams(self):
+    """
+
+    Notes:
+    * Turned off subsampling operations given currently doing these at the
+      raw sampling level and doing them here complicates things because it
+      changes the feature shapes (i.e. their length).
+
+    """
+
+    return {
+      "video": {
+        "do_random_subsampling": False,
+        "do_random_flips": False,
+        "do_random_masking": False,
+        "do_random_enhancement": False,
+        "do_random_shift": False,
+        "subsample_max_frame_skips": 1,
+        "shift_max_xy": 5,
+        "mask_num_patches": 10,
+        "mask_max_patch_fraction": 0.2,
+        "enhance_min_color": 0.25,
+        "enhance_max_color": 1.0,
+        "enhance_min_contrast": 0.25,
+        "enhance_max_contrast": 1.0,
+        "enhance_min_brightness": 0.25,
+        "enhance_max_brightness": 1.0,
+        "enhance_min_sharpness": 0.25,
+        "enhance_max_sharpness": 1.75
+      },
+      "audio": {
+        "do_random_shift": False,
+        "do_add_gaussian_noise": False,
+        "gaussian_snr": 10
+      }
+    }
+
+  @property
+  def audio_source_steps_per_frame(self):
+    return 1760
+
+  @property
+  def audio_downsample_factor(self):
+    return 2
+
+  @property
+  def audio_shape(self):
+    alen = int(self.audio_source_steps_per_frame/self.audio_downsample_factor)
+    return (alen*self.video_shape[0],)
+
+  def decode_example(self, serialized_example):
+
+    """
+
+    Experimental.
+
+    - Need to obtain exact frame sizes and audio length from program properties.
+    - Need go program to produce examples conforming to these sizes.
+    - And to include labels.
+
+    """
+
+    example_data = tf.decode_raw(
+      input_bytes=serialized_example,
+      out_type=tf.uint8,
+    )
+
+    vs = self.video_shape
+    
+    label_offset = 0
+    label_length = 2
+    frames_length = vs[0]*vs[1]*vs[2]*vs[3]
+    frames_offset = label_offset + label_length
+    audio_length = self.audio_shape[0]
+
+    audio_offset = frames_offset + frames_length
+
+    example = {}
+    example["targets"] = tf.slice(example_data, (label_offset,), (label_length,))
+    example["video"] = tf.slice(example_data, (frames_offset,), (frames_length,))
+    example["audio"] = tf.slice(example_data, (audio_offset,), (audio_length,))
+
+    return example

@@ -132,7 +132,8 @@ def deploy_topic_responder(function_name,
                            create_topic=True,
                            create_done_topic=True,
                            memory="256MB",
-                           timeout="60s"):
+                           timeout="60s",
+                           max_instances=1000):
 
   _validate_runtime(runtime)
 
@@ -154,7 +155,8 @@ def deploy_topic_responder(function_name,
     "--runtime", runtime,
     "--source", source,
     "--memory", memory,
-    "--timeout", timeout
+    "--timeout", timeout,
+    "--max-instances", str(max_instances)
   ]
 
   if service_account:

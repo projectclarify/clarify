@@ -40,7 +40,7 @@ from pcml.launcher.util import _compress_and_stage
 # A common base image that extends kubeflow tensorflow_notebook workspace
 # image with python dependencies needed for various examples.
 # TODO: In the future include various additional deps in this base image
-_COMMON_BASE = "gcr.io/kubeflow-rl/common-base:0.0.1"
+_COMMON_BASE = "gcr.io/kubeflow-rl/common-base:0.1.0"
 _TF_JOB_GROUP = "kubeflow.org"
 _TF_JOB_VERSION = "v1beta1"
 _TF_JOB_PLURAL = "tfjobs"
@@ -813,11 +813,18 @@ class TFJob(Job):
 class PCMLJob(Job):
   """A type of Job that always starts with staging in and setting up PCML."""
 
-  def __init__(self, command_args, job_name, staging_path, *args, **kwargs):
+  def __init__(self, command_args, job_name, staging_path=None, stage_and_install=False,
+               *args, **kwargs):
 
-    self._remote_app_root = "%s/%s" % (staging_path, job_name)
+    if stage_and_install:
+      if not staging_path:
+        raise ValueError("Please specify staging_path when stage_and_install is enabled.")
+      self._remote_app_root = "%s/%s" % (staging_path, job_name)
+      setup_command = self.get_setup_command(self._remote_app_root)
+    else:
+      setup_command = "ls /tmp"
+    self.stage_and_install = stage_and_install
 
-    setup_command = self.get_setup_command(self._remote_app_root)
     command_arg_str = command_args[0]
     command_args = "; ".join([setup_command, command_arg_str])
 
@@ -861,7 +868,9 @@ class PCMLJob(Job):
     # a problem object instead of needing to specify it.
 
     app_root = get_pcml_root()
-    _compress_and_stage(app_root, self._remote_app_root)
+    
+    if self.stage_and_install:
+      _compress_and_stage(app_root, self._remote_app_root)
 
     num_jobs_launched = 0
 

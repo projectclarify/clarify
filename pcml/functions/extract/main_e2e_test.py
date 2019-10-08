@@ -58,8 +58,13 @@ class TestExtractFnE2E(tf.test.TestCase):
       "project": project,
       "bigtable_instance": cbt_instance,
       "target_table_name": target_table_name,
-      "mp4_path": test_video_path,
-      "video_id": 0
+      "mp4_paths": [test_video_path, test_video_path],
+      "prefix": "train",
+      "video_ids": [0,1],
+      "downsample_xy_dims": 96,
+      "greyscale": True,
+      "resample_every": 2,
+      "audio_block_size": 1000
     })
 
     e2e_test_function(

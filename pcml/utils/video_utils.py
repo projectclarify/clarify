@@ -60,44 +60,6 @@ def mp4_to_frame_array(input_path):
   return np.asarray(frames)
 
 
-def stream_mp4(input_path, downsample_size=(96, 96)):
-
-  frames = []
-
-  cap = cv2.VideoCapture(input_path)
-
-  # Check if camera opened successfully
-  if (cap.isOpened()== False): 
-    tf.logging.error("Error opening video stream or file")
-
-  # Read until video is completed
-  while(cap.isOpened()):
-
-    # Capture frame-by-frame
-    ret, frame = cap.read()
-
-    if ret == True:
-
-      frame = cv2.cvtColor(frame,
-                           cv2.COLOR_BGR2RGB)
-
-      if isinstance(downsample_size, tuple):
-        frame = Image.fromarray(frame).resize(size=downsample_size)
-
-      yield np.asarray(frame)
-
-      # Press Q on keyboard to  exit
-      if cv2.waitKey(25) & 0xFF == ord('q'):
-        break
-
-    # Break the loop
-    else: 
-      break
-
-  # When everything done, release the video capture object
-  cap.release()
-
-
 def resize_video(input_frame_array, size):
 
   with tf.Session() as sess:
@@ -109,7 +71,7 @@ def resize_video(input_frame_array, size):
   return resized
 
 
-def stream_mp4(input_path, downsample_size=(96, 96)):
+def stream_mp4(input_path, downsample_size=(96, 96), greyscale=False):
 
   frames = []
 
@@ -129,8 +91,11 @@ def stream_mp4(input_path, downsample_size=(96, 96)):
     ret, frame = cap.read()
     if ret == True:
 
-      frame = cv2.cvtColor(frame,
-                           cv2.COLOR_BGR2RGB)
+      color_conversion = cv2.COLOR_BGR2RGB
+      if greyscale:
+        color_conversion = cv2.COLOR_BGR2GRAY
+
+      frame = cv2.cvtColor(frame, color_conversion)
 
       if isinstance(downsample_size, tuple):
         if len(downsample_size) != 2:
@@ -193,8 +158,8 @@ class Video(object):
       yield current.data
       current = current.next_node
 
-  def load_from_file(self, input_path, downsample_size=(96,96)):
-    for frame in stream_mp4(input_path, downsample_size=downsample_size):
+  def load_from_file(self, input_path, downsample_size=(96,96), greyscale=False):
+    for frame in stream_mp4(input_path, downsample_size=downsample_size, greyscale=greyscale):
       self.insert(frame)
 
 
@@ -294,7 +259,7 @@ class AVSamplable(object):
     frame_sample = np.delete(frame_sample, skip)
     assert len(frame_sample) == num_frames
     
-    meta["frame_sample_bounds"] = [frame_sample[0], frame_sample[-1]]
+    meta["frame_sample_bounds"] = [int(frame_sample[0]), int(frame_sample[-1])]
     meta["audio_sample_bounds"] = [audio_sample[0], audio_sample[-1]]
 
     return (np.asarray(frame_sample), np.asarray(audio_sample), meta)

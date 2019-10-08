@@ -17,6 +17,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import datetime
+
+import os
+import math
+import json
+
+import tempfile
+
 import tensorflow as tf
 
 from tensor2tensor.utils import registry
@@ -29,6 +37,10 @@ from pcml.operations import extract
 from pcml.launcher.kube import Resources
 from pcml.launcher.kube import PCMLJob
 from pcml.launcher.kube import gen_timestamped_uid
+
+from pcml.utils.cmd_utils import run_and_output
+from pcml.utils.fs_utils import get_pcml_root
+from pcml.utils.cbt_utils import VideoMeta
 
 
 @registry.register_problem
@@ -58,10 +70,10 @@ class CBTDatagenJob(PCMLJob):
                problem_name,
                project,
                bigtable_instance,
-               bigtable_source_table_name,
-               bigtable_target_table_name,
                prefix,
-               max_num_examples=-1, # No maximum
+               max_num_examples=-1,
+               bigtable_source_table_name="",
+               bigtable_target_table_name="",
                job_name_prefix="cbt-datagen",
                image="gcr.io/clarify/basic-runtime:0.0.4",
                num_cpu=1,
@@ -139,6 +151,107 @@ def log_flags(flags):
     tf.logging.info("%s: %s" % (key, getattr(flags, key)))
 
 
+def cbt_generate_and_load_examples_experimental(project,
+                                   problem_name,
+                                   bigtable_instance,
+                                   prefix,
+                                   max_num_examples=10,
+                                   audio_shard_size=1000):
+
+  problem = registry.problem(problem_name)
+
+  if not hasattr(problem, "sampling_generator"):
+    msg = ("Problem {} is not compatible, must "
+           "implement an {} method.").format(
+      problem_name, attr)
+    raise ValueError(msg)
+
+  # For now the raw and example video shapes are the same. But if the raw
+  # video shape were different we could e.g. add a .raw_video_shape attr.
+  video_shape = problem.video_shape
+  audio_shape = problem.audio_shape
+
+  source_selection = cbt_utils.RawVideoSelection(
+    project=project,
+    instance=bigtable_instance,
+    table=problem.raw_table_name,
+    prefix=prefix)
+  
+  tf.logging.debug("instantiated raw video table selection")
+
+  generator = source_selection.sample_av_correspondence_examples(
+    frames_per_video=video_shape[0],
+    max_num_samples=int(math.floor(max_num_examples/3)),
+    keys_only=True)
+
+  tf.logging.debug("instantiated generator")
+
+  def _unpack(generator):
+    for example_set in generator:
+      for key, value in example_set.items():
+        yield value.dump_keys()
+
+  samples = json.dumps([data for data in _unpack(generator)])
+
+  _cbt_datagen(project=project,
+               instance_name=bigtable_instance,
+               source_table_name=problem.raw_table_name,
+               target_table_name=problem.examples_table_name,
+               target_prefix=prefix,
+               samples=samples,
+               source_shape=video_shape[1:],
+               target_shape=video_shape[1:],
+               audio_shard_size=audio_shard_size)
+
+
+def _cbt_datagen(project, instance_name, source_table_name, target_table_name,
+                 target_prefix, source_shape, target_shape,
+                 samples, target_key_size=4, mode="compiled", audio_shard_size=1000):
+
+  pcml_root = get_pcml_root()
+
+  main_go_path = os.path.join(pcml_root, "go", "main.go")
+  main_compiled_path = os.path.join(pcml_root, "go", "main")
+
+  gopath = "/usr/local/go/bin/go"
+
+  go_command = gopath
+  go_run_command = " ".join([gopath, "run"])
+
+  if mode == "compiled":
+    #command_prefix = " ".join([go_command, main_compiled_path])
+    command_prefix = main_compiled_path
+  else:
+    command_prefix = " ".join([go_run_command, main_go_path])
+
+  start = datetime.datetime.now()
+  
+  tempd = tempfile.mkdtemp()
+  samples_path = os.path.join(tempd, "samples.json")
+  with tf.gfile.Open(samples_path, "w") as f:
+    f.write(samples)
+
+  run_and_output([command_prefix,
+                  "--project", project,
+                  "--instance", instance_name,
+                  "--sourceTableName", source_table_name,
+                  "--targetTableName", target_table_name,
+                  "--targetPrefix", target_prefix,
+                  "--targetKeySize", str(target_key_size),
+                  "--sourceFrameX", str(source_shape[0]),
+                  "--sourceFrameY", str(source_shape[1]),
+                  "--sourceFrameC", str(source_shape[2]),
+                  "--targetFrameX", str(target_shape[0]),
+                  "--targetFrameY", str(target_shape[1]),
+                  "--targetFrameC", str(target_shape[2]),
+                  "--audioShardSize", str(audio_shard_size),
+                  "--samplesPath", samples_path])
+
+  end = datetime.datetime.now()
+
+  print("go runtime: {}".format(str(end-start)))
+
+
 def main(_):
   
   log_flags(FLAGS)
@@ -164,7 +277,12 @@ def main(_):
     return job.launch_shard_parallel_jobs(
         num_shards=FLAGS.batch_num_shards)
 
+  cbt_generate_and_load_examples_experimental(
+    FLAGS.project, FLAGS.problem_name, FLAGS.bigtable_instance,
+    FLAGS.prefix, max_num_examples=FLAGS.max_num_examples)
+
   # Run locally, e.g. inside VM running in batch.
+  '''
   cbt_generate_and_load_examples(
     project=FLAGS.project,
     bigtable_instance=FLAGS.bigtable_instance,
@@ -173,6 +291,7 @@ def main(_):
     max_num_examples=FLAGS.max_num_examples,
     prefix=FLAGS.prefix,
     problem_name=FLAGS.problem_name)
+  '''
 
 
 if __name__ == "__main__":

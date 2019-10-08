@@ -46,13 +46,15 @@ setup(
         'requests-toolbelt',
         'sklearn',
         'faced @ https://github.com/iitzco/faced/archive/31ef0d30e1567a06113f49ff4a1202760d952df2.zip',
-        'tensor2tensor',
+        'tensor2tensor==1.14.0',
         'google-cloud-logging',
-        'apache-beam[gcp]'
+        'pathos',
+        'opencv-python',
+        'tensorflow-probability==0.7.0'
     ],
     extras_require={
         'tensorflow': [
-            'tensorflow==1.14.0'
+            'tensorflow==1.14'
         ],
         'tensorflow-gpu': [
             'tensorflow-gpu>=1.13.1'

@@ -76,8 +76,8 @@ _FEC_ARCHIVE="https://storage.googleapis.com/public_release/FEC_dataset.zip"
 _FEC_TEST_META_FILENAME="faceexp-comparison-data-test-public.csv"
 _FEC_TRAIN_META_FILENAME="faceexp-comparison-data-train-public.csv"
 _FEC_IMAGE_SIZE = 64
-
 _SUCCESS_MESSAGE = "Successfully completed download and filtering of FEC dataset."
+
 
 def _load_meta_line(line):
   def _load_meta_entry(entry_array):
@@ -293,7 +293,6 @@ class DownloadFec(PCMLJob):
       command=command,
       command_args=command_args,
       namespace="kubeflow",
-      image="gcr.io/clarify/basic-runtime:0.1.0",
       *args, **kwargs)
 
 
@@ -305,7 +304,7 @@ def main(_):
 
   condition = "train"
   if not is_training:
-    condition = "test"
+    condition = "eval"
 
   # TODO: need to check maybe transfer code above for downloading direct to GCS then
   # use it in fec.py

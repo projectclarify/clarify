@@ -47,11 +47,14 @@ def upsearch(directory, query, max_levels=3):
     max_levels(int): The maximum depth of recursion.
 
   """
+  
+  tf.logging.info("Upsearched to {}".format(directory))
 
   if max_levels < 0:
     return None
 
   directory_contents = tf.gfile.ListDirectory(directory)
+  tf.logging.info("Directory contents {}".format(directory_contents))
 
   if query in directory_contents:
     return directory
@@ -65,8 +68,9 @@ def get_pcml_root():
 
   this_dir = os.path.dirname(
       os.path.abspath(inspect.getfile(inspect.currentframe())))
+  tf.logging.info("Searching from pcml root from {}".format(this_dir))
 
-  return upsearch(this_dir, "WORKSPACE")
+  return upsearch(this_dir, "MANIFEST.in")
 
 
 def expect_path(path):

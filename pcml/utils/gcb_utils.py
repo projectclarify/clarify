@@ -21,10 +21,16 @@ import datetime
 import os
 import yaml
 import uuid
+import dateutil
 
 import tensorflow as tf
 
 from pcml.utils.cmd_utils import run_and_output
+
+import googleapiclient.discovery
+from googleapiclient import _auth
+
+credentials = _auth.default_credentials()
 
 
 def generate_image_tag(project_or_user, app_name,
@@ -41,8 +47,8 @@ def generate_image_tag(project_or_user, app_name,
 
 
 def gcb_build_and_push(image_tag, build_dir,
-                       cache_from="tensorflow/tensorflow:1.6.0",
-                       dry_run=False):
+                       cache_from=None,
+                       dry_run=False, auto_cache_from=True):
   """Generate GCB config and build container, caching from `cache_from`.
 
   A Google Container Builder build.yaml config will be produced in
@@ -57,9 +63,14 @@ def gcb_build_and_push(image_tag, build_dir,
     cache_from (str): A container image string identifier.
     dry_run (bool): Whether to actually trigger the build on GCB.
 
-  TODO: Use GCB REST API.
-
   """
+
+  fallback_cache_from = "tensorflow/tensorflow:1.6.0"
+  if not cache_from:
+    if auto_cache_from:
+      cache_from = latest_successful_build(image_tag)
+    if not cache_from:
+      cache_from = fallback_cache_from
 
   if not isinstance(build_dir, str):
     raise ValueError("Paths must be of type str, saw: %s" % build_dir)
@@ -108,3 +119,38 @@ def gcb_build_and_push(image_tag, build_dir,
                         "submit", "--config", "build.yaml", "."])
 
   return build_config
+
+
+def latest_successful_build(image_uri):
+  """Given an image URI get the most recent green cloudbuild."""
+
+  uri_prefix = image_uri.split(":")[0]
+  
+  project_id = uri_prefix.split("/")[1]
+  cloudbuild = googleapiclient.discovery.build(
+    'cloudbuild', 'v1', credentials=credentials,
+    cache_discovery=False)
+  builds = cloudbuild.projects().builds().list(
+      projectId=project_id).execute()
+
+  latest_time = None
+  latest = None
+
+  for build in builds["builds"]:
+    if build["status"] == "SUCCESS":
+      images = build["images"]
+      if len(images) == 1:
+        if images[0].startswith(uri_prefix):
+          finish_time = dateutil.parser.parse(build["finishTime"])
+          if not latest:
+            latest_time = finish_time
+          if finish_time >= latest_time:
+            latest = images[0]
+            latest_time = finish_time
+
+  if latest:
+    tf.logging.info("Found a latest successful build: {}".format(
+      latest
+    ))
+
+  return latest

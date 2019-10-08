@@ -15,6 +15,7 @@ import tensorflow as tf
 
 import json
 import base64
+import uuid
 
 from collections import UserDict
 import mock
@@ -23,10 +24,25 @@ from pcml.functions.extract.messages import ExtractTriggerMessage
 
 import main
 
+from pcml.utils.cfg_utils import Config
+
+TEST_CONFIG = Config()
+
 
 class TestExtractFn(tf.test.TestCase):
 
   def test_extract(self):
+
+    function_name = "extract"
+    project = TEST_CONFIG.get("project")
+    sa = TEST_CONFIG.get("functions_testing_service_account")
+    region = TEST_CONFIG.get("region")
+    staging = TEST_CONFIG.get("test_artifacts_root")
+    cbt_instance = TEST_CONFIG.get("test_cbt_instance")
+    test_video_path = TEST_CONFIG.get("test_video_path")
+
+    salt = str(uuid.uuid4())
+    target_table_name = "ext-fn-test" + str(uuid.uuid4())
 
     mock_context = UserDict()
     mock_context = mock.Mock()
@@ -36,12 +52,16 @@ class TestExtractFn(tf.test.TestCase):
     mp4_path = "gs://clarify-data/requires-eula/voxceleb2/dev/mp4/id00012/21Uxsk56VDQ/00001.mp4"
 
     test_message = ExtractTriggerMessage(**{
-      "problem_name": problem_name,
       "project": project,
       "bigtable_instance": cbt_instance,
       "target_table_name": target_table_name,
-      "mp4_path": mp4_path,
-      "video_id": 0
+      "mp4_paths": [test_video_path, test_video_path],
+      "prefix": "train",
+      "video_ids": [0,1],
+      "downsample_xy_dims": 96,
+      "greyscale": True,
+      "resample_every": 2,
+      "audio_block_size": 1000
     }).__dict__
 
     event = {

@@ -279,7 +279,7 @@ class DisfaProblemBase(problem.Problem):
     return {
       #"video": text_encoder.ImageEncoder(channels=self.video_shape[3]),
     }
-    
+
   def example_reading_spec(self):
 
     video_shape = () # WIP
