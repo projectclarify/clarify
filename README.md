@@ -25,15 +25,111 @@ Various additional options are available for model deployment that offer lower-l
 
 The tensor2tensor Problem object provides a way to encapsulate the steps and parameters involved in processing raw data into training examples (for a particular problem). These can be sub-classed or combined in the context of multi-problem training. More information is available [here](https://tensorflow.github.io/tensor2tensor/new_problem.html). The PCML codebase includes a growing number of Problem implementations in support of various sub-projects, enumerated here:
 
-| Dataset | Visual | Audio | EEG | Annotations | Other modalities | Status | Code | Source | Citation |
-|---|---|---|---|---|---|---|---|---|---|
-| AffectNet | Image | - | - | Emo. (rater) | - | Planned | [link](https://github.com/projectclarify/pcml/blob/master/pcml/datasets/affectnet.py) | [link](http://mohammadmahoor.com/affectnet/) | 7 |
-| DEAP | Video | Audio | 32ch. | Vid. rating | Resp., temp., GSR | Examples | [link](https://github.com/projectclarify/pcml/blob/master/pcml/datasets/deap.py) | [link](https://www.eecs.qmul.ac.uk/mmv/datasets/deap/) | 4 |
-| FEC | Image | - | - | Percep. sim. | - | Examples | [link](https://github.com/projectclarify/pcml/blob/master/pcml/datasets/fec.py) | [link](https://ai.google/tools/datasets/google-facial-expression/) | 9 |
-| MMIMP | Video | Audio | Various | Various | Various | Examples* | [link](https://github.com/projectclarify/pcml/blob/master/pcml/datasets/mmimp.py) | various | - |
-| VoxCeleb 2 | Video | Audio | - | N/A | - | Examples | [link](https://github.com/projectclarify/pcml/blob/master/pcml/datasets/vox_celeb_cbt.py) | [link](http://www.robots.ox.ac.uk/~vgg/data/voxceleb/) | 3 |
-| DISFA | Image | - | EEG | FACS (rater) | - | Examples | [link](https://github.com/projectclarify/pcml/blob/master/pcml/datasets/disfa.py) | [link](http://mohammadmahoor.com/disfa/) | 6 |
-| MAHNOB | Video | Audio | 32ch. | Emo. (self) | Resp., temp., eye | Download | [link](https://github.com/projectclarify/pcml/blob/master/pcml/datasets/mahnob_hci.py) | [link](https://mahnob-db.eu/hci-tagging/) | 5 |
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;margin:0px auto;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black; text-align: center;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+@media screen and (max-width: 767px) {.tg {width: auto !important;}.tg col {width: auto !important;}.tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;margin: auto 0px;}}</style>
+<div class="tg-wrap"><table class="tg">
+  <tr>
+    <th class="tg-0lax">Dataset</th>
+    <th class="tg-0lax">Visual</th>
+    <th class="tg-0lax">Audio</th>
+    <th class="tg-0lax">EEG</th>
+    <th class="tg-0lax">Annotations</th>
+    <th class="tg-0lax">Other modalities</th>
+    <th class="tg-0lax">Status</th>
+    <th class="tg-0lax">Code</th>
+    <th class="tg-0lax">Source</th>
+    <th class="tg-0lax">Citation</th>
+  </tr>
+  <tr>
+    <td class="tg-0lax">AffectNet</td>
+    <td class="tg-0lax">Image</td>
+    <td class="tg-0lax">-</td>
+    <td class="tg-0lax">-</td>
+    <td class="tg-0lax">Emo. (rater)</td>
+    <td class="tg-0lax">-</td>
+    <td class="tg-0lax">Planned</td>
+    <td class="tg-0lax"><a href="https://github.com/projectclarify/pcml/blob/master/pcml/datasets/affectnet.py" target="_blank">link</a></td>
+    <td class="tg-0lax"><a href="http://mohammadmahoor.com/affectnet/" target="_blank">link</a></td>
+    <td class="tg-0lax">7</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">DEAP</td>
+    <td class="tg-0lax">Video</td>
+    <td class="tg-0lax">Audio</td>
+    <td class="tg-0lax">32ch.</td>
+    <td class="tg-0lax">Vid. rating</td>
+    <td class="tg-0lax">Resp., temp., gsr</td>
+    <td class="tg-0lax">Examples</td>
+    <td class="tg-0lax"><a href="https://github.com/projectclarify/pcml/blob/master/pcml/datasets/deap.py" target="_blank">link</a></td>
+    <td class="tg-0lax"><a href="https://www.eecs.qmul.ac.uk/mmv/datasets/deap/" target="_blank">link</a></td>
+    <td class="tg-0lax">4</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">FEC</td>
+    <td class="tg-0lax">Image</td>
+    <td class="tg-0lax">-</td>
+    <td class="tg-0lax">-</td>
+    <td class="tg-0lax">Percep. sim.</td>
+    <td class="tg-0lax">-</td>
+    <td class="tg-0lax">Examples</td>
+    <td class="tg-0lax"><a href="https://github.com/projectclarify/pcml/blob/master/pcml/datasets/fec.py" target="_blank">link</a></td>
+    <td class="tg-0lax"><a href="https://ai.google/tools/datasets/google-facial-expression/" target="_blank">link</a></td>
+    <td class="tg-0lax">9</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">MMIMP</td>
+    <td class="tg-0lax">Video</td>
+    <td class="tg-0lax">Audio</td>
+    <td class="tg-0lax">Various</td>
+    <td class="tg-0lax">Various</td>
+    <td class="tg-0lax">Various</td>
+    <td class="tg-0lax">Examples*</td>
+    <td class="tg-0lax"><a href="https://github.com/projectclarify/pcml/blob/master/pcml/datasets/mmimp.py" target="_blank">link</a></td>
+    <td class="tg-0lax">Various</td>
+    <td class="tg-0lax">-</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">VoxCeleb2</td>
+    <td class="tg-0lax">Video</td>
+    <td class="tg-0lax">Audio</td>
+    <td class="tg-0lax">-</td>
+    <td class="tg-0lax">N/A</td>
+    <td class="tg-0lax">-</td>
+    <td class="tg-0lax">Examples</td>
+    <td class="tg-0lax"><a href="https://github.com/projectclarify/pcml/blob/master/pcml/datasets/vox_celeb_cbt.py" target="_blank">link</a></td>
+    <td class="tg-0lax"><a href="http://www.robots.ox.ac.uk/~vgg/data/voxceleb/" target="_blank">link</a></td>
+    <td class="tg-0lax">3</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">DISFA</td>
+    <td class="tg-0lax">Image</td>
+    <td class="tg-0lax">-</td>
+    <td class="tg-0lax">-</td>
+    <td class="tg-0lax">FACS (rater)</td>
+    <td class="tg-0lax">-</td>
+    <td class="tg-0lax">Examples</td>
+    <td class="tg-0lax"><a href="https://github.com/projectclarify/pcml/blob/master/pcml/datasets/disfa.py" target="_blank">link</a></td>
+    <td class="tg-0lax"><a href="http://mohammadmahoor.com/disfa/" target="_blank">link</a></td>
+    <td class="tg-0lax">6</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">MAHNOB</td>
+    <td class="tg-0lax">Video</td>
+    <td class="tg-0lax">Audio</td>
+    <td class="tg-0lax">32ch.</td>
+    <td class="tg-0lax">Emo. (self)</td>
+    <td class="tg-0lax">Resp., temp., eye.</td>
+    <td class="tg-0lax">Download</td>
+    <td class="tg-0lax"><a href="https://github.com/projectclarify/pcml/blob/master/pcml/datasets/mahnob_hci.py" target="_blank">link</a></td>
+    <td class="tg-0lax"><a href="https://mahnob-db.eu/hci-tagging/" target="_blank">link</a></td>
+    <td class="tg-0lax">5</td>
+  </tr>
+</table></div>
 
 
 ### Citations
