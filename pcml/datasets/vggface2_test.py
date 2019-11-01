@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""FEC problem definition tests."""
+"""Tests of VGGFace2 problem."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -23,7 +23,7 @@ import tempfile
 import uuid
 import os
 
-from pcml.datasets import fec
+from pcml.datasets import vggface2
 from tensor2tensor.utils import registry
 
 from pcml.utils.dev_utils import T2TDevHelper
@@ -33,7 +33,7 @@ from pcml.utils.cfg_utils import Config
 TEST_CONFIG = Config()
 
 
-class TestFECProblem(tf.test.TestCase):
+class TestVGGFace2Problem(tf.test.TestCase):
 
   def setUp(self):
 
@@ -41,19 +41,19 @@ class TestFECProblem(tf.test.TestCase):
     self.instance = TEST_CONFIG.get("test_cbt_instance")
     self.tmpdir = tempfile.mkdtemp()
     self.salt = str(uuid.uuid4())[0:8]
-    self.test_run_tag = "clarify-test-{}-fec-cbt".format(
+    self.test_run_tag = "clarify-test-{}-vggface-cbt".format(
       self.salt
     )
     self.mode = "train"
-    self.test_problem_name = "fec_tiny"
+    self.test_problem_name = "vgg_face2_tiny"
     self.staging = os.path.join(TEST_CONFIG.test_artifacts_root,
                                 self.test_run_tag)
 
   def test_registry_lookups(self):
 
     problem_names = [
-      "facial_expression_correspondence",
-      "fec_tiny"
+      "vgg_face2",
+      "vgg_face2_tiny"
     ]
 
     for problem_name in problem_names:

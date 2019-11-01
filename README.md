@@ -124,6 +124,21 @@ The tensor2tensor Problem object provides a way to encapsulate the steps and par
   </tr>
 </table></div>
 
+### Deep learning methods overview
+
+Below is summarized the integration of several sub-projects.
+
+![](docs/images/dl-overview.png)
+
+Figure N. Multi-modal modeling. The means by which examples will be synergized from several modalities including vision (teal), audio (green), cortical sensing (e.g. EEG, fNIRS; blue), and one-dimensional peripheral physiological measures (orange). At left (a) is diagrammed the triplet image similarity learning scheme of Vemulapalli and Agarwala (2019; and predecessors) that will be used to learn expression embeddings in a way that is consistent with human perception; following pre-training on VGGFace2; in conjunction with learning to predict landmark and pose labels from VGGFace2 and other datasets. As described above, perception of cognitive and emotional state from the visual modality will be used as conceptual grounding and supervision for learning the same from co-occurring modalities (b, center; including auditory, physiological, and neural) where multi-modal data is available. To supplement this training will be performed in conjunction on larger unimodal datasets using various self-supervised methods (center, top). Modeling of cortical sensing will be enhanced with a partially model-based approach (right, b) where an encoder will both (1) parameterize a latent variable model of the subject’s neuroanatomical structure and (2) propagate its state to subsequent encoder layers that will be enabled by operating on both (abstract) state and structure information. The modeling approach, taken as a whole, is a progressive and extensible one in terms of modalities, losses, and datasets providing a continuous ramp from very simple experiments (a) through a stepwise progression of more complex extensions (b, c).
+
+### Application context
+
+Below is summarized how we aim to use abstract state representations for feedback.
+
+![](docs/images/abstract-feedback.png)
+
+Figure 1. Generalized representation of feedback problem in state space. Given a state space wherein we have (1) the ability to represent current state as a position, ‘e’, in that space, (2) a position or region in that space that corresponds to a goal, ‘g’, defined by way of a collection of exemplars, and (3) a means of computing the distance ‘𝜹t‘ of a representation obtained at time t, ‘et’, from that goal. Within this framework, the latter distance provides a signal that can be used for feedback and 𝜹t - 𝜹t+Δt > 0 is considered favorable progress. The desired effect is that over time the user develops automatic subconscious habits that tend to drive their state towards ‘g’ based on the internalization of ‘g’ and ‘𝜹 ’.
 
 ### Citations
 

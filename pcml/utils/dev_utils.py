@@ -115,7 +115,7 @@ class T2TDevHelper(object):
   def __init__(self, model_name, problem_name, hparams_set, queries,
                output_dir=None, data_dir=None, model_dir=None,
                tmp_dir=None, export_dir=None, decode_hparams="",
-               default_tmp=None, tfms_path=None):
+               default_tmp=None, tfms_path=None, mode="train"):
 
     self.model_name = model_name
     self.model = registry.model(model_name)
@@ -126,6 +126,7 @@ class T2TDevHelper(object):
     self.queries = queries
 
     self.problem = registry.problem(self.problem_name)
+    self.problem.mode = mode
 
     tmp = tempfile.mkdtemp() if default_tmp is None else default_tmp
 
@@ -153,7 +154,7 @@ class T2TDevHelper(object):
     self.problem.generate_data(self.data_dir, self.tmp_dir)
     self.has_run_datagen = True
 
-  def train(self, use_tpu=False):
+  def train(self, use_tpu=False, schedule="train"):
     """Run training."""
 
     exp_fn = trainer_lib.create_experiment_fn(
@@ -163,13 +164,15 @@ class T2TDevHelper(object):
         train_steps=10,
         eval_steps=1,
         min_eval_frequency=9,
-        use_tpu=use_tpu)
+        use_tpu=use_tpu,
+        schedule=schedule)
 
     run_config = trainer_lib.create_run_config(
         model_name=self.model_name,
         model_dir=self.model_dir,
         num_gpus=0,
-        use_tpu=use_tpu)
+        use_tpu=use_tpu,
+        schedule=schedule)
 
     hparams = registry.hparams(self.hparams_set)
 

@@ -17,7 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
+import osa
 import json
 import shutil
 
@@ -444,12 +444,30 @@ def build_accelerator_args(gpu_type="nvidia-tesla-k80",
     return extra_train_args, extra_experiment_args
 
 
+def _replicate_checkpoint(source, target):
+    
+  latest = tf.train.latest_checkpoint(source)
+  if not latest:
+    msg = "couldn't find latest ckpt to replicate"
+    raise ValueError(msg)
+
+  tf.logging.info("Found latest checkpoint {}".format(latest))
+
+  for filename in tf.gfile.ListDirectory(source):
+    tf.logging.debug("Ckpt dir filename: {}".format(filename))
+    source_path = os.path.join(source, filename)
+    prefix = latest + "."
+    tf.logging.debug("Filename prefix: {}".format(prefix))
+    if prefix in source_path or "checkpoint" in filename or "graph.pbtxt" in filename:
+      tf.gfile.Copy(source_path, os.path.join(target, filename))
+
+
 def configure_experiment(base_name,
                          problem,
                          model,
                          hparams_set,
-                         remote_base,
                          num_train_steps,
+                         remote_base,
                          num_gpu_per_worker=0,
                          num_eval_steps=100,
                          local_eval_frequency=90,
@@ -466,17 +484,19 @@ def configure_experiment(base_name,
                          base_image="tensorflow/tensorflow:1.13.1-py3",
                          reuse_output_dir=None,
                          schedule="train",
-                         data_dir="/mnt/disks/ssd0",
-                         tmp_dir="/mnt/disks/ssd0",
+                         data_dir="/mnt/ssd0",
+                         tmp_dir="/mnt/ssd0",
                          gpu_type="nvidia-tesla-k80",
                          use_katib=False,
                          use_tpu=True,
                          num_tpu_cores=8,
                          tpu_tf_version="1.14",
+                         tpu_type="preemptible-v3",
                          selector_labels={"type": "tpu-host"},
-                         save_checkpoints_secs=1800,
+                         save_checkpoints_secs=600,
                          vendor_t2t=False,
                          stage_and_install=False,
+                         continue_with_ckpt_dir=None,
                          **kwargs):
   """Wrapper to construct args object and produce job scripts.
 
@@ -501,8 +521,24 @@ def configure_experiment(base_name,
 
   checkpoint_output_dir = os.path.join(remote_app_root, "output")
 
-  if isinstance(reuse_output_dir, str):
-    # Apply output dir override
+  """
+  
+  One can either re-use a checkpoint dir to continue training those parameters
+  or use those as a starting point for a separate training timeline. The former
+  is specified via reuse_output_dir and the latter via continue_with_ckpt_dir.
+  
+  """
+  
+  tf.logging.info("continue with ckpt dir setting: {}".format(continue_with_ckpt_dir))
+
+  if continue_with_ckpt_dir:
+    
+    tf.logging.info("Continuing from ckpt dir {}".format(continue_with_ckpt_dir))
+
+    _replicate_checkpoint(source=continue_with_ckpt_dir,
+                          target=checkpoint_output_dir)
+
+  elif reuse_output_dir:
     checkpoint_output_dir = reuse_output_dir
 
   if use_katib:
@@ -536,7 +572,7 @@ def configure_experiment(base_name,
       "ps_gpu": ps_gpu,
       "save_checkpoints_secs": save_checkpoints_secs,
       "dbgprofile": dbgprofile,
-      "ssd_mount_path": "/mnt/disks/ssd0",
+      "ssd_mount_path": "/mnt/ssd0",
       "tmp_dir": tmp_dir,
       "worker_gpu_memory_fraction": 0.95,
       # On the workers, the pcml code will reside at /tmp/pcml
@@ -639,6 +675,7 @@ def main(argv):
 
   # HACK ==
   tf.gfile.MakeDirs(FLAGS.output_dir)
+  tf.gfile.MakeDirs(FLAGS.data_dir)
   #final_output_dir = FLAGS.output_dir
   #FLAGS.output_dir = "/mnt/disks/ssd0"
   # =======

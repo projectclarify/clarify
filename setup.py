@@ -44,7 +44,7 @@ setup(
         'google-auth',
         'requests',
         'requests-toolbelt',
-        'sklearn',
+        'scikit-learn>=0.21.3',
         'faced @ https://github.com/iitzco/faced/archive/31ef0d30e1567a06113f49ff4a1202760d952df2.zip',
         'tensor2tensor==1.14.0',
         'google-cloud-logging',

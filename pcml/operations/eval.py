@@ -75,6 +75,7 @@ class EvalJob(CronJob, PCMLJob):
                                   "memory": memory}),
       *args, **kwargs)
 
+
 def _metrics_given_threshold(predictions, targets, threshold):
 
   TP = 0.0
@@ -188,10 +189,6 @@ def compute_metrics(problem_name, model_name, hparams_name,
   eval_dataset = problem_instance.dataset(mode=Modes.EVAL,
                                           data_dir=data_dir)
 
-  '''eval_dataset = problem_instance.dataset(mode=Modes.TRAIN,
-                                          mode_override=mode,
-                                          data_dir=data_dir)'''
-
   eval_dataset = eval_dataset.repeat(None).batch(eval_batch_size)
   eval_dataset_iterator = tfe.Iterator(eval_dataset)
 
@@ -251,6 +248,77 @@ def compute_metrics(problem_name, model_name, hparams_name,
   midpoint_metrics["auc"] = _auc_for_metrics_set(metrics_set)
 
   return midpoint_metrics, metrics_set, predictions, targets
+
+
+def compute_metrics_v2(problem_name, model_name, hparams_name, 
+                       ckpt_dir, data_dir="/tmp", eval_batch_size=32,
+                       eval_steps=100, extra_hparams=[], mode=Modes.EVAL,
+                       num_threshold_bins=100):
+
+  registered_model = registry.model(model_name)
+
+  hparams = registry.hparams(hparams_name)
+  hparams.mode = mode
+
+  for extra_hparam in extra_hparams:
+    assert len(extra_hparam) == 2
+    if extra_hparam[0] == "mode":
+      continue
+    hparams.setattr(extra_hparam[0], extra_hparam[1])
+
+  problem_instance = registry.problem(problem_name)
+  problem_hparams = problem_instance.get_hparams(hparams)
+
+  # Build the eval dataset and get the examples
+  eval_dataset = problem_instance.dataset(mode=Modes.EVAL,
+                                          data_dir=data_dir)
+
+  eval_dataset = eval_dataset.repeat(None).batch(eval_batch_size)
+  eval_dataset_iterator = tfe.Iterator(eval_dataset)
+
+  metrics = {}
+
+  def _merge(metrics, metrics_partial):
+    for key, value in metrics_partial.items():
+      if key not in metrics:
+        metrics[key] = value
+      else:
+        metrics[key] += value
+    return metrics
+
+  with tfe.restore_variables_on_create(ckpt_dir):
+
+    model_instance = registered_model(
+      hparams, mode, problem_hparams
+    )
+
+    for i in range(eval_steps):
+
+      try:
+
+        eval_examples = eval_dataset_iterator.next()
+
+        metrics_partial = model_instance.eager_eval(eval_examples)
+        metrics = _merge(metrics, metrics_partial)
+
+        if i % 10 == 0:
+          msg = "Finished collecting predictions for eval step {}.".format(i)
+          tf.logging.info(msg)
+
+      except:
+        # Seeing rare CBT deadline exceeded errors and don't know how to modfiy
+        # the deadline... More likely to run into error with more iterations,
+        # wasn't seeing it with 10 and almost always seeing it with 100.
+        # Could conceivably have to do with running out of examples in the eval
+        # set... but there should be over 20k and this would only go through
+        # 3200.
+        msg = "HACK: Squashing inference error."
+        tf.logging.info(msg)
+
+  for key, value in metrics.items():
+    metrics[key] = value/eval_steps
+
+  return metrics
 
 
 def lookup_config(ckpt_path, max_retries=10, retry_delay=10):
@@ -383,11 +451,6 @@ def eval_for_ckpt_dir(ckpt_dir, delay_seconds=5, mock_acc=False,
   config = lookup_config(ckpt_dir)
   extra_hparams = parse_extra_hparams(config["hparams"])
 
-  # HACK
-  #config["model"] = "res_ut_conv3d"
-  #config["problem"] = "vox_celeb_problem_v3_preaugmentation_dev"
-  #config["hparams_set"] = "ut_tpu"
-
   last_global_step = None
 
   while True:
@@ -409,6 +472,9 @@ def eval_for_ckpt_dir(ckpt_dir, delay_seconds=5, mock_acc=False,
 
     for mode in [Modes.EVAL]: #, Modes.TRAIN]:
 
+      """
+      #Previous version
+
       midpoint_metrics, metrics_set, predictions, targets = compute_metrics(
         problem_name=config["problem"],
         model_name=config["model"],
@@ -419,17 +485,29 @@ def eval_for_ckpt_dir(ckpt_dir, delay_seconds=5, mock_acc=False,
         eval_steps=eval_steps,
         data_dir=data_dir)
 
-      report_metrics_summaries(metrics=midpoint_metrics,
-                               ckpt_dir=ckpt_dir,
-                               global_step=global_step,
-                               mode=mode)
-
       log_all_metric_data(predictions=predictions,
                           targets=targets,
                           metrics_set=metrics_set,
                           ckpt_dir=ckpt_dir,
                           global_step=global_step,
                           mode=mode)
+
+      """
+
+      metrics = compute_metrics_v2(
+        problem_name=config["problem"],
+        model_name=config["model"],
+        hparams_name=config["hparams_set"],
+        ckpt_dir=ckpt_dir,
+        extra_hparams=extra_hparams,
+        mode=mode,
+        eval_steps=eval_steps,
+        data_dir=data_dir)
+
+      report_metrics_summaries(metrics=metrics,
+                               ckpt_dir=ckpt_dir,
+                               global_step=global_step,
+                               mode=mode)
 
     tf.logging.info("Delaying {}s until next eval".format(
       delay_seconds
@@ -463,7 +541,7 @@ def trigger_eval(ckpt_dir, data_dir=None, eval_steps=30):
   
   """
 
-  # Wait 10min before computing first metrics
+  # Wait 5min before computing first metrics
   time.sleep(300)
 
   while True:
@@ -483,7 +561,7 @@ def trigger_eval(ckpt_dir, data_dir=None, eval_steps=30):
 
       tf.logging.info("Squashing failed eval call, will retry...")
       # ...
-    
+
     time.sleep(60)
 
   return out

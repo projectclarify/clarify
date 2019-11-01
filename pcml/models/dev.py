@@ -407,13 +407,20 @@ class MCLDev3(mcl.ModalityCorrespondenceLearner):
     features = {"inputs": image_tensor}
     return tf.squeeze(self.embed_image(features)).numpy()
 
+  def eager_embed_single_audio(self, d, **kwargs):
+    del kwargs
+    t = tf.convert_to_tensor(d)
+    t = tf.expand_dims(t, 0)
+    features = {"inputs": t}
+    return tf.squeeze(self.embed_audio(features)).numpy()
+
   @property
   def has_input(self):
     return True
 
   @property
   def modality_embedding_size(self):
-    return 64
+    return 512
 
   def _embed(self, tensor, embedding_size, dense_reduction_factor,
              hparams):

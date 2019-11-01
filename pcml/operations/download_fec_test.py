@@ -22,6 +22,7 @@ import datetime
 import tempfile
 import uuid
 import os
+import numpy as np
 
 import tensorflow as tf
 
@@ -43,6 +44,25 @@ class TestDownloadFec(tf.test.TestCase):
     self.staging = os.path.join(TEST_CONFIG.test_artifacts_root,
                                 self.test_run_tag)
 
+  def test_normalize_shape(self):
+
+    cases = [
+      (64,64,3),
+      (16,16,3),
+      (72,72,3),
+      (128,72,3),
+      (128,72,3)
+    ]
+
+    target_shape = (64,64,3)
+
+    for case in cases:
+
+      cropped = np.random.randint(0, 255, case)
+      cropped = download_fec._normalize_dimensions(cropped, target_shape)
+      self.assertTrue(cropped.shape == target_shape)
+
+  '''
   def test_sharded_download_fec_data(self):
     
     tmp_dir = tempfile.mktemp()
@@ -63,7 +83,7 @@ class TestDownloadFec(tf.test.TestCase):
     _testing_run_poll_and_check_job(test_object=self,
                                     create_response=create_responses[0],
                                     expect_in_logs=download_fec._SUCCESS_MESSAGE)
-
+  '''
 
 if __name__ == "__main__":
   tf.test.main()

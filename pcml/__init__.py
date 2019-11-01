@@ -19,6 +19,7 @@ from pcml.datasets import deap
 from pcml.datasets import vox_celeb_cbt
 from pcml.datasets import fec
 from pcml.datasets import affectnet
+from pcml.datasets import vggface2
 
 from pcml.models import modality_correspondence
 from pcml.models import dev

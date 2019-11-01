@@ -70,6 +70,7 @@ import tensorflow as tf
 from pcml.launcher.kube import Job
 from pcml.launcher.kube import PCMLJob
 from pcml.launcher.kube import gen_timestamped_uid
+from pcml.launcher.kube import Resources
 
 
 _FEC_ARCHIVE="https://storage.googleapis.com/public_release/FEC_dataset.zip"
@@ -122,20 +123,24 @@ def _load_meta(path):
       yield _load_meta_line(raw_line)
 
 
-def _get_fec_meta(is_training=True):
+def _get_fec_meta(is_training=True, tmp_dir=None):
   """Download FEC meta files to directory."""
-  
-  directory = tempfile.mktemp()
 
-  err = "Problem in obtaining FEC dataset"
-  filename = "FEC_dataset.zip"
-  generator_utils.maybe_download(directory, filename, _FEC_ARCHIVE)
-  os.chdir(directory)
-  run_and_output(["unzip", filename])
-  fec_dir = "FEC_dataset"
+  if not tmp_dir:
+    tmp_dir = tempfile.mktemp()
 
-  test = os.path.join(directory, "FEC_dataset", _FEC_TEST_META_FILENAME)
-  train = os.path.join(directory, "FEC_dataset", _FEC_TRAIN_META_FILENAME)
+  test = os.path.join(tmp_dir, "FEC_dataset", _FEC_TEST_META_FILENAME)
+  train = os.path.join(tmp_dir, "FEC_dataset", _FEC_TRAIN_META_FILENAME)
+
+  if not tf.gfile.Exists(test) or not tf.gfile.Exists(train):
+
+    tf.logging.info("Couldn't find FEC meta locally, obtaining...")
+    err = "Problem in obtaining FEC dataset"
+    filename = "FEC_dataset.zip"
+    generator_utils.maybe_download(tmp_dir, filename, _FEC_ARCHIVE)
+    os.chdir(tmp_dir)
+    run_and_output(["unzip", filename])
+    fec_dir = "FEC_dataset"
 
   for path in [test, train]:
     if not os.path.exists(path):
@@ -144,6 +149,8 @@ def _get_fec_meta(is_training=True):
   meta_path = test
   if is_training:
     meta_path = train
+
+  tf.logging.info("Finished maybe obtaining FEC meta.")
 
   with open(meta_path, "r") as f:
     for line in f:
@@ -174,16 +181,37 @@ def _crop_to_fractional_xy_bbox(image, bbox, expand_rate=0.15):
   y_start = max(int(y_start - y_expand), 0)
   y_end = min(int(y_end + y_expand), h)
 
+  # Make the result square if possible
+  y_size = (y_end - y_start)
+  x_size = (x_end - x_start)
+  x_extra = 0
+  y_extra = 0
+  if y_size < x_size:
+    y_extra = x_size - y_size
+  elif x_size < y_size:
+    x_extra = y_size - x_size
+    
+  x_extra_before = int(x_extra/2.0)
+  x_extra_after = x_extra - x_extra_before
+  y_extra_before = int(y_extra/2.0)
+  y_extra_after = y_extra - y_extra_before
+
+  x_start = max(int(x_start - x_extra_before), 0)
+  y_start = max(int(y_start - y_extra_before), 0)
+
+  x_end = min(int(x_end + x_extra_after), w)
+  y_end = min(int(y_end + y_extra_after), h)
+
   return image[x_start:x_end, y_start:y_end]
 
 
 def _read_image(image_path):
   img = cv2.imread(image_path)
-  rgb_img = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2RGB)
+  rgb_img = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2RGB)  
   return rgb_img
 
 
-def _download_fec_data(tmp_dir, meta):
+def _download_fec_data(tmp_dir, meta, target_shape):
 
   nonfailed = [None for _ in range(len(meta))]
   last_idx = 0
@@ -193,7 +221,8 @@ def _download_fec_data(tmp_dir, meta):
 
   # For now just download all images and consider filtering for presence
   # of faces a secondary step
-  for item in meta:
+  for i, item in enumerate(meta):
+
     failed = False
     face_data = {}
     for case in ["a", "b", "c"]:
@@ -210,6 +239,10 @@ def _download_fec_data(tmp_dir, meta):
 
         bounds = item[case]["bounds"]
         cropped = _crop_to_fractional_xy_bbox(img, bounds)
+        if cropped.shape[0] != cropped.shape[1]:
+          failed = True
+
+        #cropped = _normalize_dimensions(cropped, target_shape)
 
         face_data[case] = cropped
 
@@ -230,9 +263,9 @@ def _download_fec_data(tmp_dir, meta):
         if not has_face:
           failed = True
 
-      except urllib.error.HTTPError as err:
+      except:
+        tf.logging.info("Exception case.")
         failed = True
-      # For other types of error, actually fail
 
     # End of for case in ["a", "b", "c"]
     if not failed:
@@ -257,7 +290,9 @@ def _download_fec_data(tmp_dir, meta):
 
 def sharded_download_fec_data(tmp_dir, is_training, shard_id, num_shards):
 
-  meta = [thing for thing in _get_fec_meta(is_training=is_training)]
+  target_shape = (128, 128, 3)
+
+  meta = [thing for thing in _get_fec_meta(is_training=is_training, tmp_dir=tmp_dir)]
 
   meta_len = len(meta)
 
@@ -267,7 +302,11 @@ def sharded_download_fec_data(tmp_dir, is_training, shard_id, num_shards):
 
   meta = meta[shard_start:min(shard_end, meta_len)]
 
-  return _download_fec_data(tmp_dir, meta)
+  tf.logging.info("Processing shard with {} records of {} total".format(
+    len(meta), meta_len
+  ))
+
+  return _download_fec_data(tmp_dir, meta, target_shape=target_shape)
 
 
 class DownloadFec(PCMLJob):
@@ -293,6 +332,8 @@ class DownloadFec(PCMLJob):
       command=command,
       command_args=command_args,
       namespace="kubeflow",
+      num_local_ssd=1,
+      resources=Resources(limits={"cpu": "750m", "memory": "4Gi"}),
       *args, **kwargs)
 
 
@@ -306,16 +347,20 @@ def main(_):
   if not is_training:
     condition = "eval"
 
+  tf.logging.info("Obtaining raw data for condition {}".format(condition))
+
   # TODO: need to check maybe transfer code above for downloading direct to GCS then
   # use it in fec.py
   output_dir = os.path.join(str(FLAGS.output_bucket),
                             condition, str(FLAGS.shard_id))
 
-  tmp_dir = tempfile.mktemp()
+  #tmp_dir = tempfile.mktemp()
+  tmp_dir = "/mnt/ssd0"
+  tf.gfile.MakeDirs(tmp_dir)
 
   # TODO: download_fec_data needs modification to work in sharded form
   sharded_download_fec_data(tmp_dir=tmp_dir,
-                            is_training=(FLAGS.is_training == 1),
+                            is_training=is_training,
                             shard_id=FLAGS.shard_id,
                             num_shards=FLAGS.num_shards)
 
@@ -331,8 +376,9 @@ def main(_):
     target_path = os.path.join(output_dir, filename)
 
     if not tf.gfile.Exists(target_path):
-      tf.gfile.Copy(source_path, target_path,
-                    overwrite=True)
+      valid_jpg = (filename.endswith("jpg") and filename.startswith("cropped"))
+      if valid_jpg or filename.endswith("json"):
+        tf.gfile.Copy(source_path, target_path, overwrite=True)
 
   tf.logging.info(_SUCCESS_MESSAGE)
 
