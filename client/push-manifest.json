@@ -1,0 +1,98 @@
+{
+  "/": {
+    "src/components/my-app.js": {
+      "crossorigin": "anonymous",
+      "type": "script",
+      "weight": 1
+    },
+    "src/components/view-article-project-clarify.js": {
+      "crossorigin": "anonymous",
+      "type": "script",
+      "weight": 1
+    },
+    "node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js": {
+      "type": "script",
+      "weight": 1
+    }
+  },
+  "/article-project-clarify": {
+    "src/components/my-app.js": {
+      "crossorigin": "anonymous",
+      "type": "script",
+      "weight": 1
+    },
+    "src/components/view-article-project-clarify.js": {
+      "crossorigin": "anonymous",
+      "type": "script",
+      "weight": 1
+    },
+    "node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js": {
+      "type": "script",
+      "weight": 1
+    }
+  },
+  "/article-models-and-infra": {
+    "src/components/my-app.js": {
+      "crossorigin": "anonymous",
+      "type": "script",
+      "weight": 1
+    },
+    "src/components/view-article-models-and-infra.js": {
+      "crossorigin": "anonymous",
+      "type": "script",
+      "weight": 1
+    },
+    "node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js": {
+      "type": "script",
+      "weight": 1
+    }
+  },
+  "/interactive-perspective-shift": {
+    "src/components/my-app.js": {
+      "crossorigin": "anonymous",
+      "type": "script",
+      "weight": 1
+    },
+    "src/components/view-interactive-perspective-shift.js": {
+      "crossorigin": "anonymous",
+      "type": "script",
+      "weight": 1
+    },
+    "node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js": {
+      "type": "script",
+      "weight": 1
+    }
+  },
+  "/interactive-be-the-crowd": {
+    "src/components/my-app.js": {
+      "crossorigin": "anonymous",
+      "type": "script",
+      "weight": 1
+    },
+    "src/components/view-interactive-be-the-crowd.js": {
+      "crossorigin": "anonymous",
+      "type": "script",
+      "weight": 1
+    },
+    "node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js": {
+      "type": "script",
+      "weight": 1
+    }
+  },
+  "/account": {
+    "src/components/my-app.js": {
+      "crossorigin": "anonymous",
+      "type": "script",
+      "weight": 1
+    },
+    "src/components/view-account.js": {
+      "crossorigin": "anonymous",
+      "type": "script",
+      "weight": 1
+    },
+    "node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js": {
+      "type": "script",
+      "weight": 1
+    }
+  }
+}

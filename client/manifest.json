@@ -1,0 +1,21 @@
+{
+  "name": "Clarify",
+  "short_name": "Clarify",
+  "description": "Neuroscape's Project Clarify is using machine learning to build the next generation of EQ training tools",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#3c78d8",
+  "background_color": "#3c78d8",
+  "icons": [
+    {
+      "src": "images/manifest/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/manifest/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
