@@ -404,8 +404,8 @@ class MCLDev3(mcl.ModalityCorrespondenceLearner):
     del kwargs
     image_tensor = tf.convert_to_tensor(image_data)
     image_tensor = tf.expand_dims(image_tensor, 0)
-    features = {"inputs": image_tensor}
-    return tf.squeeze(self.embed_image(features)).numpy()
+    image_tensor = tf.cast(image_tensor, tf.uint8)
+    return tf.squeeze(self.embed_image(image_tensor)).numpy()
 
   def eager_embed_single_audio(self, d, **kwargs):
     del kwargs

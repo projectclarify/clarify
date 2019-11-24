@@ -38,6 +38,7 @@ from pcml.datasets.fec import FacialExpressionCorrespondence as FEC
 from sklearn.neighbors import KDTree
 import numpy as np
 
+
 @registry.register_problem
 class FECNoAug(FEC):
 
@@ -153,9 +154,9 @@ def make_and_show_img_similarity_query(query_data, ref_data, kdt, query_idx, num
   for j in range(num_column_major):
 
     query = [query_data[str(query_idx + j)]["emb"]]
+    img = query_data[str(query_idx + j)]["img"].astype(np.int32)
     dist, ind = kdt.query(query, k=k, return_distance=return_distance)
 
-    img = ref_data[str(ind[0][0])]["img"].astype(np.int32)
     axarr[0,2*j].imshow(img)
     axarr[0,2*j].set_title("query")
     axarr[0,2*j].axis('off')

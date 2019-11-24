@@ -2,13 +2,21 @@
 
 <a href="https://kubeflow.org" target="_blank"><img src="https://img.shields.io/static/v1?label=Built%20with&message=Kubeflow&color=blue"></img></a>
 
+
 Towards clarifying our signals processing capabilities for various neural- and bio-sensing modalities (including for example de-noising, artifact removal, and feature identification); towards providing a mature foundation for transfer- and co-learning of predictors that provide value to the medical community; towards enabling biofeedback gaming that enhances users' self-awareness and self-regulatory skills regarding cognitive and emotional states (e.g. akin to making it easier to learn mindfulness meditation).
 
 Find an intro to our machine learning methods at <a href="https://ai4hi.org/machine-learning" target="_blank">ai4hi.org/machine-learning</a> and a more technical summary of our current research plan [here](https://github.com/projectclarify/pcml/blob/master/docs/research-plan.md). A legacy version of a whitepaper originating the project can be found [here](https://github.com/projectclarify/experiments/raw/25e5a3e8f7854dc58f54db28cfda99181eb43b9e/public/assets/docs/project_clarify_whitepaper.pdf). Somewhat blue-sky interface design prototypes can be found at <a href="https://ai4hi.org/interface-design" target="_blank">ai4hi.org/interface-design</a>.
 
+The current capabilities demo notebook can be launched via the following:
+
+<a href="https://colab.research.google.com/gist/cwbeitel/9f647889b63f9db3469bc45e16709f31/project-clarify-demo-nb-q4-19.ipynb" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></img></a>
+
+
 The following provides an overview of the computational infrastructure (on the Google Cloud) that enables us to make productive use of large-scale, high-content datasets including feeding Cloud TPUs at the necessary rate.
 
-![](docs/images/infra.png)
+<div style="width:100%; display: flex; justify-content: center">
+<img style="max-width:700px"; src="docs/images/infra.png">
+</div>
 
 Various additional options are available for model deployment that offer lower-latency than the diagrammed option which is the simplest from a research prototyping perspective (enabling cross-platform support for all moderate-latency applications), see also [TFLite](https://www.tensorflow.org/lite), [tfjs](https://www.tensorflow.org/js), and [TFServing](https://www.kubeflow.org/docs/components/serving/tfserving_new/).
 
@@ -128,7 +136,9 @@ The tensor2tensor Problem object provides a way to encapsulate the steps and par
 
 Below is summarized the integration of several sub-projects.
 
-![](docs/images/dl-overview.png)
+<div style="width:100%; display: flex; justify-content: center">
+<img style="max-width:700px"; src="docs/images/dl-overview.png">
+</div>
 
 Figure N. Multi-modal modeling. The means by which examples will be synergized from several modalities including vision (teal), audio (green), cortical sensing (e.g. EEG, fNIRS; blue), and one-dimensional peripheral physiological measures (orange). At left (a) is diagrammed the triplet image similarity learning scheme of Vemulapalli and Agarwala (2019; and predecessors) that will be used to learn expression embeddings in a way that is consistent with human perception; following pre-training on VGGFace2; in conjunction with learning to predict landmark and pose labels from VGGFace2 and other datasets. As described above, perception of cognitive and emotional state from the visual modality will be used as conceptual grounding and supervision for learning the same from co-occurring modalities (b, center; including auditory, physiological, and neural) where multi-modal data is available. To supplement this training will be performed in conjunction on larger unimodal datasets using various self-supervised methods (center, top). Modeling of cortical sensing will be enhanced with a partially model-based approach (right, b) where an encoder will both (1) parameterize a latent variable model of the subject’s neuroanatomical structure and (2) propagate its state to subsequent encoder layers that will be enabled by operating on both (abstract) state and structure information. The modeling approach, taken as a whole, is a progressive and extensible one in terms of modalities, losses, and datasets providing a continuous ramp from very simple experiments (a) through a stepwise progression of more complex extensions (b, c).
 
@@ -136,7 +146,9 @@ Figure N. Multi-modal modeling. The means by which examples will be synergized f
 
 Below is summarized how we aim to use abstract state representations for feedback.
 
-![](docs/images/abstract-feedback.png)
+<div style="width:100%; display: flex; justify-content: center">
+  <img style="max-width:700px"; src="docs/images/abstract-feedback.png">
+</div>
 
 Figure 1. Generalized representation of feedback problem in state space. Given a state space wherein we have (1) the ability to represent current state as a position, ‘e’, in that space, (2) a position or region in that space that corresponds to a goal, ‘g’, defined by way of a collection of exemplars, and (3) a means of computing the distance ‘𝜹t‘ of a representation obtained at time t, ‘et’, from that goal. Within this framework, the latter distance provides a signal that can be used for feedback and 𝜹t - 𝜹t+Δt > 0 is considered favorable progress. The desired effect is that over time the user develops automatic subconscious habits that tend to drive their state towards ‘g’ based on the internalization of ‘g’ and ‘𝜹 ’.
 

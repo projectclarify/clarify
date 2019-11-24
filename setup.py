@@ -50,8 +50,9 @@ setup(
         'google-cloud-logging',
         'pathos',
         'opencv-python',
-        'tensorflow-probability==0.7.0'
-    ],
+        'tensorflow-probability==0.7.0',
+        'gTTS'
+        ],
     extras_require={
         'tensorflow': [
             'tensorflow==1.14'
