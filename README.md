@@ -41,8 +41,7 @@ How to get involved: [here](https://medium.com/project-clarify/how-to-get-involv
 
 #### Community statistics
 
-Community statistics: 24 new members for Q1, 21 (~88%) of whom are interested in working in area/machine-learning and 17/24 (~80%) who have made a commitment to contribute at least at the level of 25% of an FTE. These numbers are current and have not yet been affected by our start-of-Q1 hackathon that is expected to significantly increase community engagement in part by way of our currently-live Facebook targeted-advertising campaign.
-
+Community statistics: 24 new members for Q1, 21 (~88%) of whom are interested in working in area/machine-learning and 17/24 (~80%) who have made a commitment to contribute at least at the level of 25% of an FTE.
 
 ### Cite this
 
