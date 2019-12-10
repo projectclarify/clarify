@@ -1,8 +1,8 @@
-<div style="width: 100%; display: flex; justify-content: center;">
+<div align="center">
   <img src="https://cdn-images-1.medium.com/max/767/1*O2ez3NPF36VZLJ2PAlxQiw@2x.png" style="max-width: 500px"></img>
-</div>
 
-<table>
+
+<table style="max-width: 500px">
   <tr>
     <th>Acknowledgement</th>
     <th>Demo notebook</th>
@@ -17,6 +17,8 @@
     <td><a href="https://zenodo.org/badge/latestdoi/194198315"><img src="https://zenodo.org/badge/194198315.svg" alt="DOI"></a></td>
   </tr>
 </table>
+
+</div>
 
 ### Key info
 
