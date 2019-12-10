@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/projectclarify/pcml/master/docs/images/pcml-logo.png" style="max-width: 500px"></img>
+  <img src="https://raw.githubusercontent.com/projectclarify/pcml/master/docs/images/pcml-logo2.png" style="max-width: 500px"></img>
 
 <table style="max-width: 500px">
   <tr>
