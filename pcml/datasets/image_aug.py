@@ -35,15 +35,6 @@ def preprocess_image(image, mode, resize_size=None, normalize=True,
 
   if normalize: image = tf.to_float(image) / 255.0
 
-  if mode == tf.estimator.ModeKeys.TRAIN:
-    image = _random_crop(image, size=image_size, area_min=crop_area_min)
-    if normalize: image = _normalize(image, mean_rgb, stddev_rgb)
-    image = _flip(image)
-  else:
-    image = _do_scale(image, image_size + 32)
-    if normalize: image = _normalize(image, mean_rgb, stddev_rgb)
-    image = _center_crop(image, image_size)
-
   brightness_delta = tf.random.uniform(
     shape=(),
     minval=brightness_delta_min,
@@ -52,12 +43,27 @@ def preprocess_image(image, mode, resize_size=None, normalize=True,
     seed=None,
     name=None)
 
-  image = tf.image.adjust_brightness(image, delta=brightness_delta)
+  if mode == tf.estimator.ModeKeys.TRAIN:
+    image = _random_crop(image, size=image_size, area_min=crop_area_min)
+    if normalize: image = _normalize(image, mean_rgb, stddev_rgb)
+    image = _flip(image)
 
-  image = tf.image.random_contrast(image,
-                                   lower=contrast_lower,
-                                   upper=contrast_upper,
-                                   seed=None)
+    image = tf.image.adjust_brightness(image, delta=brightness_delta)
+
+    image = tf.image.random_contrast(image,
+                                     lower=contrast_lower,
+                                     upper=contrast_upper,
+                                     seed=None)
+
+  else:
+    image = _do_scale(image, image_size + 32)
+
+    # Might want to remove this at inference time as it may not be
+    # applicable whereas we intend to have trained models that are
+    # invariant to this...
+    if normalize: image = _normalize(image, mean_rgb, stddev_rgb)
+
+    image = _center_crop(image, image_size)
 
   image = tf.reshape(image, [image_size, image_size, 3])
   return image
