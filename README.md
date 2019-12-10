@@ -1,6 +1,5 @@
 <div align="center">
-  <img src="https://cdn-images-1.medium.com/max/767/1*O2ez3NPF36VZLJ2PAlxQiw@2x.png" style="max-width: 500px"></img>
-
+  <img src="https://raw.githubusercontent.com/projectclarify/pcml/master/docs/images/logo.png" style="max-width: 500px"></img>
 
 <table style="max-width: 500px">
   <tr>
