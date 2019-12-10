@@ -1,5 +1,3 @@
-<div align="center">
-  <img src="https://raw.githubusercontent.com/projectclarify/pcml/master/docs/images/pcml-logo2.png" style="max-width: 500px"></img>
 
 <table style="max-width: 500px">
   <tr>
@@ -16,8 +14,6 @@
     <td><a href="https://zenodo.org/badge/latestdoi/194198315"><img src="https://zenodo.org/badge/194198315.svg" alt="DOI"></a></td>
   </tr>
 </table>
-
-</div>
 
 ### Key info
 
