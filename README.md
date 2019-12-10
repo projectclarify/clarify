@@ -15,7 +15,7 @@
   </tr>
 </table>
 
-### Key info
+### Project Clarify
 
 We are applying machine learning and advanced computation to enable the future of mental training, neurotechnology, and experiential medicine.
 
