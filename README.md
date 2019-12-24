@@ -27,11 +27,22 @@ Check out the front-end platform alpha at [ai4hi.org](ai4hi.org)
 
 Read the [FAQ](https://medium.com/project-clarify/faq-8b886e69886b)
 
-### Community
+#### Datasets
+
+* VGGFace2. [readme](), [code]()
+* Google's FEC. [readme](), [code]()
+
+#### Models
+
+TODO: Maybe a table if it will display propperly. May want a prominently displayed table showing each subproject, a link to the demo notebook, readme, code, status, etc.
+
+* [Image FEx Correspondence with ResNet]()
+
+#### Community
 
 How to get involved: [here](https://medium.com/project-clarify/how-to-get-involved-9d0d976e3810)
 
-#### Events
+##### Events
 
 * Hackathons (Jan 25th and Feb 29th; [read more](https://medium.com/project-clarify/upcoming-hackathons-d71c32498518))
 
@@ -39,11 +50,11 @@ How to get involved: [here](https://medium.com/project-clarify/how-to-get-involv
 
 * Demo day (March 21st; [read more](https://medium.com/project-clarify/project-clarify-demo-day-29e78194aa54))
 
-#### Community statistics
+##### Community statistics
 
 Community statistics: 24 new members for Q1, 21 (~88%) of whom are interested in working in area/machine-learning and 17/24 (~80%) who have made a commitment to contribute at least at the level of 25% of an FTE.
 
-### Cite this
+#### Cite this
 
 Project Clarify is a citeable work.
 
