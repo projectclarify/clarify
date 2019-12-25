@@ -27,17 +27,6 @@ Check out the front-end platform alpha at [ai4hi.org](ai4hi.org)
 
 Read the [FAQ](https://medium.com/project-clarify/faq-8b886e69886b)
 
-#### Datasets
-
-* VGGFace2. [readme](), [code]()
-* Google's FEC. [readme](), [code]()
-
-#### Models
-
-TODO: Maybe a table if it will display propperly. May want a prominently displayed table showing each subproject, a link to the demo notebook, readme, code, status, etc.
-
-* [Image FEx Correspondence with ResNet]()
-
 #### Community
 
 How to get involved: [here](https://medium.com/project-clarify/how-to-get-involved-9d0d976e3810)
