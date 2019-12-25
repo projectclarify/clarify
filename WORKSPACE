@@ -56,12 +56,6 @@ container_pull(
   tag = "0.0.13"
 )
 
-container_pull(
-    name = "alpine_linux_amd64",
-    registry = "index.docker.io",
-    repository = "library/alpine",
-    tag = "3.8",
-)
 
 # requires gcloud auth configure-docker to have credentials to pull or push from/to
 # gcr.io/clarify..
