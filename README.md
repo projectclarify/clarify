@@ -10,7 +10,7 @@
     <td><a href="https://kubeflow.org" target="_blank"><img src="https://img.shields.io/static/v1?label=Built%20with&message=Kubeflow&color=blue"></img></a></td>
     <td><a href="https://colab.research.google.com/gist/cwbeitel/9f647889b63f9db3469bc45e16709f31/project-clarify-demo-nb-q4-19.ipynb" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></img></a>
 </td>
-    <td><a href="https://circleci.com/gh/projectclarify/pcml"><img src="https://circleci.com/gh/projectclarify/pcml.svg?style=svg"></img></a></td>
+    <td><a href="https://travis-ci.org/projectclarify/pcml"><img src="https://travis-ci.org/projectclarify/pcml.svg?branch=master"></img></a></td>
     <td><a href="https://zenodo.org/badge/latestdoi/194198315"><img src="https://zenodo.org/badge/194198315.svg" alt="DOI"></a></td>
   </tr>
 </table>
