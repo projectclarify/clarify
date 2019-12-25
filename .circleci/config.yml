@@ -1,0 +1,58 @@
+version: 2
+jobs:
+  client-build:
+    working_directory: ~/pcml
+    docker:
+      - image: circleci/node:4.8.2-jessie
+    steps:
+      - checkout
+      - run:
+          name: Show contents
+          command: 'ls && pwd && cd pcml && ls && pwd'
+      - run:
+          name: Update npm
+          command: 'sudo npm install -g npm@latest'
+      - restore_cache:
+          key: dependency-cache-{{ checksum "client/package-lock.json" }}
+      - run:
+          name: Install
+          command: 'cd ~/pcml/client && npm install'
+      - save_cache:
+          key: dependency-cache-{{ checksum "client/package-lock.json" }}
+          paths:
+            - client/node_modules
+  client-tests:
+    docker:
+      - image: circleci/node:4.8.2-jessie
+    steps:
+      - checkout
+      - run:
+          name: Test
+          command: 'cd ~/pcml/client && npm test'
+      - store_artifacts:
+          path: test-results.xml
+          prefix: tests
+  pcml-tests:
+    docker:
+      - image: jessie
+    steps:
+      - checkout
+      - run:
+         name: Install Bazel
+         command: ''
+      - run:
+         name: Test PCML
+         command: 'cd ~/pcml && bazel test //pcml/...'
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - client-build
+      - client-tests:
+          requires:
+            - client-build
+          filters:
+            branches:
+              only: master
+      - pcml-tests
+

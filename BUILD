@@ -22,7 +22,6 @@ sh_binary(
     data = [
         "MANIFEST.in",
         "setup.py",
-        #"//pcml",
     ],
 )
 
@@ -32,7 +31,7 @@ sh_binary(
 container_image(
     name = "trainer_image",
     base = "@base//image",
-    files = glob(["build/**"]),
+    #files = gloib(["build/**"]),
     data_path = "/"
 )
 
@@ -45,3 +44,12 @@ container_push(
    repository = "clarify/trainer",
    tag = "dev"
 )
+
+container_image(
+    name = "basic_alpine",
+    base = "@alpine_linux_amd64//image",
+    cmd = ["Hello World!"],
+    entrypoint = ["echo"],
+)
+
+

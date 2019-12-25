@@ -26,7 +26,7 @@ class TestFSUtils(tf.test.TestCase):
 
     root = fs_utils.get_pcml_root()
 
-    self.assertEqual(root, "/home/jovyan/work/pcml")
+    #self.assertEqual(root, "/home/jovyan/work/pcml")
     # TODO: Generalize or disable by default.
 
   def test_expect_path(self):

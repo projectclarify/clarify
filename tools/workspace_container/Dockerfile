@@ -11,7 +11,7 @@ RUN echo "jovyan:Docker!" | chpasswd
 RUN sudo apt-get update
 RUN sudo apt-get install -y pkg-config zip g++ zlib1g-dev unzip ffmpeg wget curl
 
-ENV BAZEL_VERSION=0.21.0
+ENV BAZEL_VERSION=0.29.1
 RUN cd $HOME && wget https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
 
 RUN chmod +x $HOME/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
