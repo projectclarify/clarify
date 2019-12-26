@@ -1,7 +1,6 @@
 version: 2
 jobs:
   client-build:
-    working_directory: ~/pcml
     docker:
       - image: tensorflow/tensorflow:1.14.0-py3
     steps:
@@ -19,7 +18,7 @@ jobs:
           key: dependency-cache-{{ checksum "client/package-lock.json" }}
       - run:
           name: Install
-          command: 'cd ~/pcml/client && npm install'
+          command: 'cd $HOME/project/client && npm install'
       - save_cache:
           key: dependency-cache-{{ checksum "client/package-lock.json" }}
           paths:
@@ -41,14 +40,11 @@ jobs:
     steps:
       - checkout
       - run:
-         name: inspect
-         command: 'find py $HOME | grep pcml'
-      - run:
          name: Install Bazel
          command: 'sh tools/bazel_utils/alt_install_bazel.sh'
       - run:
          name: Test PCML
-         command: 'cd ~/pcml && $HOME/bin/bazel test //pcml/...'
+         command: 'cd $HOME/project && $HOME/bin/bazel test //pcml/...'
 workflows:
   version: 2
   build_and_test:
