@@ -40,7 +40,7 @@ jobs:
       - image: tensorflow/tensorflow:1.14.0-py3
     steps:
       - checkout
-      - run
+      - run:
          name: inspect
          command: 'ls $HOME'
       - run:
