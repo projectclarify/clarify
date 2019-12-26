@@ -1,7 +1,7 @@
 
 apt-get update
 
-apt install g++ unzip zip -y
+apt install g++ unzip zip wget -y
 
 apt-get install openjdk-11-jdk -y
 
