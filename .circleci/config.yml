@@ -3,12 +3,9 @@ jobs:
   client-build:
     working_directory: ~/pcml
     docker:
-      - image: circleci/node:4.8.2-jessie
+      - image: gcr.io/kubeflow-images-public/tensorflow-1.14.0-notebook-cpu:v0.7.0
     steps:
       - checkout
-      - run:
-          name: Show contents
-          command: 'ls && pwd && cd pcml && ls && pwd'
       - run:
           name: Update npm
           command: 'sudo npm install -g npm@latest'
@@ -23,7 +20,7 @@ jobs:
             - client/node_modules
   client-tests:
     docker:
-      - image: circleci/node:4.8.2-jessie
+      - image: gcr.io/kubeflow-images-public/tensorflow-1.14.0-notebook-cpu:v0.7.0
     steps:
       - checkout
       - run:
@@ -34,12 +31,12 @@ jobs:
           prefix: tests
   pcml-tests:
     docker:
-      - image: jessie
+      - image: gcr.io/kubeflow-images-public/tensorflow-1.14.0-notebook-cpu:v0.7.0
     steps:
       - checkout
       - run:
          name: Install Bazel
-         command: ''
+         command: 'sh tools/bazel_utils/install_bazel.sh'
       - run:
          name: Test PCML
          command: 'cd ~/pcml && bazel test //pcml/...'
