@@ -45,7 +45,7 @@ jobs:
          command: 'sh tools/bazel_utils/alt_install_bazel.sh'
       - run:
          name: Test PCML
-         command: 'cd ~/pcml && bazel test //pcml/...'
+         command: 'cd ~/pcml && $HOME/bin/bazel test //pcml/...'
 workflows:
   version: 2
   build_and_test:

@@ -13,5 +13,3 @@ cd $HOME && wget https://github.com/bazelbuild/bazel/releases/download/${BAZEL_V
 chmod +x $SCRIPT
 
 ./$SCRIPT --user
-
-$HOME/.bin/bazel
