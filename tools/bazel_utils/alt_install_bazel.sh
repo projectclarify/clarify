@@ -1,9 +1,9 @@
 
 apt-get update
 
-apt install g++ unzip zip 
+apt install g++ unzip zip -y
 
-apt-get install openjdk-11-jdk
+apt-get install openjdk-11-jdk -y
 
 BAZEL_VERSION=2.0.0
 SCRIPT=bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
