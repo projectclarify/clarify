@@ -1,12 +1,15 @@
+dist: bionic
 language: node_js
-sudo: false
+sudo: true
 node_js:
   - 10
   - 9
 install:
   - cd client && npm install && cd ..
 script:
-  - cd client && npm test
+  - sh tools/bazel_utils/install_bazel.sh
+  - bazel test //pcml/...
+  # - cd client && npm test
 cache:
   directories:
     - client/node_modules
