@@ -1,16 +1,28 @@
 dist: bionic
-language: node_js
 sudo: true
-node_js:
-  - 10
-  - 9
-install:
-  - cd client && npm install && cd ..
-script:
-  - sh tools/bazel_utils/install_bazel.sh
-  - bazel test //pcml/...
-  # - cd client && npm test
 cache:
   directories:
     - client/node_modules
+    - bazel-bin
+    - bazel-out
+    - bazel-pcml
+matrix:
+  include:
+    - language: node_js
+      node_js:
+        - 11
+        - 10
+        - 9
+      install:
+        - cd client && npm install && cd ..
+      #script:
+      #  - cd client && npm test
+    - language: python
+      python:
+        - "3.7"
+      install:
+        - sh tools/bazel_utils/install_bazel.sh
+        - bazel build //pcml/...
+      script:
+        - bazel test //pcml/...
 
