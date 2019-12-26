@@ -40,6 +40,9 @@ jobs:
       - image: tensorflow/tensorflow:1.14.0-py3
     steps:
       - checkout
+      - run
+         name: inspect
+         command: 'ls $HOME'
       - run:
          name: Install Bazel
          command: 'sh tools/bazel_utils/alt_install_bazel.sh'
