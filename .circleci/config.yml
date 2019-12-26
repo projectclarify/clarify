@@ -8,13 +8,13 @@ jobs:
       - checkout
       - run:
           name: Update
-          command: 'sudo apt-get update'
+          command: 'apt-get update'
       - run:
           name: Install NPM
-          command: 'sudo apt-get install nodejs npm -y'
+          command: 'apt-get install nodejs npm -y'
       - run:
           name: Update npm
-          command: 'sudo npm install -g npm@latest'
+          command: 'npm install -g npm@latest'
       - restore_cache:
           key: dependency-cache-{{ checksum "client/package-lock.json" }}
       - run:
@@ -42,7 +42,7 @@ jobs:
       - checkout
       - run:
          name: Install Bazel
-         command: 'sh tools/bazel_utils/install_bazel.sh'
+         command: 'sh tools/bazel_utils/alt_install_bazel.sh'
       - run:
          name: Test PCML
          command: 'cd ~/pcml && bazel test //pcml/...'
@@ -50,12 +50,12 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - client-build
-      - client-tests:
-          requires:
-            - client-build
-          filters:
-            branches:
-              only: master
       - pcml-tests
+      #- client-build
+      #- client-tests:
+      #    requires:
+      #      - client-build
+      #    filters:
+      #      branches:
+      #        only: master
 
