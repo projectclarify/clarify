@@ -42,7 +42,7 @@ jobs:
       - checkout
       - run:
          name: inspect
-         command: 'ls $HOME'
+         command: 'find py $HOME | grep pcml'
       - run:
          name: Install Bazel
          command: 'sh tools/bazel_utils/alt_install_bazel.sh'
