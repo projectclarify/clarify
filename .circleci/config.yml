@@ -48,7 +48,7 @@ jobs:
       - run:
          name: Install tfms
          command: 'sh tools/environments/install_tf_serving.sh'
-         #- run:
+      - run:
          name: Test PCML
          command: 'cd $HOME/project && $HOME/bin/bazel build //...'
 workflows:
