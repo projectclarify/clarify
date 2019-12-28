@@ -19,7 +19,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from pcml.dev_helper import T2TDevHelper
+from pcml.utils.dev_utils import T2TDevHelper
 from pcml.datasets.test_utils import TrivialModel
 from pcml.datasets import celeba
 

@@ -117,11 +117,13 @@ class TestExpect(tf.test.TestCase):
     expect_type("hello world", str)
 
 
+"""
 class TestStagingUtils(tf.test.TestCase):
 
   def test_compress_and_stage(self):
     _compress_and_stage("/home/jovyan/work/pcml", # HACK
                         "gs://clarify-dev/tmp/")
+"""
 
 
 if __name__ == "__main__":

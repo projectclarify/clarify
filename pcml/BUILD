@@ -1,10 +1,15 @@
-load("@pcml_deps//:requirements.bzl", "requirement")
-
 py_library(
-    name = "pcml",
+    name = "__init__",
     srcs = ["__init__.py"],
     deps = [
-        requirement("numpy"),
-    ]
+        "//pcml/datasets:affectnet",
+        "//pcml/datasets:celeba",
+        "//pcml/datasets:deap",
+        "//pcml/datasets:fec",
+        "//pcml/datasets:vggface2",
+        "//pcml/datasets:vox_celeb_cbt",
+        "//pcml/models:dev",
+        "//pcml/models:modality_correspondence",
+        "//pcml/models:percep_similarity_emb",
+    ],
 )
-

@@ -10,12 +10,14 @@ git_repository(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-# Download the rules_docker repository at release v0.7.0
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+# Download the rules_docker repository at release v0.13.0
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "aed1c249d4ec8f703edddf35cbe9dfaca0b5f5ea6e4cd9e83e99f3b0d1136c3d",
-    strip_prefix = "rules_docker-0.7.0",
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.7.0.tar.gz"],
+    sha256 = "df13123c44b4a4ff2c2f337b906763879d94871d16411bf82dcfeba892b58607",
+    strip_prefix = "rules_docker-0.13.0",
+    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.13.0/rules_docker-v0.13.0.tar.gz"],
 )
 
 # OPTIONAL: Call this to override the default docker toolchain configuration.
@@ -24,7 +26,7 @@ http_archive(
 # Note this is only required if you actually want to call
 # docker_toolchain_configure with a custom attr; please read the toolchains
 # docs in /toolchains/docker/ before blindly adding this to your WORKSPACE.
-
+# BEGIN OPTIONAL segment:
 load("@io_bazel_rules_docker//toolchains/docker:toolchain.bzl",
     docker_toolchain_configure="toolchain_configure"
 )
@@ -33,16 +35,33 @@ docker_toolchain_configure(
   # OPTIONAL: Path to a directory which has a custom docker client config.json.
   # See https://docs.docker.com/engine/reference/commandline/cli/#configuration-files
   # for more details.
-  #client_config="/path/to/docker/client/config",
+  #client_config="<enter absolute path to your docker config directory here>",
+  # OPTIONAL: Path to the docker binary.
+  # Should be set explcitly for remote execution.
+  #docker_path="<enter absolute path to the docker binary (in the remote exec env) here>",
+  # OPTIONAL: Path to the gzip binary.
+  # Either gzip_path or gzip_target should be set explcitly for remote execution.
+  #gzip_path="<enter absolute path to the gzip binary (in the remote exec env) here>",
+  # OPTIONAL: Bazel target for the gzip tool.
+  # Either gzip_path or gzip_target should be set explcitly for remote execution.
+  #gzip_target="<enter absolute path (i.e., must start with repo name @...//:...) to an executable gzip target>",
+  # OPTIONAL: Path to the xz binary.
+  # Should be set explcitly for remote execution.
+  #xz_path="<enter absolute path to the xz binary (in the remote exec env) here>",
 )
+# End of OPTIONAL segment.
 
-# This is NOT needed when going through the language lang_image
-# "repositories" function(s).
 load(
     "@io_bazel_rules_docker//repositories:repositories.bzl",
     container_repositories = "repositories",
 )
 container_repositories()
+
+# This is NOT needed when going through the language lang_image
+# "repositories" function(s).
+load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
+
+container_deps()
 
 load(
     "@io_bazel_rules_docker//container:container.bzl",
@@ -50,15 +69,11 @@ load(
 )
 
 container_pull(
-  name = "base",
+  name = "trainer_base",
   registry = "gcr.io",
   repository = "clarify/clarify-base",
-  tag = "0.0.13"
+  #digest = "sha256:deadbeef", # TODO: cwbeitel
 )
-
-
-# requires gcloud auth configure-docker to have credentials to pull or push from/to
-# gcr.io/clarify..
 
 http_archive(
     name = "rules_python",
@@ -76,11 +91,11 @@ load("@rules_python//python:pip.bzl", "pip_import")
 # Create a central repo that knows about the dependencies needed for
 # requirements.txt.
 pip_import(   # or pip3_import
-   name = "pcml_deps",
+   name = "my_deps",
    requirements = "requirements.txt",
 )
 
 # Load the central repo's install function from its `//:requirements.bzl` file,
 # and call it.
-load("@pcml_deps//:requirements.bzl", "pip_install")
+load("@my_deps//:requirements.bzl", "pip_install")
 pip_install()
