@@ -1,0 +1,71 @@
+prowjob_namespace: default
+pod_namespace: default
+log_level: debug
+
+slack_reporter_configs:
+  '*':
+    job_types_to_report:
+      - postsubmit
+      - presubmit
+    job_states_to_report:
+      - failure
+      - error
+    channel: test-failures
+    report_template: 'Job {{.Spec.Job}} of type {{.Spec.Type}} ended with state {{.Status.State}}. <{{.Status.URL}}|View logs>'
+
+github_reporter:
+  job_types_to_report:
+  - presubmit
+  - postsubmit
+
+tide:
+  sync_period: 1m
+
+  merge_method:
+    projectclarify/pcml: squash
+
+  queries:
+  - repos:
+    - projectclarify/pcml
+    labels:
+    - lgtm
+    - approved
+    - "Contribution Allowed"
+    missingLabels:
+    - do-not-merge
+    - do-not-merge/hold
+    - do-not-merge/work-in-progress
+    - do-not-merge/invalid-owners-file
+    - needs-rebase
+
+  context_options:
+    # Use branch protection options to define required and optional contexts
+    from-branch-protection: true
+    # Treat unknown contexts as optional
+    skip-unknown-contexts: true
+    orgs:
+      org:
+        required-contexts:
+        - check-required-for-all-repos
+        repos:
+          repo:
+            required-contexts:
+             - check-required-for-all-branches
+            branches:
+              branch:
+                from-branch-protection: false
+                required-contexts:
+                - required_test
+                optional-contexts:
+                - optional_test
+
+presubmits:
+  projectclarify/pcml:
+  - name: test-presubmit
+    always_run: true
+    skip_report: false
+    spec:
+      containers:
+      - image: alpine
+        command: ["/bin/printenv"]
+

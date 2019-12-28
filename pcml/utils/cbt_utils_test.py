@@ -23,8 +23,6 @@ import uuid
 import tempfile
 import numpy as np
 
-# Has to be imported before registry
-import pcml
 from pcml.operations import cbt_datagen
 
 from tensor2tensor.utils import registry

@@ -19,4 +19,6 @@ sklearn
 -e git://github.com/iitzco/faced.git@31ef0d30e1567a06113f49ff4a1202760d952df2#egg=faced
 tensor2tensor
 google-cloud-logging
-apache-beam[gcp]
+pyyaml
+grpcio
+tensorflow-serving-api

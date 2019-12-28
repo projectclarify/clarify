@@ -247,7 +247,6 @@ def fec_generator(fec_data_root,
     # is not but should be there...
     except:
       pass
-      
 
 
 @registry.register_problem
