@@ -15,15 +15,6 @@ size:
   xl: 500
   xxl: 1000
 
-slack:
-  mergewarnings:
-  - repos:
-    - projectclarify/pcml
-    channels:
-    - sig-testing
-    whitelist:
-    - clarify-bot
-
 lgtm:
 - repos:
   - projectclarify/pcml
