@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Test the FEC dataset downloader."""
 
 from __future__ import absolute_import
@@ -36,33 +35,27 @@ TEST_CONFIG = Config()
 
 
 class TestDownloadFec(tf.test.TestCase):
-  
-  def setUp(self):
-    self.test_run_tag = "clarify-test-{}-download-fec".format(
-      str(uuid.uuid4())[0:8]
-    )
-    self.staging = os.path.join(TEST_CONFIG.test_artifacts_root,
-                                self.test_run_tag)
 
-  def test_normalize_shape(self):
+    def setUp(self):
+        self.test_run_tag = "clarify-test-{}-download-fec".format(
+            str(uuid.uuid4())[0:8])
+        self.staging = os.path.join(TEST_CONFIG.test_artifacts_root,
+                                    self.test_run_tag)
 
-    cases = [
-      (64,64,3),
-      (16,16,3),
-      (72,72,3),
-      (128,72,3),
-      (128,72,3)
-    ]
+    def test_normalize_shape(self):
 
-    target_shape = (64,64,3)
+        cases = [(64, 64, 3), (16, 16, 3), (72, 72, 3), (128, 72, 3),
+                 (128, 72, 3)]
 
-    for case in cases:
+        target_shape = (64, 64, 3)
 
-      cropped = np.random.randint(0, 255, case)
-      cropped = download_fec._normalize_dimensions(cropped, target_shape)
-      self.assertTrue(cropped.shape == target_shape)
+        for case in cases:
 
-  '''
+            cropped = np.random.randint(0, 255, case)
+            cropped = download_fec._normalize_dimensions(cropped, target_shape)
+            self.assertTrue(cropped.shape == target_shape)
+
+    '''
   def test_sharded_download_fec_data(self):
     
     tmp_dir = tempfile.mktemp()
@@ -85,5 +78,6 @@ class TestDownloadFec(tf.test.TestCase):
                                     expect_in_logs=download_fec._SUCCESS_MESSAGE)
   '''
 
+
 if __name__ == "__main__":
-  tf.test.main()
+    tf.test.main()

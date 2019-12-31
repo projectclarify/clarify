@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of common test utils related to data generators."""
 
 from __future__ import absolute_import
@@ -26,16 +25,16 @@ from pcml.datasets.test_utils import get_test_data_path
 
 
 class TestTestUtils(tf.test.TestCase):
-  """Tests of test utils."""
+    """Tests of test utils."""
 
-  def test_temporary_directory(self):
+    def test_temporary_directory(self):
 
-    with TemporaryDirectory() as tmp_dir:
-      self.assertTrue(os.path.exists(tmp_dir))
+        with TemporaryDirectory() as tmp_dir:
+            self.assertTrue(os.path.exists(tmp_dir))
 
-  def test_get_test_data_path(self):
-    self.assertEqual(get_test_data_path().split('/')[-1], "test_data")
-    
+    def test_get_test_data_path(self):
+        self.assertEqual(get_test_data_path().split('/')[-1], "test_data")
+
 
 if __name__ == "__main__":
-  tf.test.main()
+    tf.test.main()

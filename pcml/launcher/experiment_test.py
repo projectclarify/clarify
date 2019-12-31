@@ -24,19 +24,23 @@ from pcml.launcher.experiment import tf_config_to_additional_flags
 
 class TestParseTFConfig(tf.test.TestCase):
 
-  def test_parse_tf_config(self):
-    """Simple test that tf_config_to_additional_flags can be run."""
+    def test_parse_tf_config(self):
+        """Simple test that tf_config_to_additional_flags can be run."""
 
-    os.environ["TF_CONFIG"] = json.dumps({
-        u'environment': u'cloud',
-        u'cluster': {
-            u'master': [u'enhance-0401-0010-882a-master-5sq4-0:2222']
-        },
-        u'task': {u'index': 0, u'type': u'master'}})
+        os.environ["TF_CONFIG"] = json.dumps({
+            u'environment': u'cloud',
+            u'cluster': {
+                u'master': [u'enhance-0401-0010-882a-master-5sq4-0:2222']
+            },
+            u'task': {
+                u'index': 0,
+                u'type': u'master'
+            }
+        })
 
-    flags = tf_config_to_additional_flags()
-    tf.logging.info(flags)
+        flags = tf_config_to_additional_flags()
+        tf.logging.info(flags)
 
 
 if __name__ == "__main__":
-  tf.test.main()
+    tf.test.main()

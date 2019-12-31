@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of utilities supporting modality correspondence learning models."""
 
 from __future__ import absolute_import
@@ -23,8 +22,6 @@ from pcml.utils.cfg_utils import Config
 
 TEST_CONFIG = Config()
 
-
-
 if __name__ == "__main__":
-  tf.logging.set_verbosity(tf.logging.INFO)
-  tf.test.main()
+    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.test.main()

@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of file-system utilities."""
 
 import tensorflow as tf
@@ -21,18 +20,18 @@ from pcml.utils import fs_utils
 
 class TestFSUtils(tf.test.TestCase):
 
-  def test_finds_workspace_root(self):
-    """Test that we can run a command."""
+    def test_finds_workspace_root(self):
+        """Test that we can run a command."""
 
-    root = fs_utils.get_pcml_root()
+        root = fs_utils.get_pcml_root()
 
-    #self.assertEqual(root, "/home/jovyan/work/pcml")
-    # TODO: Generalize or disable by default.
+        #self.assertEqual(root, "/home/jovyan/work/pcml")
+        # TODO: Generalize or disable by default.
 
-  def test_expect_path(self):
-    tmpd = tempfile.mkdtemp()
-    fs_utils.expect_path(tmpd)
+    def test_expect_path(self):
+        tmpd = tempfile.mkdtemp()
+        fs_utils.expect_path(tmpd)
 
 
 if __name__ == "__main__":
-  tf.test.main()
+    tf.test.main()

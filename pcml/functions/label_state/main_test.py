@@ -29,60 +29,56 @@ class Context(object):
 @patch('main.client')
 def test_label_state(firestore_mock, capsys):
 
-  firestore_mock.collection = MagicMock(return_value=firestore_mock)
-  firestore_mock.document = MagicMock(return_value=firestore_mock)
-  firestore_mock.set = MagicMock(return_value=firestore_mock)
+    firestore_mock.collection = MagicMock(return_value=firestore_mock)
+    firestore_mock.document = MagicMock(return_value=firestore_mock)
+    firestore_mock.set = MagicMock(return_value=firestore_mock)
 
-  user_id = str(uuid.uuid4())
-  date_string = datetime.now().isoformat()
-  email_string = '%s@%s.com' % (uuid.uuid4(), uuid.uuid4())
-  video = np.random.randint(0, 255, (15,96,96,3), dtype=np.uint8)
-  video = bytes(video.flatten())
-  audio = np.random.randint(0, 255, (1000,), dtype=np.uint8)
-  audio = bytes(audio.flatten())
+    user_id = str(uuid.uuid4())
+    date_string = datetime.now().isoformat()
+    email_string = '%s@%s.com' % (uuid.uuid4(), uuid.uuid4())
+    video = np.random.randint(0, 255, (15, 96, 96, 3), dtype=np.uint8)
+    video = bytes(video.flatten())
+    audio = np.random.randint(0, 255, (1000,), dtype=np.uint8)
+    audio = bytes(audio.flatten())
 
-  data = {
-    'uid': user_id,
-    'metadata': {'createdAt': date_string},
-    'email': email_string,
-    'value': {
-      'fields': {
-        'audioData': {
-          'stringValue': audio
+    data = {
+        'uid': user_id,
+        'metadata': {
+            'createdAt': date_string
         },
-        'videoData': {
-          'stringValue': video
-        },
-        'audioMeta': {
-          "mapValue": {
-            "fields": {
-              
+        'email': email_string,
+        'value': {
+            'fields': {
+                'audioData': {
+                    'stringValue': audio
+                },
+                'videoData': {
+                    'stringValue': video
+                },
+                'audioMeta': {
+                    "mapValue": {
+                        "fields": {}
+                    }
+                },
+                'videoMeta': {
+                    "mapValue": {
+                        "fields": {}
+                    }
+                },
+                'meta': {
+                    "mapValue": {
+                        "fields": {}
+                    }
+                }
             }
-          }
-        },
-        'videoMeta': {
-          "mapValue": {
-            "fields": {
-              
-            }
-          }
-        },
-        'meta': {
-          "mapValue": {
-            "fields": {
-              
-            }
-          }          
         }
-      }
     }
-  }
 
-  context = UserDict()
-  context.resource = '/documents/users/{uid}/modalities/av'
+    context = UserDict()
+    context.resource = '/documents/users/{uid}/modalities/av'
 
-  main.label_state(data, context)
+    main.label_state(data, context)
 
-  out, _ = capsys.readouterr()
+    out, _ = capsys.readouterr()
 
-  #assert 'Received healthy model response.' in out
+    #assert 'Received healthy model response.' in out

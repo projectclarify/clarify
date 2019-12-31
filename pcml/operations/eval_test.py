@@ -31,96 +31,98 @@ core_api = kubernetes.client.apis.core_v1_api.CoreV1Api()
 
 
 def get_job_names_with_prefix(prefix):
-  jobs = batch_api.list_namespaced_job(namespace="kubeflow")
-  names = []
-  for job in jobs.items:
-    name = job.metadata.name
-    if name.startswith(prefix):
-      names.append(name)
-  return names
+    jobs = batch_api.list_namespaced_job(namespace="kubeflow")
+    names = []
+    for job in jobs.items:
+        name = job.metadata.name
+        if name.startswith(prefix):
+            names.append(name)
+    return names
 
 
 CREATE_TIMEOUT = datetime.timedelta(seconds=120)
 
-def _testing_run_poll_and_check_cron_job(test_object, create_response,
+
+def _testing_run_poll_and_check_cron_job(test_object,
+                                         create_response,
                                          expect_in_logs=None,
                                          startup_timeout=CREATE_TIMEOUT):
-  """Poll for completion of job then check status and log contents."""
-  created_name = create_response.metadata.name
-  created_namespace = create_response.metadata.namespace
+    """Poll for completion of job then check status and log contents."""
+    created_name = create_response.metadata.name
+    created_namespace = create_response.metadata.namespace
 
-  # Given the way we name cron jobs this should uniquely identify a
-  # collection of jobs associated with the cron job of the same name.
-  start_time = datetime.datetime.now()
-  while True:
-    current_time = datetime.datetime.now()
-    if (current_time - start_time) > startup_timeout:
-      raise Exception(
-          "Timeout waiting for cron jobs to be created."
-      )
-    jobs = get_job_names_with_prefix(created_name)
-    if jobs:
-      break
-    time.sleep(10)
+    # Given the way we name cron jobs this should uniquely identify a
+    # collection of jobs associated with the cron job of the same name.
+    start_time = datetime.datetime.now()
+    while True:
+        current_time = datetime.datetime.now()
+        if (current_time - start_time) > startup_timeout:
+            raise Exception("Timeout waiting for cron jobs to be created.")
+        jobs = get_job_names_with_prefix(created_name)
+        if jobs:
+            break
+        time.sleep(10)
 
-  tf.logging.info("Found jobs: %s" % jobs)
+    tf.logging.info("Found jobs: %s" % jobs)
 
-  poll_response = wait_for_job(
-      batch_api,
-      namespace=created_namespace,
-      name=jobs[0],
-      polling_interval=datetime.timedelta(seconds=3)
-  )
+    poll_response = wait_for_job(batch_api,
+                                 namespace=created_namespace,
+                                 name=jobs[0],
+                                 polling_interval=datetime.timedelta(seconds=3))
 
-  test_object.assertEqual(poll_response.spec.completions, 1)
-  test_object.assertEqual(poll_response.status.succeeded, 1)
+    test_object.assertEqual(poll_response.spec.completions, 1)
+    test_object.assertEqual(poll_response.status.succeeded, 1)
 
-  job_pods = get_job_pods(core_api,
-                          namespace=created_namespace,
-                          job_name=jobs[0])
+    job_pods = get_job_pods(core_api,
+                            namespace=created_namespace,
+                            job_name=jobs[0])
 
-  tf.logging.info("Job pods: %s" % job_pods)
+    tf.logging.info("Job pods: %s" % job_pods)
 
-  logs = core_api.read_namespaced_pod_log(
-      name=job_pods[0],
-      namespace=created_namespace)
+    logs = core_api.read_namespaced_pod_log(name=job_pods[0],
+                                            namespace=created_namespace)
 
-  if expect_in_logs is not None:
-    test_object.assertTrue(expect_in_logs in logs)
+    if expect_in_logs is not None:
+        test_object.assertTrue(expect_in_logs in logs)
 
 
 class TestEvalJob(tf.test.TestCase):
 
-  def setUp(self):
-    self.ckpt_path = (
-      "gs://clarify-models-us-central1/experiments/cbtdev/b96vox-cel-cbt-j0625-0356-f671/output")
-    self.staging_path = "gs://clarify-dev/tmp/evaldev"
-    
-  def test_eval_fn(self):
-    """Local test of fn which pulls ckpts and writes summaries."""
-    out = eval_for_ckpt_dir(self.ckpt_path,
-                            delay_seconds=5, mock_acc=False,
-                            mock_step=False, continuous=False,
-                            eval_steps=5)
+    def setUp(self):
+        self.ckpt_path = (
+            "gs://clarify-models-us-central1/experiments/cbtdev/b96vox-cel-cbt-j0625-0356-f671/output"
+        )
+        self.staging_path = "gs://clarify-dev/tmp/evaldev"
 
-  def test_e2e(self):
+    def test_eval_fn(self):
+        """Local test of fn which pulls ckpts and writes summaries."""
+        out = eval_for_ckpt_dir(self.ckpt_path,
+                                delay_seconds=5,
+                                mock_acc=False,
+                                mock_step=False,
+                                continuous=False,
+                                eval_steps=5)
 
-    job = EvalJob(ckpt_dir=self.ckpt_path,
-                  staging_path=self.staging_path,
-                  # HACK: Pick a node that will have the necessary 
-                  # credentials
-                  selector_labels={"type": "tpu-host"})
+    def test_e2e(self):
 
-    create_response = job.stage_and_batch_run()
+        job = EvalJob(
+            ckpt_dir=self.ckpt_path,
+            staging_path=self.staging_path,
+            # HACK: Pick a node that will have the necessary
+            # credentials
+            selector_labels={"type": "tpu-host"})
 
-    _testing_run_poll_and_check_cron_job(test_object=self,
-                                    create_response=create_response,
-                                    expect_in_logs=self.ckpt_path)
+        create_response = job.stage_and_batch_run()
 
-  def tearDown(self):
-    """Delete all cron jobs created as part of the test."""
-    pass
+        _testing_run_poll_and_check_cron_job(test_object=self,
+                                             create_response=create_response,
+                                             expect_in_logs=self.ckpt_path)
+
+    def tearDown(self):
+        """Delete all cron jobs created as part of the test."""
+        pass
+
 
 if __name__ == "__main__":
-  tf.logging.set_verbosity(tf.logging.INFO)
-  tf.test.main()
+    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.test.main()

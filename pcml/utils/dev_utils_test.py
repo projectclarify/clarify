@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of the development helper utilities."""
 
 from __future__ import absolute_import
@@ -32,55 +31,59 @@ TEST_CONFIG = Config()
 
 @registry.register_problem
 class TinyAlgoProblem(algorithmic.AlgorithmicIdentityBinary40):
-  """A tiny algorithmic problem to aid testing (quickly)."""
+    """A tiny algorithmic problem to aid testing (quickly)."""
 
-  @property
-  def num_symbols(self):
-    return 2
+    @property
+    def num_symbols(self):
+        return 2
 
-  @property
-  def train_length(self):
-    return 40
+    @property
+    def train_length(self):
+        return 40
 
-  @property
-  def dev_length(self):
-    return 40
+    @property
+    def dev_length(self):
+        return 40
 
-  @property
-  def train_size(self):
-    return 10
+    @property
+    def train_size(self):
+        return 10
 
-  @property
-  def dev_size(self):
-    return 10
+    @property
+    def dev_size(self):
+        return 10
 
-  @property
-  def num_shards(self):
-    return 1
+    @property
+    def num_shards(self):
+        return 1
 
 
 @registry.register_model
 class TrivialModelT2tdh(t2t_model.T2TModel):
-  def body(self, features):
-    return features["inputs"]
+
+    def body(self, features):
+        return features["inputs"]
 
 
 class TestDevHelper(tf.test.TestCase):
 
-  def test_e2e(self):
-    """End-to-end test of the dev helper utility."""
+    def test_e2e(self):
+        """End-to-end test of the dev helper utility."""
 
-    tfms_path = TEST_CONFIG.get("tfms_path")
+        tfms_path = TEST_CONFIG.get("tfms_path")
 
-    import tensor2tensor.models
-    helper2 = T2TDevHelper("trivial_model_t2tdh",
-                           "tiny_algo_problem",
-                           "transformer_tiny",
-                           [["1 0 0 1"]],
-                           tfms_path=tfms_path)
+        import tensor2tensor.models
+        helper2 = T2TDevHelper("trivial_model_t2tdh",
+                               "tiny_algo_problem",
+                               "transformer_tiny", [["1 0 0 1"]],
+                               tfms_path=tfms_path)
 
-    helper2.run_e2e()
+        helper2.datagen()
+        helper2.train()
+        # TODO: Re-include e2e if retaining T2TDevHelper, note this
+        # currently has removed the model export, serve, and query
+        # steps.
 
 
 if __name__ == "__main__":
-  tf.test.main()
+    tf.test.main()

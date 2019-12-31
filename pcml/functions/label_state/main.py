@@ -40,41 +40,38 @@ hparams.data_dir = "foo"
 p_hparams = problem_obj.get_hparams(hparams)
 mode = "predict"
 
-
 ckpt_path = "gs://clarify-models-us-central1/experiments/mnist01/mcl-dev-j0830-1542-167c/output"
-
 
 # Checkpoints obtained and model restored in global scope i.e. once per
 # cold start (i.e. not per each function execution).
-with tfe.restore_variables_on_create(
-    tf.train.latest_checkpoint(ckpt_path)):
-  model = MCLDev(hparams, mode, p_hparams)
+with tfe.restore_variables_on_create(tf.train.latest_checkpoint(ckpt_path)):
+    model = MCLDev(hparams, mode, p_hparams)
 
 client = firestore.Client()
 
 
 class DataPacket:
 
-  def __init__(self, raw_data):
+    def __init__(self, raw_data):
 
-    self.audio_data = raw_data["audioData"]["stringValue"]
-    self.video_data = raw_data["videoData"]["stringValue"]
-    self.audio_meta = {}
-    self.video_meta = {}
-    self.meta = {}
+        self.audio_data = raw_data["audioData"]["stringValue"]
+        self.video_data = raw_data["videoData"]["stringValue"]
+        self.audio_meta = {}
+        self.video_meta = {}
+        self.meta = {}
 
-    for key, value in raw_data["audioMeta"]["mapValue"]["fields"].items():
-      self.audio_meta[key] = value["integerValue"]
+        for key, value in raw_data["audioMeta"]["mapValue"]["fields"].items():
+            self.audio_meta[key] = value["integerValue"]
 
-    for key, value in raw_data["videoMeta"]["mapValue"]["fields"].items():
-      self.video_meta[key] = value["integerValue"]
+        for key, value in raw_data["videoMeta"]["mapValue"]["fields"].items():
+            self.video_meta[key] = value["integerValue"]
 
-    for key, value in raw_data["meta"]["mapValue"]["fields"].items():
-      self.meta[key] = value["integerValue"]
+        for key, value in raw_data["meta"]["mapValue"]["fields"].items():
+            self.meta[key] = value["integerValue"]
 
 
 class LabeledEmbeddingSpace(object):
-  """Usage:
+    """Usage:
   
   space = LabeledEmbeddingSpace(given_data="/path/to/data")
   space.build_kdtree()
@@ -84,80 +81,83 @@ class LabeledEmbeddingSpace(object):
   
   """
 
-  def __init__(self, given_data, generate_random=False):
-    if generate_random:
-      self.generate_random(given_data)
-    self.emb_data = self.load_emb_data(given_data)
+    def __init__(self, given_data, generate_random=False):
+        if generate_random:
+            self.generate_random(given_data)
+        self.emb_data = self.load_emb_data(given_data)
 
-  def generate_random(self, emb_data_path, embedding_length=2048, num_embeddings=100):
+    def generate_random(self,
+                        emb_data_path,
+                        embedding_length=2048,
+                        num_embeddings=100):
 
-    ref = []
+        ref = []
 
-    for _ in range(num_embeddings):
-      emb = np.random.random((embedding_length,)).tolist()
-      ref.append({
-          "embedding": emb,
-          "labels": {
-              "happiness": float(np.random.random()),
-              "calm": float(np.random.random()),
-              "confidence": float(np.random.random()),
-              "kindness": float(np.random.random()),
-              "focus": float(np.random.random()),
-              "posture": float(np.random.random()),
-              "flow": float(np.random.random())
-            }
-          })
+        for _ in range(num_embeddings):
+            emb = np.random.random((embedding_length,)).tolist()
+            ref.append({
+                "embedding": emb,
+                "labels": {
+                    "happiness": float(np.random.random()),
+                    "calm": float(np.random.random()),
+                    "confidence": float(np.random.random()),
+                    "kindness": float(np.random.random()),
+                    "focus": float(np.random.random()),
+                    "posture": float(np.random.random()),
+                    "flow": float(np.random.random())
+                }
+            })
 
-    serialized_data = json.dumps(ref)
+        serialized_data = json.dumps(ref)
 
-    with open(emb_data_path, "w") as f:
-      f.write(serialized_data)
+        with open(emb_data_path, "w") as f:
+            f.write(serialized_data)
 
-    return serialized_data
+        return serialized_data
 
-  def load_emb_data(self, emb_data_path):
-    with open(emb_data_path, "r") as f:
-      self.data = json.loads(f.read())    
+    def load_emb_data(self, emb_data_path):
+        with open(emb_data_path, "r") as f:
+            self.data = json.loads(f.read())
 
-  def build_kdtree(self):
+    def build_kdtree(self):
 
-    X = np.asarray([np.asarray(thing["embedding"]) for thing in self.data])
+        X = np.asarray([np.asarray(thing["embedding"]) for thing in self.data])
 
-    self.kdt = KDTree(X, leaf_size=30, metric='euclidean')
+        self.kdt = KDTree(X, leaf_size=30, metric='euclidean')
 
-  def consensus_labels(self, result_indices):
-    
-    consensus = None
-    num_results = len(result_indices)
+    def consensus_labels(self, result_indices):
 
-    err = "expected all label sets to have the same keys"
+        consensus = None
+        num_results = len(result_indices)
 
-    for idx in result_indices:
-      labels = self.data[idx]["labels"]
-      if not consensus:
-        consensus = labels
-      else:
-        for key, value in labels.items():
-          if key not in consensus:
-            raise Exception(err)
-          else:
-            consensus[key] += value
+        err = "expected all label sets to have the same keys"
 
-    for key, value in consensus.items():
-      consensus[key] = consensus[key] / num_results
+        for idx in result_indices:
+            labels = self.data[idx]["labels"]
+            if not consensus:
+                consensus = labels
+            else:
+                for key, value in labels.items():
+                    if key not in consensus:
+                        raise Exception(err)
+                    else:
+                        consensus[key] += value
 
-    return consensus
+        for key, value in consensus.items():
+            consensus[key] = consensus[key] / num_results
 
-  def consensus_query(self, query, k=10, return_distance=False):
-    results = self.kdt.query(query, k=k, return_distance=return_distance)
-    return self.consensus_labels(results[0])
+        return consensus
+
+    def consensus_query(self, query, k=10, return_distance=False):
+        results = self.kdt.query(query, k=k, return_distance=return_distance)
+        return self.consensus_labels(results[0])
 
 
 space = None
 
 
 def label_state(data, context):
-  """Glue between video in Firestore and queries to TFServing.
+    """Glue between video in Firestore and queries to TFServing.
 
   Notes:
   * Function is triggered by a change to a Firestore document.
@@ -174,71 +174,70 @@ def label_state(data, context):
 
   """
 
-  global space
+    global space
 
-  # Lazy-load the embedding space object on first invocation instead of on
-  # cold-start to deal with unclear issue of gcloud.functions.deploy not being
-  # able to find label_state function if this code is in the global scope above
-  # as well as because the docs recommend this pattern.
-  if not space:
+    # Lazy-load the embedding space object on first invocation instead of on
+    # cold-start to deal with unclear issue of gcloud.functions.deploy not being
+    # able to find label_state function if this code is in the global scope above
+    # as well as because the docs recommend this pattern.
+    if not space:
 
-    tmpdir = tempfile.gettempdir()
+        tmpdir = tempfile.gettempdir()
 
-    # NOTE: For dev purposes initially this is using random embedding vectors.
-    space = LabeledEmbeddingSpace(
-      given_data="{}/emb.json".format(tmpdir),
-      generate_random=True)
+        # NOTE: For dev purposes initially this is using random embedding vectors.
+        space = LabeledEmbeddingSpace(given_data="{}/emb.json".format(tmpdir),
+                                      generate_random=True)
 
-    space.build_kdtree()
+        space.build_kdtree()
 
-  path_parts = context.resource.split('/documents/')[1].split('/')
-  collection_path = path_parts[0]
-  document_path = '/'.join(path_parts[1:])
-  uid = path_parts[1]
+    path_parts = context.resource.split('/documents/')[1].split('/')
+    collection_path = path_parts[0]
+    document_path = '/'.join(path_parts[1:])
+    uid = path_parts[1]
 
-  affected_doc = client.collection(collection_path).document(document_path)
+    affected_doc = client.collection(collection_path).document(document_path)
 
-  data_packet = DataPacket(data["value"]["fields"])
+    data_packet = DataPacket(data["value"]["fields"])
 
-  # ========
-  # NOTE: This is currently mocked data.
-  image_data = np.zeros((28, 28, 1)).astype(np.float32)
-  # ========
+    # ========
+    # NOTE: This is currently mocked data.
+    image_data = np.zeros((28, 28, 1)).astype(np.float32)
+    # ========
 
-  out = model.eager_embed_single_image(image_data)
+    out = model.eager_embed_single_image(image_data)
 
-  # (1, 2048)
-  query = np.asarray([out])
+    # (1, 2048)
+    query = np.asarray([out])
 
-  tf.logging.info(query)
+    tf.logging.info(query)
 
-  consensus_labels = space.consensus_query(query)
+    consensus_labels = space.consensus_query(query)
 
-  update = {
-    u'state': {
-      u'data': [],
-      u'meta': {
-        u'timestamp': datetime.datetime.utcfromtimestamp(0)
-      }
+    update = {
+        u'state': {
+            u'data': [],
+            u'meta': {
+                u'timestamp': datetime.datetime.utcfromtimestamp(0)
+            }
+        }
     }
-  }
 
-  targets = {
-    "happiness": 0.5,
-    "calm": 0.5,
-    "confidence": 0.5,
-    "kindness": 0.5,
-    "focus": 0.5,
-    "posture": 0.5,
-    "flow": 0.5
-  }
+    targets = {
+        "happiness": 0.5,
+        "calm": 0.5,
+        "confidence": 0.5,
+        "kindness": 0.5,
+        "focus": 0.5,
+        "posture": 0.5,
+        "flow": 0.5
+    }
 
-  for key, value in consensus_labels.items():
-    update[u'state'][u'data'].append({
-      "label": key,
-      "current": value,
-      "target": targets[key]
-    })
+    for key, value in consensus_labels.items():
+        update[u'state'][u'data'].append({
+            "label": key,
+            "current": value,
+            "target": targets[key]
+        })
 
-  target_doc = client.collection(collection_path).document(uid)
-  target_doc.set(update)
+    target_doc = client.collection(collection_path).document(uid)
+    target_doc.set(update)

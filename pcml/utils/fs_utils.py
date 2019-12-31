@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """File-system utilities."""
 
 import os
@@ -21,20 +20,20 @@ import tempfile
 
 
 class TemporaryDirectory(object):
-  """For py2 support of `with tempfile.TemporaryDirectory() as name:`"""
+    """For py2 support of `with tempfile.TemporaryDirectory() as name:`"""
 
-  def __enter__(self):
-    self.name = tempfile.mkdtemp()
-    if not self.name.startswith("/tmp"):
-      raise ValueError("Safety first!")
-    return self.name
+    def __enter__(self):
+        self.name = tempfile.mkdtemp()
+        if not self.name.startswith("/tmp"):
+            raise ValueError("Safety first!")
+        return self.name
 
-  def __exit__(self, exc_type, exc_value, traceback):
-    shutil.rmtree(self.name)
+    def __exit__(self, exc_type, exc_value, traceback):
+        shutil.rmtree(self.name)
 
 
 def upsearch(directory, query, max_levels=3):
-  """Recursively search parent dirs for one containing `query` file.
+    """Recursively search parent dirs for one containing `query` file.
 
   The root of the Bazel workspace is indicated by the presence of
   a WORKSPACE file and when we want to run commands specifically
@@ -47,30 +46,30 @@ def upsearch(directory, query, max_levels=3):
     max_levels(int): The maximum depth of recursion.
 
   """
-  
-  tf.logging.info("Upsearched to {}".format(directory))
 
-  if max_levels < 0:
-    return None
+    tf.logging.info("Upsearched to {}".format(directory))
 
-  directory_contents = tf.gfile.ListDirectory(directory)
-  tf.logging.info("Directory contents {}".format(directory_contents))
+    if max_levels < 0:
+        return None
 
-  if query in directory_contents:
-    return directory
+    directory_contents = tf.gfile.ListDirectory(directory)
+    tf.logging.info("Directory contents {}".format(directory_contents))
 
-  parent_dir = "/".join(directory.split("/")[:-1])
+    if query in directory_contents:
+        return directory
 
-  return upsearch(parent_dir, query, max_levels=(max_levels-1))
+    parent_dir = "/".join(directory.split("/")[:-1])
+
+    return upsearch(parent_dir, query, max_levels=(max_levels - 1))
 
 
 def get_pcml_root():
 
-  this_dir = os.path.dirname(
-      os.path.abspath(inspect.getfile(inspect.currentframe())))
-  tf.logging.info("Searching from pcml root from {}".format(this_dir))
+    this_dir = os.path.dirname(
+        os.path.abspath(inspect.getfile(inspect.currentframe())))
+    tf.logging.info("Searching from pcml root from {}".format(this_dir))
 
-  return upsearch(this_dir, "MANIFEST.in")
+    return upsearch(this_dir, "MANIFEST.in")
 
 
 def expect_path(path):
@@ -89,8 +88,8 @@ def expect_path(path):
         raise ValueError("Paths must be of type string, saw: %s" % path)
 
     if not path.startswith("/"):
-        raise ValueError(
-            "Expected an absolute, user-space path, saw: %s" % path)
+        raise ValueError("Expected an absolute, user-space path, saw: %s" %
+                         path)
 
     if not tf.gfile.Exists(path):
         raise ValueEror("Path does not exist: %s" % path)

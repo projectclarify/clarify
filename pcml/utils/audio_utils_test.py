@@ -22,12 +22,12 @@ from pcml.utils import audio_utils
 
 class TestAudioUtils(tf.test.TestCase):
 
-  def test_standardize_audio_array(self):
-    pass
+    def test_standardize_audio_array(self):
+        pass
 
-  def test_mp4_to_1d_array(self):
-    pass
+    def test_mp4_to_1d_array(self):
+        pass
 
 
 if __name__ == "__main__":
-  tf.test.main()
+    tf.test.main()

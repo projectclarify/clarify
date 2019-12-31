@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of MAHNOB-HCI problem definitions."""
 
 from __future__ import absolute_import
@@ -26,19 +25,20 @@ TESTING_TMP = "/tmp"
 
 class TestMahnobProblem(tf.test.TestCase):
 
-  def test_data_verifier(self):
+    def test_data_verifier(self):
 
-    mahnob_hci._raw_data_verifier(mahnob_hci.DEFAULT_DATA_ROOT)
+        mahnob_hci._raw_data_verifier(mahnob_hci.DEFAULT_DATA_ROOT)
 
-  def test_walkthrough(self):
+    def test_walkthrough(self):
 
-    paths = mahnob_hci.maybe_get_data(TESTING_TMP,
-                                      mahnob_hci.DEFAULT_DATA_ROOT).next()
-    expected_keys = ["video_path", "audio_path", "guide_cut_path",
-                     "all_data_path"]
-    for key in expected_keys:
-      self.assertTrue(key in paths.keys())
+        paths = mahnob_hci.maybe_get_data(TESTING_TMP,
+                                          mahnob_hci.DEFAULT_DATA_ROOT).next()
+        expected_keys = [
+            "video_path", "audio_path", "guide_cut_path", "all_data_path"
+        ]
+        for key in expected_keys:
+            self.assertTrue(key in paths.keys())
 
 
 if __name__ == "__main__":
-  tf.test.main()
+    tf.test.main()

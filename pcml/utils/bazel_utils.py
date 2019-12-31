@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Utilities for working with Bazel."""
 
 from __future__ import absolute_import
@@ -23,7 +22,7 @@ from pcml.utils.fs_utils import get_pcml_root
 
 
 def bazel_command(command_string):
-  """Wrap Bazel commands with the context to allow them to work.
+    """Wrap Bazel commands with the context to allow them to work.
 
   Notably we're activating the necessary python environment,
   discovering the root of the Bazel workspace, and executing
@@ -31,16 +30,16 @@ def bazel_command(command_string):
 
   """
 
-  cwd = get_pcml_root()
+    cwd = get_pcml_root()
 
-  wrapped_cmd = []
-  wrapped_cmd.append("source activate py2")
-  wrapped_cmd.append(command_string)
-  # TODO: Generalize from `source activate py2` which assumes there
-  # is a conda env by that name on the host system to something
-  # that works more generally.
+    wrapped_cmd = []
+    wrapped_cmd.append("source activate py2")
+    wrapped_cmd.append(command_string)
+    # TODO: Generalize from `source activate py2` which assumes there
+    # is a conda env by that name on the host system to something
+    # that works more generally.
 
-  cmd = "bash -c '%s'" % "; ".join(wrapped_cmd)
+    cmd = "bash -c '%s'" % "; ".join(wrapped_cmd)
 
-  proc = subprocess.Popen(cmd, shell=True, cwd=cwd)
-  proc.wait()
+    proc = subprocess.Popen(cmd, shell=True, cwd=cwd)
+    proc.wait()

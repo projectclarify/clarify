@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """FEC problem definition tests."""
 
 from __future__ import absolute_import
@@ -35,78 +34,70 @@ TEST_CONFIG = Config()
 
 class TestFECProblem(tf.test.TestCase):
 
-  def setUp(self):
+    def setUp(self):
 
-    self.project = TEST_CONFIG.get("project")
-    self.instance = TEST_CONFIG.get("test_cbt_instance")
-    self.tmpdir = tempfile.mkdtemp()
-    self.salt = str(uuid.uuid4())[0:8]
-    self.test_run_tag = "clarify-test-{}-fec-cbt".format(
-      self.salt
-    )
-    self.mode = "train"
-    self.test_problem_name = "fec_tiny"
-    self.staging = os.path.join(TEST_CONFIG.test_artifacts_root,
-                                self.test_run_tag)
+        self.project = TEST_CONFIG.get("project")
+        self.instance = TEST_CONFIG.get("test_cbt_instance")
+        self.tmpdir = tempfile.mkdtemp()
+        self.salt = str(uuid.uuid4())[0:8]
+        self.test_run_tag = "clarify-test-{}-fec-cbt".format(self.salt)
+        self.mode = "train"
+        self.test_problem_name = "fec_tiny"
+        self.staging = os.path.join(TEST_CONFIG.test_artifacts_root,
+                                    self.test_run_tag)
 
-  def test_registry_lookups(self):
+    def test_registry_lookups(self):
 
-    problem_names = [
-      "facial_expression_correspondence",
-      "fec_tiny"
-    ]
+        problem_names = ["facial_expression_correspondence", "fec_tiny"]
 
-    for problem_name in problem_names:
-      _ = registry.problem(problem_name)
+        for problem_name in problem_names:
+            _ = registry.problem(problem_name)
 
-  def test_cbt_generate(self):
+    def test_cbt_generate(self):
 
-    prob = registry.problem(self.test_problem_name)
-    prob.mode = self.mode
-    prob.dataset_version_tag = self.salt
-    prob.cbt_generate(self.project, self.instance, self.mode)
+        prob = registry.problem(self.test_problem_name)
+        prob.mode = self.mode
+        prob.dataset_version_tag = self.salt
+        prob.cbt_generate(self.project, self.instance, self.mode)
 
-    selection = prob.dataset_selection(self.mode)
-    example_iterator = selection.iterate_tfexamples()
-    ex = example_iterator.__next__()
-    self.assertTrue(ex is not None)
+        selection = prob.dataset_selection(self.mode)
+        example_iterator = selection.iterate_tfexamples()
+        ex = example_iterator.__next__()
+        self.assertTrue(ex is not None)
 
-  def test_tiny_e2e(self):
+    def test_tiny_e2e(self):
 
-    tmp = tempfile.mkdtemp()
+        tmp = tempfile.mkdtemp()
 
-    helper = T2TDevHelper(
-      problem_name=self.test_problem_name,
-      model_name="percep_similarity_triplet_emb",
-      hparams_set="mcl_res_ut_vtiny",
-      data_dir=tmp,
-      tmp_dir=tmp,
-      queries=None,
-      mode="train"
-    )
+        helper = T2TDevHelper(problem_name=self.test_problem_name,
+                              model_name="percep_similarity_triplet_emb",
+                              hparams_set="mcl_res_ut_vtiny",
+                              data_dir=tmp,
+                              tmp_dir=tmp,
+                              queries=None,
+                              mode="train")
 
-    helper.problem.dataset_version_tag = self.salt
-    helper.problem.cbt_generate(self.project, self.instance, "train")
-    helper.problem.cbt_generate(self.project, self.instance, "eval")
+        helper.problem.dataset_version_tag = self.salt
+        helper.problem.cbt_generate(self.project, self.instance, "train")
+        helper.problem.cbt_generate(self.project, self.instance, "eval")
 
-    ex = helper.eager_get_example()
+        ex = helper.eager_get_example()
 
-    helper.eager_train_one_step()
+        helper.eager_train_one_step()
 
-    # HACK
-    def _mock_tfrecords_for_mode(mode):
-      path = os.path.join(tmp, "{}-{}-01-of-01".format(
-        self.test_problem_name, mode
-      ))
-      with open(path, "w") as f:
-        f.write("")
+        # HACK
+        def _mock_tfrecords_for_mode(mode):
+            path = os.path.join(
+                tmp, "{}-{}-01-of-01".format(self.test_problem_name, mode))
+            with open(path, "w") as f:
+                f.write("")
 
-    _mock_tfrecords_for_mode("train")
-    _mock_tfrecords_for_mode("eval")
+        _mock_tfrecords_for_mode("train")
+        _mock_tfrecords_for_mode("eval")
 
-    helper.train()
+        helper.train()
 
 
 if __name__ == "__main__":
-  tf.logging.set_verbosity(tf.logging.INFO)
-  tf.test.main()
+    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.test.main()

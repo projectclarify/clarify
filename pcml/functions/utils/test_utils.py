@@ -23,14 +23,21 @@ from pcml.utils.cmd_utils import run_and_output
 import tensorflow as tf
 
 
-def e2e_test_function(function_name, trigger_message, trigger_topic,
-                      project, service_account, region, staging,
-                      deploy_fn, expect_string, wait_seconds=60):
+def e2e_test_function(function_name,
+                      trigger_message,
+                      trigger_topic,
+                      project,
+                      service_account,
+                      region,
+                      staging,
+                      deploy_fn,
+                      expect_string,
+                      wait_seconds=60):
 
     deploy_fn(project_id=project,
-            service_account=service_account,
-            region=region,
-            staging_root=staging)
+              service_account=service_account,
+              region=region,
+              staging_root=staging)
 
     start_time = datetime.datetime.now().isoformat()
     publisher_client = pubsub_v1.PublisherClient()
@@ -43,11 +50,10 @@ def e2e_test_function(function_name, trigger_message, trigger_topic,
     time.sleep(wait_seconds)
 
     # Check logs after a delay
-    logs = run_and_output(['gcloud', 'alpha',
-                           'functions', 'logs',
-                           'read', function_name,
-                           '--start-time', start_time,
-                           '--project', project])
+    logs = run_and_output([
+        'gcloud', 'alpha', 'functions', 'logs', 'read', function_name,
+        '--start-time', start_time, '--project', project
+    ])
 
     tf.logging.info("fn logs: {}".format(logs))
 

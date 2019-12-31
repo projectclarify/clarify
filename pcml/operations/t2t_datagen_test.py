@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License
-
 """Tests of dedicated datagen Job wrapper."""
 
 import uuid
@@ -21,37 +20,37 @@ from pcml.operations.t2t_datagen import T2TDatagenJob
 
 
 class TestT2TDatagenJob(tf.test.TestCase):
- 
-  def test_instantiate_and_mock(self):
 
-    job = T2TDatagenJob(problem_name="vox_celeb_distributed_datagen",
-                        data_dir="gs://clarify-dev/tmp/datagendev",
-                        job_name_prefix="datagen-test",
-                        image="gcr.io/clarify/basic-runtime:0.0.4",
-                        staging_path="gs://clarify-dev/tmp/datagendev",
-                        node_selector={"type": "tpu-host"})
-                        # HACK: Cause job to be allocated onto host that
+    def test_instantiate_and_mock(self):
 
-    job.launch_shard_parallel_jobs(mock=True)
+        job = T2TDatagenJob(problem_name="vox_celeb_distributed_datagen",
+                            data_dir="gs://clarify-dev/tmp/datagendev",
+                            job_name_prefix="datagen-test",
+                            image="gcr.io/clarify/basic-runtime:0.0.4",
+                            staging_path="gs://clarify-dev/tmp/datagendev",
+                            node_selector={"type": "tpu-host"})
+        # HACK: Cause job to be allocated onto host that
 
-  def test_run_small_scale(self):
+        job.launch_shard_parallel_jobs(mock=True)
 
-    tag = str(uuid.uuid4())
+    def test_run_small_scale(self):
 
-    job = T2TDatagenJob(problem_name="vox_celeb_distributed_datagen",
-                        data_dir="gs://clarify-dev/tmp/datagendev-%s" % tag,
-                        job_name_prefix="datagen-test",
-                        image="gcr.io/clarify/basic-runtime:0.0.4",
-                        staging_path="gs://clarify-dev/tmp/datagendev",
-                        node_selector={"type": "tpu-host"})
+        tag = str(uuid.uuid4())
 
-    job.launch_shard_parallel_jobs(dev_max_num_jobs=10)
-    
-    # TODO: Return job ids.
+        job = T2TDatagenJob(problem_name="vox_celeb_distributed_datagen",
+                            data_dir="gs://clarify-dev/tmp/datagendev-%s" % tag,
+                            job_name_prefix="datagen-test",
+                            image="gcr.io/clarify/basic-runtime:0.0.4",
+                            staging_path="gs://clarify-dev/tmp/datagendev",
+                            node_selector={"type": "tpu-host"})
 
-    # TODO: Add a poll and check function that verifies whether the
-    # launched jobs succeeded.
+        job.launch_shard_parallel_jobs(dev_max_num_jobs=10)
+
+        # TODO: Return job ids.
+
+        # TODO: Add a poll and check function that verifies whether the
+        # launched jobs succeeded.
 
 
 if __name__ == "__main__":
-  tf.test.main()
+    tf.test.main()

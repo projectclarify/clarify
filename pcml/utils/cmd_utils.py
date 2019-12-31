@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Subprocess command utilities."""
 
 from __future__ import absolute_import
@@ -25,18 +24,17 @@ import tensorflow as tf
 
 def _maybe_decode(raw):
 
-  if isinstance(raw, str):
-    return raw
+    if isinstance(raw, str):
+        return raw
 
-  elif isinstance(raw, bytes):
-    return raw.decode()
+    elif isinstance(raw, bytes):
+        return raw.decode()
 
-  return raw.encode('ascii', 'ignore').decode('ascii')
-
+    return raw.encode('ascii', 'ignore').decode('ascii')
 
 
 def run_and_output(command, cwd=None, env=None):
-  """Run a system command.
+    """Run a system command.
 
   Args:
     command (list): The command to run as a string array.
@@ -51,32 +49,29 @@ def run_and_output(command, cwd=None, env=None):
 
   """
 
-  tf.logging.info("Running: %s \ncwd=%s", " ".join(command), cwd)
+    tf.logging.info("Running: %s \ncwd=%s", " ".join(command), cwd)
 
-  if not env:
+    if not env:
 
-    env = os.environ
+        env = os.environ
 
-  try:
+    try:
 
-    output = subprocess.check_output(
-        command, cwd=cwd, env=env,
-        stderr=subprocess.STDOUT).decode("utf-8")
+        output = subprocess.check_output(
+            command, cwd=cwd, env=env, stderr=subprocess.STDOUT).decode("utf-8")
 
-    output = _maybe_decode(output)
+        output = _maybe_decode(output)
 
-    tf.logging.info("\n=======\nSubprocess output:%s\n=====" % output)
+        tf.logging.info("\n=======\nSubprocess output:%s\n=====" % output)
 
-  except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError as e:
 
-    output = _maybe_decode(e.output)
+        output = _maybe_decode(e.output)
 
-    tf.logging.info(
-        "\n=======\nCommand failed, subprocess output:\n%s\n=======",
-        output)
+        tf.logging.info(
+            "\n=======\nCommand failed, subprocess output:\n%s\n=======",
+            output)
 
-    raise
+        raise
 
-  return output
-
-
+    return output

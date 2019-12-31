@@ -23,14 +23,14 @@ TEST_CONFIG = Config()
 
 class TestDeploy(tf.test.TestCase):
 
-  def test_deploy(self):
+    def test_deploy(self):
 
-    logs = deploy._deploy(project_id=TEST_CONFIG.get("project"),
-                          region=TEST_CONFIG.get("region"))
+        logs = deploy._deploy(project_id=TEST_CONFIG.get("project"),
+                              region=TEST_CONFIG.get("region"))
 
-    self.assertTrue("status: ACTIVE" in logs)
+        self.assertTrue("status: ACTIVE" in logs)
 
 
 if __name__ == "__main__":
-  tf.logging.set_verbosity(tf.logging.INFO)
-  tf.test.main()
+    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.test.main()
