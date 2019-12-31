@@ -50,7 +50,7 @@ jobs:
          command: 'sh tools/environments/install_tf_serving.sh'
       - run:
          name: Non-authenticated tests
-         command: 'cd $HOME/project && sh tools/testing/test_local.sh'
+         command: 'sh tools/testing/test_local.sh'
 workflows:
   version: 2
   build_and_test:
