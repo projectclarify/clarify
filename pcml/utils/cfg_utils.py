@@ -18,9 +18,7 @@ import json
 import os
 import tensorflow as tf
 
-DEFAULT_CONFIG_PATH = os.path.join(
-  get_pcml_root(), "default_config.json"
-)
+from pcml.test_config import PCML_CONFIG
 
 
 class Config(object):
@@ -28,27 +26,16 @@ class Config(object):
   def __init__(self,
                project=None,
                service_account_path=None,
-               from_path=DEFAULT_CONFIG_PATH,
                test_artifacts_root=None):
 
     self.project = project
     self.service_account_path = service_account_path
-    if isinstance(from_path, str):
-      self.load_config_from_path(from_path)
 
-    #if isinstance(self.service_account_path, str):
-    #  os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = sa_path
-
-  def load_config_from_path(self, path):
-
-    with open(path, "r") as config_file:
-      data = json.load(config_file)
-
-    for key, value in data.items():
+    for key, value in PCML_CONFIG.items():
       setattr(self, key, value)
 
-    if "service_account_path" in data:
-      sa_path = data["service_account_path"]
+    if "service_account_path" in PCML_CONFIG:
+      sa_path = PCML_CONFIG["service_account_path"]
       if isinstance(sa_path, str):
 
         with open(sa_path, "r") as sa_file:

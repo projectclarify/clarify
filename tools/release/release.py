@@ -11,10 +11,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.7
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
-ENV APP_HOME /app
-WORKDIR $APP_HOME
-COPY . .
+"""Supporting release utilities."""
 
-RUN pip install -e .[tensorflow,tests]
+VERSION="v0.1.0-rc.0"
+
+
+def my_fun():
+  return 1
+
+
+if __name__ == "__main__":
+  
+  print("Releasing version {}".format(VERSION))
+
+  # TODO: If run, determine whether a release should be sent
+  # based on VERSION and if so cut the release.

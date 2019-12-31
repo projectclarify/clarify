@@ -11,14 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.7
-
-COPY requirements.txt ./
-
-RUN pip install -r requirements.txt
-
-ENV APP_HOME /app
-WORKDIR $APP_HOME
-COPY . .
-
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 main:app
+bazel test //...

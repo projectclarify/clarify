@@ -11,24 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests of general test utilities."""
+bazel test //pcml/utils:audio_utils_test
+bazel test //pcml/utils:augmentation_utils_test
+bazel test //pcml/utils:cmd_utils_test
+bazel test //pcml/utils:bazel_utils_test
+bazel test //pcml/utils:fs_utils_test
+bazel test //pcml/utils:video_utils_test
+bazel test //pcml/utils:cfg_utils_test
+bazel test //pcml/utils:dev_utils_test
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import tensorflow as tf
-from pcml.utils import test_utils
-
-
-class TestTestUtils(tf.test.TestCase):
-
-  def test_get_tfms_path(self):
-    """Test of our ability to look up tensorflow_model_server path."""
-
-    path = test_utils.maybe_get_tfms_path()
-    self.assertTrue(path.endswith("tensorflow_model_server"))
-
-
-if __name__ == "__main__":
-  tf.test.main()
+# Requires BigTable permissions
+#bazel test //pcml/utils:cbt_utils_test

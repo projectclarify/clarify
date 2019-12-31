@@ -15,7 +15,7 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-from pcml.functions.embed_frames import deploy
+from pcml.functions.label_state import deploy
 
 from pcml.utils.cfg_utils import Config
 TEST_CONFIG = Config()

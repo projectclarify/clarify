@@ -1,3 +1,6 @@
+
+package(default_visibility = ["//visibility:public"])
+
 load("@my_deps//:requirements.bzl", "requirement")
 
 py_library(
@@ -14,7 +17,7 @@ py_library(
     ],
 )
 
-py_binary(
+py_test(
     name = "affectnet_test",
     srcs = ["affectnet_test.py"],
     deps = [
@@ -45,7 +48,7 @@ py_library(
     ],
 )
 
-py_binary(
+py_test(
     name = "celeba_test",
     srcs = ["celeba_test.py"],
     deps = [
@@ -68,7 +71,7 @@ py_library(
     ],
 )
 
-py_binary(
+py_test(
     name = "deap_test",
     srcs = ["deap_test.py"],
     deps = [
@@ -89,7 +92,7 @@ py_library(
     ],
 )
 
-py_binary(
+py_test(
     name = "example_utils_test",
     srcs = ["example_utils_test.py"],
     deps = [
@@ -115,7 +118,7 @@ py_library(
     ],
 )
 
-py_binary(
+py_test(
     name = "fec_test",
     srcs = ["fec_test.py"],
     deps = [
@@ -145,7 +148,7 @@ py_library(
     ],
 )
 
-py_binary(
+py_test(
     name = "mahnob_hci_test",
     srcs = ["mahnob_hci_test.py"],
     deps = [
@@ -163,7 +166,7 @@ py_library(
     ],
 )
 
-py_binary(
+py_test(
     name = "test_utils_test",
     srcs = ["test_utils_test.py"],
     deps = [
@@ -184,7 +187,7 @@ py_library(
     ],
 )
 
-py_binary(
+py_test(
     name = "utils_test",
     srcs = ["utils_test.py"],
     deps = [
@@ -211,7 +214,7 @@ py_library(
     ],
 )
 
-py_binary(
+py_test(
     name = "vggface2_test",
     srcs = ["vggface2_test.py"],
     deps = [
@@ -236,7 +239,7 @@ py_library(
     ],
 )
 
-py_binary(
+py_test(
     name = "vox_celeb_cbt_test",
     srcs = ["vox_celeb_cbt_test.py"],
     deps = [

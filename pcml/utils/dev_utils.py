@@ -34,8 +34,6 @@ from tensor2tensor.utils import trainer_lib
 from tensor2tensor.utils import registry
 from tensor2tensor.utils import decoding
 
-from pcml.utils.test_utils import maybe_get_tfms_path
-
 #import os
 #os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = ""
 
@@ -219,24 +217,11 @@ class T2TDevHelper(object):
         is_the_final_export=True
     )
 
-  def maybe_lookup_tfms_path(self):
-    """Look up the path to tensorflow_model_server."""
-
-    tfms_path = self.tf_model_server_path
-
-    if tfms_path is None:
-
-      tfms_path = maybe_get_tfms_path()
-
-      if tfms_path is None:
-        raise ValueError("Could not obtain tensorflow_model_server path.")
-
-    self.tf_model_server_path = tfms_path
-
   def serve(self):
     """Serve a SavedModel."""
 
-    self.maybe_lookup_tfms_path()
+    if not self.tf_model_server_path:
+      raise ValueError("Need to set `tf_model_server_path` attr.")
 
     _, server, _ = run_server(
         self.model_name,

@@ -11,26 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Messages related media embedding."""
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-prohibited_targets = [
-  # Took a long time to generate, let's not accidentally write the wrong
-  # data to it.
-  "vox-celeb-2-raw"
-]
+"""Testing of release utils."""
 
-class EmbedTriggerMessage(object):
-  def __init__(self, problem_name, project, bigtable_instance,
-               target_table_name):
-    self.problem_name = problem_name
-    self.project = project
-    self.bigtable_instance = bigtable_instance
+from release import my_fun
 
-    msg = "Writing to {} is prohibited".format(target_table_name)
-    if target_table_name in prohibited_targets:
-      raise ValueError(msg)
-    self.target_table_name = target_table_name
+if __name__ == "__main__":
+  assert my_fun() == 1
