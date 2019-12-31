@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+bazel build //pcml/utils/...
+
 bazel test //pcml/utils:audio_utils_test --test_output=all
 bazel test //pcml/utils:augmentation_utils_test --test_output=all
 bazel test //pcml/utils:cmd_utils_test --test_output=all
