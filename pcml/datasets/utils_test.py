@@ -37,7 +37,7 @@ Modes = tf.estimator.ModeKeys  # pylint: disable=invalid-name
 
 
 class TestMultiProblemUtils(tf.test.TestCase):
-    """
+  """
   def test_dummy_video_generator(self):
     spec = MultiModalImagingExampleSpec()
     encoded = array2gif(spec.fields["video"].mock_one(zeros=True).numpy())
@@ -48,35 +48,35 @@ class TestMultiProblemUtils(tf.test.TestCase):
     self.assertEqual(encoded2, encoded)
   """
 
-    def test_gen_dummy_schedule(self):
+  def test_gen_dummy_schedule(self):
 
-        num_problems = 10
-        steps_per_problem = 10
+    num_problems = 10
+    steps_per_problem = 10
 
-        schedule = gen_dummy_schedule(num_problems=num_problems,
-                                      steps_per_problem=steps_per_problem)
+    schedule = gen_dummy_schedule(num_problems=num_problems,
+                                  steps_per_problem=steps_per_problem)
 
-        assert schedule[0] == "step"
-        assert len(schedule[1]) == num_problems
-        assert len(schedule[2]) == num_problems
-        assert len(schedule[2][0]) == num_problems
+    assert schedule[0] == "step"
+    assert len(schedule[1]) == num_problems
+    assert len(schedule[2]) == num_problems
+    assert len(schedule[2][0]) == num_problems
 
 
 class TestTestUtils(tf.test.TestCase):
-    """Tests of test utils."""
+  """Tests of test utils."""
 
-    def test_get_random_index_subinterval(self):
+  def test_get_random_index_subinterval(self):
 
-        samples = get_random_index_subinterval(5, 2, 100)
-        self.assertTrue(np.amax(samples) < 5)
-        self.assertTrue(np.amin(samples) >= 0)
+    samples = get_random_index_subinterval(5, 2, 100)
+    self.assertTrue(np.amax(samples) < 5)
+    self.assertTrue(np.amin(samples) >= 0)
 
-    def test_get_temporal_subinterval(self):
+  def test_get_temporal_subinterval(self):
 
-        for duration, subinterval_length in [(10, 2), (10, 10), (10.0, 0.1)]:
-            start, end = get_temporal_subinterval(duration, subinterval_length)
-            self.assertTrue(((end - start) - subinterval_length) < 0.001)
+    for duration, subinterval_length in [(10, 2), (10, 10), (10.0, 0.1)]:
+      start, end = get_temporal_subinterval(duration, subinterval_length)
+      self.assertTrue(((end - start) - subinterval_length) < 0.001)
 
 
 if __name__ == "__main__":
-    tf.test.main()
+  tf.test.main()

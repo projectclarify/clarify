@@ -27,88 +27,88 @@ from pcml.launcher.util import _compress_and_stage
 
 class MyClassOne(object):
 
-    def __init__(self):
-        self.attr_refs_dict = {"hello": "world"}
+  def __init__(self):
+    self.attr_refs_dict = {"hello": "world"}
 
 
 class MyClassTwo(object):
 
-    def __init__(self):
+  def __init__(self):
 
-        self.attr_refs_dict = {"hello": "world"}
-        self.attr_refs_list = ["hello", "world"]
-        self.attr_refs_obj = MyClassOne()
+    self.attr_refs_dict = {"hello": "world"}
+    self.attr_refs_list = ["hello", "world"]
+    self.attr_refs_obj = MyClassOne()
 
 
 class TestObjectAsDict(tf.test.TestCase):
 
-    def test_nested_list(self):
+  def test_nested_list(self):
 
-        instance = MyClassTwo()
-        cases = [{
-            "input": [{
+    instance = MyClassTwo()
+    cases = [{
+        "input": [{
+            "hello": "world"
+        }],
+        "output": [{
+            "hello": "world"
+        }]
+    }, {
+        "input": [{
+            "hello": "world"
+        }],
+        "output": [{
+            "hello": "world"
+        }]
+    }, {
+        "input": instance,
+        "output": {
+            "attr_refs_dict": {
                 "hello": "world"
-            }],
-            "output": [{
-                "hello": "world"
-            }]
-        }, {
-            "input": [{
-                "hello": "world"
-            }],
-            "output": [{
-                "hello": "world"
-            }]
-        }, {
-            "input": instance,
-            "output": {
+            },
+            "attr_refs_list": ["hello", "world"],
+            "attr_refs_obj": {
                 "attr_refs_dict": {
                     "hello": "world"
-                },
-                "attr_refs_list": ["hello", "world"],
-                "attr_refs_obj": {
-                    "attr_refs_dict": {
-                        "hello": "world"
-                    }
                 }
             }
-        }]
+        }
+    }]
 
-        for case in cases:
-            self.assertEqual(object_as_dict(case["input"]), case["output"])
+    for case in cases:
+      self.assertEqual(object_as_dict(case["input"]), case["output"])
 
 
 class TestDictPrunePrivate(tf.test.TestCase):
 
-    def test_simple(self):
+  def test_simple(self):
 
-        cases = [{
-            "input": {
-                "key": "value",
-                "_ignore": "me",
-                "_also_ignore": {
-                    "this": "subtree"
-                },
-                "keep": {
-                    "this": "subtree"
-                }
+    cases = [{
+        "input": {
+            "key": "value",
+            "_ignore": "me",
+            "_also_ignore": {
+                "this": "subtree"
             },
-            "expected": {
-                "key": "value",
-                "keep": {
-                    "this": "subtree"
-                }
+            "keep": {
+                "this": "subtree"
             }
-        }]
-        for case in cases:
-            pruned = dict_prune_private(case["input"])
-            self.assertEqual(pruned, case["expected"])
+        },
+        "expected": {
+            "key": "value",
+            "keep": {
+                "this": "subtree"
+            }
+        }
+    }]
+    for case in cases:
+      pruned = dict_prune_private(case["input"])
+      self.assertEqual(pruned, case["expected"])
 
 
 class TestExpect(tf.test.TestCase):
 
-    def test_expect_type(self):
-        expect_type("hello world", str)
+  def test_expect_type(self):
+    expect_type("hello world", str)
 
 
 """
@@ -120,4 +120,4 @@ class TestStagingUtils(tf.test.TestCase):
 """
 
 if __name__ == "__main__":
-    tf.test.main()
+  tf.test.main()

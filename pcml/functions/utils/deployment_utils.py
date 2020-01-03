@@ -25,24 +25,24 @@ from pcml.utils.fs_utils import TemporaryDirectory
 
 
 def _lookup_firestore_event_type(type_shorthand):
-    type_lookup = {
-        "create": "providers/cloud.firestore/eventTypes/document.create",
-        "write": "providers/cloud.firestore/eventTypes/document.write",
-        "delete": "providers/cloud.firestore/eventTypes/document.delete",
-        "update": "providers/cloud.firestore/eventTypes/document.update"
-    }
-    if type_shorthand not in type_lookup:
-        msg = "Unrecognized event type {}, expected {}".format(
-            type_shorthand, type_lookup.keys())
-        raise ValueError(msg)
-    return type_lookup[type_shorthand]
+  type_lookup = {
+      "create": "providers/cloud.firestore/eventTypes/document.create",
+      "write": "providers/cloud.firestore/eventTypes/document.write",
+      "delete": "providers/cloud.firestore/eventTypes/document.delete",
+      "update": "providers/cloud.firestore/eventTypes/document.update"
+  }
+  if type_shorthand not in type_lookup:
+    msg = "Unrecognized event type {}, expected {}".format(
+        type_shorthand, type_lookup.keys())
+    raise ValueError(msg)
+  return type_lookup[type_shorthand]
 
 
 def _validate_runtime(runtime):
-    allowed_runtimes = ["python37"]
-    if runtime not in allowed_runtimes:
-        raise ValueError("Runtime {} must be one of {}".format(
-            runtime, allowed_runtimes))
+  allowed_runtimes = ["python37"]
+  if runtime not in allowed_runtimes:
+    raise ValueError("Runtime {} must be one of {}".format(
+        runtime, allowed_runtimes))
 
 
 def deploy_firestore_responder(function_name,
@@ -56,7 +56,7 @@ def deploy_firestore_responder(function_name,
                                region="us-central1",
                                memory="256MB",
                                timeout="60s"):
-    """Convenience wrapper for deployment of firestore responder fn.
+  """Convenience wrapper for deployment of firestore responder fn.
   
   Notes:
   * Service account defaults to
@@ -64,50 +64,50 @@ def deploy_firestore_responder(function_name,
   
   """
 
-    _validate_runtime(runtime)
+  _validate_runtime(runtime)
 
-    event_type_longhand = _lookup_firestore_event_type(event_type)
+  event_type_longhand = _lookup_firestore_event_type(event_type)
 
-    triggering_resource = "projects/{}/databases/(default)/".format(project_id)
+  triggering_resource = "projects/{}/databases/(default)/".format(project_id)
 
-    triggering_resource += "documents/{}/{}".format(collection, document_path)
+  triggering_resource += "documents/{}/{}".format(collection, document_path)
 
-    msg = "Function {} will trigger on {} ".format(function_name,
-                                                   event_type_longhand)
+  msg = "Function {} will trigger on {} ".format(function_name,
+                                                 event_type_longhand)
 
-    msg += "in response to triggering resource {}.".format(triggering_resource)
+  msg += "in response to triggering resource {}.".format(triggering_resource)
 
-    tf.logging.info(msg)
+  tf.logging.info(msg)
 
-    cmd = [
-        "gcloud", "functions", "deploy", function_name, "--trigger-event",
-        event_type_longhand, "--trigger-resource", triggering_resource,
-        "--runtime", runtime, "--source", source, "--memory", memory,
-        "--timeout", timeout
-    ]
+  cmd = [
+      "gcloud", "functions", "deploy", function_name, "--trigger-event",
+      event_type_longhand, "--trigger-resource", triggering_resource,
+      "--runtime", runtime, "--source", source, "--memory", memory, "--timeout",
+      timeout
+  ]
 
-    if service_account:
-        cmd.extend(["--service-account", service_account])
+  if service_account:
+    cmd.extend(["--service-account", service_account])
 
-    if region:
-        cmd.extend(["--region", region])
+  if region:
+    cmd.extend(["--region", region])
 
-    return run_and_output(cmd)
+  return run_and_output(cmd)
 
 
 def _create_topic(project_id, topic_name):
-    msg = "Creating topic {} in project {}".format(topic_name, project_id)
-    tf.logging.info(msg)
-    publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(project_id, topic_name)
-    print(topic_path)
+  msg = "Creating topic {} in project {}".format(topic_name, project_id)
+  tf.logging.info(msg)
+  publisher = pubsub_v1.PublisherClient()
+  topic_path = publisher.topic_path(project_id, topic_name)
+  print(topic_path)
 
-    project_path = publisher.project_path(project_id)
+  project_path = publisher.project_path(project_id)
 
-    topic_paths = [topic.name for topic in publisher.list_topics(project_path)]
+  topic_paths = [topic.name for topic in publisher.list_topics(project_path)]
 
-    if topic_path not in topic_paths:
-        topic = publisher.create_topic(topic_path)
+  if topic_path not in topic_paths:
+    topic = publisher.create_topic(topic_path)
 
 
 def deploy_topic_responder(function_name,
@@ -123,103 +123,103 @@ def deploy_topic_responder(function_name,
                            timeout="60s",
                            max_instances=1000):
 
-    _validate_runtime(runtime)
+  _validate_runtime(runtime)
 
-    msg = "Function {} will be triggered by topic {} ".format(
-        function_name, trigger_topic)
+  msg = "Function {} will be triggered by topic {} ".format(
+      function_name, trigger_topic)
 
-    tf.logging.info(msg)
+  tf.logging.info(msg)
 
-    if create_topic:
-        _create_topic(project_id, trigger_topic)
+  if create_topic:
+    _create_topic(project_id, trigger_topic)
 
-    if create_done_topic:
-        _create_topic(project_id, trigger_topic + "-done")
+  if create_done_topic:
+    _create_topic(project_id, trigger_topic + "-done")
 
-    cmd = [
-        "gcloud", "functions", "deploy", function_name, "--trigger-topic",
-        trigger_topic, "--runtime", runtime, "--source", source, "--memory",
-        memory, "--timeout", timeout, "--max-instances",
-        str(max_instances)
-    ]
+  cmd = [
+      "gcloud", "functions", "deploy", function_name, "--trigger-topic",
+      trigger_topic, "--runtime", runtime, "--source", source, "--memory",
+      memory, "--timeout", timeout, "--max-instances",
+      str(max_instances)
+  ]
 
-    if service_account:
-        cmd.extend(["--service-account", service_account])
+  if service_account:
+    cmd.extend(["--service-account", service_account])
 
-    if region:
-        cmd.extend(["--region", region])
+  if region:
+    cmd.extend(["--region", region])
 
-    return run_and_output(cmd)
+  return run_and_output(cmd)
 
 
 def _touch(path):
-    with open(path, "w") as f:
-        f.write("")
+  with open(path, "w") as f:
+    f.write("")
 
 
 def _timestamp():
-    now = datetime.datetime.now()
-    epoch = datetime.datetime.utcfromtimestamp(0)
-    ts = int((now - epoch).total_seconds() * 100000.0)
-    return ts
+  now = datetime.datetime.now()
+  epoch = datetime.datetime.utcfromtimestamp(0)
+  ts = int((now - epoch).total_seconds() * 100000.0)
+  return ts
 
 
 def prepare_functions_bundle(function_code_path, tmpdir, pcml_lib_root):
 
-    pcml_lib_root = os.path.join(get_pcml_root(), "pcml")
+  pcml_lib_root = os.path.join(get_pcml_root(), "pcml")
 
-    # Recursive copy pcml_root/pcml into tmpdir
-    tf.gfile.MakeDirs(os.path.join(tmpdir, "lib"))
-    tmp_pcml_path = os.path.join(tmpdir, "lib", "pcml")
+  # Recursive copy pcml_root/pcml into tmpdir
+  tf.gfile.MakeDirs(os.path.join(tmpdir, "lib"))
+  tmp_pcml_path = os.path.join(tmpdir, "lib", "pcml")
 
-    run_and_output(["cp", "-r", pcml_lib_root, tmp_pcml_path])
+  run_and_output(["cp", "-r", pcml_lib_root, tmp_pcml_path])
 
-    run_and_output(["ls", tmp_pcml_path])
+  run_and_output(["ls", tmp_pcml_path])
 
-    # Replace __init__.py with an empty one
-    tmp_init = os.path.join(tmp_pcml_path, "__init__.py")
-    with tf.gfile.Open(tmp_init, "w") as f:
-        f.write("")
+  # Replace __init__.py with an empty one
+  tmp_init = os.path.join(tmp_pcml_path, "__init__.py")
+  with tf.gfile.Open(tmp_init, "w") as f:
+    f.write("")
 
-    # Copy in function code
-    source_function_code_path = os.path.join(pcml_lib_root, function_code_path)
-    tmp_lib_path = os.path.join(tmpdir, "lib")
+  # Copy in function code
+  source_function_code_path = os.path.join(pcml_lib_root, function_code_path)
+  tmp_lib_path = os.path.join(tmpdir, "lib")
 
-    def _allow_filename(filename):
-        if filename.endswith(".py") or filename.endswith(".txt"):
-            return True
-        if filename == "Dockerfile":
-            return True
-        return False
+  def _allow_filename(filename):
+    if filename.endswith(".py") or filename.endswith(".txt"):
+      return True
+    if filename == "Dockerfile":
+      return True
+    return False
 
-    for filename in tf.gfile.ListDirectory(source_function_code_path):
-        if _allow_filename(filename):
-            source_path = os.path.join(source_function_code_path, filename)
-            target_path = os.path.join(tmp_lib_path, filename)
-            tf.gfile.Copy(source_path, target_path)
+  for filename in tf.gfile.ListDirectory(source_function_code_path):
+    if _allow_filename(filename):
+      source_path = os.path.join(source_function_code_path, filename)
+      target_path = os.path.join(tmp_lib_path, filename)
+      tf.gfile.Copy(source_path, target_path)
 
-    return tmp_lib_path
+  return tmp_lib_path
 
 
 def stage_functions_bundle(gcs_staging_path, function_code_path):
 
-    pcml_lib_root = os.path.join(get_pcml_root(), "pcml")
+  pcml_lib_root = os.path.join(get_pcml_root(), "pcml")
 
-    with TemporaryDirectory() as tmpdir:
+  with TemporaryDirectory() as tmpdir:
 
-        tmp_lib_path = prepare_functions_bundle(function_code_path, tmpdir,
-                                                pcml_lib_root)
+    tmp_lib_path = prepare_functions_bundle(function_code_path, tmpdir,
+                                            pcml_lib_root)
 
-        local_zip_filename = "bundle.zip"
-        local_zip_path = os.path.join(tmpdir, local_zip_filename)
+    local_zip_filename = "bundle.zip"
+    local_zip_path = os.path.join(tmpdir, local_zip_filename)
 
-        remote_zip_path = os.path.join(
-            gcs_staging_path, "{}-{}".format(_timestamp(), local_zip_filename))
+    remote_zip_path = os.path.join(
+        gcs_staging_path, "{}-{}".format(_timestamp(), local_zip_filename))
 
-        # Create zip
-        os.chdir(tmp_lib_path)
-        run_and_output(["zip", "-r", local_zip_path, "./"])
+    # Create zip
+    os.chdir(tmp_lib_path)
+    run_and_output(["zip", "-r", local_zip_path, "./"])
 
-        tf.gfile.Copy(local_zip_path, remote_zip_path, overwrite=True)
+    tf.gfile.Copy(local_zip_path, remote_zip_path, overwrite=True)
 
-    return remote_zip_path
+  return remote_zip_path

@@ -25,38 +25,38 @@ import os
 
 class TestT2TDatagenJobV2(tf.test.TestCase):
 
-    def test_instantiate_and_mock(self):
+  def test_instantiate_and_mock(self):
 
-        job = T2TDatagenJobV2(problem_name="vox_celeb_sharded_generator_dev",
-                              data_dir="gs://clarify-dev/tmp/datagendev",
-                              job_name_prefix="cbtdirect",
-                              image="gcr.io/clarify/basic-runtime:0.0.4",
-                              staging_path="gs://clarify-dev/tmp/datagendev",
-                              node_selector={"type": "datagen-small"})
+    job = T2TDatagenJobV2(problem_name="vox_celeb_sharded_generator_dev",
+                          data_dir="gs://clarify-dev/tmp/datagendev",
+                          job_name_prefix="cbtdirect",
+                          image="gcr.io/clarify/basic-runtime:0.0.4",
+                          staging_path="gs://clarify-dev/tmp/datagendev",
+                          node_selector={"type": "datagen-small"})
 
-        job.launch_shard_parallel_jobs(mock=True)
+    job.launch_shard_parallel_jobs(mock=True)
 
-    def test_e2e(self):
+  def test_e2e(self):
 
-        job = T2TDatagenJobV2(problem_name="vox_celeb_sharded_generator_dev",
-                              bigtable_instance="clarify-cbt-instance",
-                              bigtable_table="clarify-cbt-devtable",
-                              project="clarify",
-                              data_dir="gs://clarify-dev/tmp/datagendev",
-                              job_name_prefix="cbtdirect",
-                              image="gcr.io/clarify/basic-runtime:0.0.4",
-                              staging_path="gs://clarify-dev/tmp/datagendev",
-                              node_selector={"type": "datagen-small"},
-                              num_cpu=1,
-                              memory="7Gi")
+    job = T2TDatagenJobV2(problem_name="vox_celeb_sharded_generator_dev",
+                          bigtable_instance="clarify-cbt-instance",
+                          bigtable_table="clarify-cbt-devtable",
+                          project="clarify",
+                          data_dir="gs://clarify-dev/tmp/datagendev",
+                          job_name_prefix="cbtdirect",
+                          image="gcr.io/clarify/basic-runtime:0.0.4",
+                          staging_path="gs://clarify-dev/tmp/datagendev",
+                          node_selector={"type": "datagen-small"},
+                          num_cpu=1,
+                          memory="7Gi")
 
-        create_responses = job.launch_shard_parallel_jobs(dev_max_num_jobs=1)
+    create_responses = job.launch_shard_parallel_jobs(dev_max_num_jobs=1)
 
-        for create_response in create_responses:
-            _testing_run_poll_and_check_job(test_object=self,
-                                            create_response=create_response,
-                                            expect_in_logs="Completed datagen.")
-        """
+    for create_response in create_responses:
+      _testing_run_poll_and_check_job(test_object=self,
+                                      create_response=create_response,
+                                      expect_in_logs="Completed datagen.")
+    """
 
     These keep crashing because of memory usage. What's happening is each
     thread is accumulating a large number of samples (in memory) before
@@ -72,4 +72,4 @@ class TestT2TDatagenJobV2(tf.test.TestCase):
 
 
 if __name__ == "__main__":
-    tf.test.main()
+  tf.test.main()

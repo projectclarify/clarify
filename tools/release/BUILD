@@ -1,4 +1,3 @@
-
 load("@my_deps//:requirements.bzl", "requirement")
 
 # Require command line flag confirmation before actually sending a
@@ -13,7 +12,6 @@ py_binary(
     main = "release.py",
     srcs = ["release.py"],
     deps = [
-
     ],
 )
 
@@ -21,7 +19,6 @@ py_library(
     name = "release",
     srcs = ["release.py"],
     deps = [
-
     ],
 )
 

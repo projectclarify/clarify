@@ -33,29 +33,29 @@ TEST_CONFIG = Config()
 
 
 def tag_simplifier(input_string):
-    out = []
-    a = input_string.split("_")
-    for string_component in a:
-        if len(string_component) < 3:
-            out.append(string_component)
-            continue
-        out.append(string_component[:3])
-    return "-".join(out)
+  out = []
+  a = input_string.split("_")
+  for string_component in a:
+    if len(string_component) < 3:
+      out.append(string_component)
+      continue
+    out.append(string_component[:3])
+  return "-".join(out)
 
 
 class TestModel(tf.test.TestCase):
 
-    def setUp(self):
-        self.model_name = "modality_correspondence_learner"
-        self.problem_name = "vox_celeb_cbt"
-        self.hparams_name = "mcl_res_ut_tiny"
+  def setUp(self):
+    self.model_name = "modality_correspondence_learner"
+    self.problem_name = "vox_celeb_cbt"
+    self.hparams_name = "mcl_res_ut_tiny"
 
-    def test_lookup_model(self):
-        registry.model(self.model_name)
+  def test_lookup_model(self):
+    registry.model(self.model_name)
 
-    def test_local_small_hparams_one_step(self):
-        pass
-        """
+  def test_local_small_hparams_one_step(self):
+    pass
+    """
     dev_utils.T2TDevHelper(
       self.model_name,
       self.problem_name,
@@ -64,13 +64,13 @@ class TestModel(tf.test.TestCase):
     ).eager_train_one_step()
     """
 
-    def test_local_small_hparams_e2e(self):
-        pass
+  def test_local_small_hparams_e2e(self):
+    pass
 
-        #dev_utils.T2TDevHelper(
-        #  self.model_name, self.problem_name, self.hparams_name, None
-        #).run_e2e()
-        """
+    #dev_utils.T2TDevHelper(
+    #  self.model_name, self.problem_name, self.hparams_name, None
+    #).run_e2e()
+    """
     TODO: Add this
 
     def _make_grpc_request(examples):
@@ -112,37 +112,36 @@ class TestModel(tf.test.TestCase):
   
     """
 
-    def test_batch_tpu(self):
+  def test_batch_tpu(self):
 
-        tag = tag_simplifier("test-{}".format(self.problem_name))
+    tag = tag_simplifier("test-{}".format(self.problem_name))
 
-        experiment = configure_experiment(
-            base_name=tag,
-            problem=self.problem_name,
-            model=self.model_name,
-            hparams_set=self.hparams_name,
-            num_gpu_per_worker=0,
-            num_train_steps=30000,
-            num_eval_steps=30,
-            local_eval_frequency=10,
-            trainer_memory="4Gi",
-            trainer_cpu=1,
-            app_root="/home/jovyan/work/pcml",
-            base_image="gcr.io/clarify/basic-runtime:0.0.4",
-            schedule="train",
+    experiment = configure_experiment(
+        base_name=tag,
+        problem=self.problem_name,
+        model=self.model_name,
+        hparams_set=self.hparams_name,
+        num_gpu_per_worker=0,
+        num_train_steps=30000,
+        num_eval_steps=30,
+        local_eval_frequency=10,
+        trainer_memory="4Gi",
+        trainer_cpu=1,
+        app_root="/home/jovyan/work/pcml",
+        base_image="gcr.io/clarify/basic-runtime:0.0.4",
+        schedule="train",
 
-            # Need mod to avoid need for data dir
-            data_dir=
-            "gs://clarify-models-us-central1/experiments/example-scaleup18",
-            remote_base="gs://clarify-models-us-central1/experiments/cbtdev",
-            use_tpu=True,
-            num_tpu_cores=8,
-            tpu_tf_version="1.13",
-            selector_labels={"type": "tpu-host"})
+        # Need mod to avoid need for data dir
+        data_dir="gs://clarify-models-us-central1/experiments/example-scaleup18",
+        remote_base="gs://clarify-models-us-central1/experiments/cbtdev",
+        use_tpu=True,
+        num_tpu_cores=8,
+        tpu_tf_version="1.13",
+        selector_labels={"type": "tpu-host"})
 
-        experiment.batch_run()
+    experiment.batch_run()
 
 
 if __name__ == "__main__":
-    tf.logging.set_verbosity(tf.logging.INFO)
-    tf.test.main()
+  tf.logging.set_verbosity(tf.logging.INFO)
+  tf.test.main()

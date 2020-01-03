@@ -52,62 +52,62 @@ from pcml.datasets.utils import gen_dummy_schedule
 
 def _load_vgg_meta(download_root, shuffle=True, mode="train"):
 
-    if mode not in ["train", "test", "eval"]:
-        raise ValueError("Unrecognized mode.")
+  if mode not in ["train", "test", "eval"]:
+    raise ValueError("Unrecognized mode.")
 
-    if mode == "eval":
-        # Naming convention for this dataset. Test can be performed on a
-        # completely separate dataset like LFW. Here we equate "test" and
-        # "dev/eval".
-        mode = "test"
+  if mode == "eval":
+    # Naming convention for this dataset. Test can be performed on a
+    # completely separate dataset like LFW. Here we equate "test" and
+    # "dev/eval".
+    mode = "test"
 
-    download_root = os.path.join(download_root, mode)
-    meta_path = os.path.join(download_root, "meta.txt")
+  download_root = os.path.join(download_root, mode)
+  meta_path = os.path.join(download_root, "meta.txt")
 
-    tf.logging.info("Loaded metadata for {} from {}".format(mode, meta_path))
+  tf.logging.info("Loaded metadata for {} from {}".format(mode, meta_path))
 
-    identity_to_paths = {}
+  identity_to_paths = {}
 
-    with tf.gfile.Open(meta_path, "r") as f:
-        for line in f:
-            line = line.strip()
-            arr = line.split("/")
-            identity = arr[0]
-            if identity not in identity_to_paths:
-                identity_to_paths[identity] = []
-            identity_to_paths[identity].append(line)
+  with tf.gfile.Open(meta_path, "r") as f:
+    for line in f:
+      line = line.strip()
+      arr = line.split("/")
+      identity = arr[0]
+      if identity not in identity_to_paths:
+        identity_to_paths[identity] = []
+      identity_to_paths[identity].append(line)
 
-    return identity_to_paths, download_root
+  return identity_to_paths, download_root
 
 
 def _vgg_sampling_iterator(meta):
 
-    keys = list(meta.keys())
-    keys_len = len(keys)
+  keys = list(meta.keys())
+  keys_len = len(keys)
 
-    while True:
+  while True:
 
-        id1 = keys[np.random.randint(0, keys_len)]
-        id2 = keys[np.random.randint(0, keys_len)]
+    id1 = keys[np.random.randint(0, keys_len)]
+    id2 = keys[np.random.randint(0, keys_len)]
 
-        id1_images = meta[id1]
-        id2_images = meta[id2]
+    id1_images = meta[id1]
+    id2_images = meta[id2]
 
-        img1 = id1_images[np.random.randint(0, len(id1_images))]
-        img2 = id1_images[np.random.randint(0, len(id1_images))]
-        img3 = id2_images[np.random.randint(0, len(id2_images))]
+    img1 = id1_images[np.random.randint(0, len(id1_images))]
+    img2 = id1_images[np.random.randint(0, len(id1_images))]
+    img3 = id2_images[np.random.randint(0, len(id2_images))]
 
-        yield (img1, img2, img3)
+    yield (img1, img2, img3)
 
 
 def _read_image(image_path, image_shape, tmp_dir):
 
-    fname = "-".join(image_path.split("/")[-2:])
-    local_path = generator_utils.maybe_download(tmp_dir, fname, image_path)
-    d = cv2.imread(local_path)
-    d = cv2.cvtColor(d, cv2.COLOR_BGR2RGB)
-    d = _normalize_dimensions(d, image_shape)
-    return d.flatten().tolist()
+  fname = "-".join(image_path.split("/")[-2:])
+  local_path = generator_utils.maybe_download(tmp_dir, fname, image_path)
+  d = cv2.imread(local_path)
+  d = cv2.cvtColor(d, cv2.COLOR_BGR2RGB)
+  d = _normalize_dimensions(d, image_shape)
+  return d.flatten().tolist()
 
 
 def _generator(data_root,
@@ -118,82 +118,82 @@ def _generator(data_root,
                num_shards=-1,
                shard_id=-1):
 
-    # Num shards and shard_id are not used because the dataset can be
-    # sampled ad infinitum. The number of examples produced is simply
-    # equal to `how_many` times the number of datagen jobs launched.
+  # Num shards and shard_id are not used because the dataset can be
+  # sampled ad infinitum. The number of examples produced is simply
+  # equal to `how_many` times the number of datagen jobs launched.
 
-    meta, download_root = _load_vgg_meta(data_root, mode=mode)
+  meta, download_root = _load_vgg_meta(data_root, mode=mode)
 
-    tf.logging.info("Geneating {} examples, shard_id {}, numshards {}".format(
-        how_many, shard_id, num_shards))
+  tf.logging.info("Geneating {} examples, shard_id {}, numshards {}".format(
+      how_many, shard_id, num_shards))
 
-    for i, sample in enumerate(_vgg_sampling_iterator(meta)):
+  for i, sample in enumerate(_vgg_sampling_iterator(meta)):
 
-        if how_many and i > how_many:
-            break
+    if how_many and i > how_many:
+      break
 
-        def _mkpath(subpath):
-            return os.path.join(download_root, subpath)
+    def _mkpath(subpath):
+      return os.path.join(download_root, subpath)
 
-        paths = [_mkpath(subpath) for subpath in sample]
+    paths = [_mkpath(subpath) for subpath in sample]
 
-        ex = {
-            "image/a": _read_image(paths[0], image_shape, tmp_dir),
-            "image/b": _read_image(paths[1], image_shape, tmp_dir),
-            "image/c": _read_image(paths[2], image_shape, tmp_dir),
+    ex = {
+        "image/a": _read_image(paths[0], image_shape, tmp_dir),
+        "image/b": _read_image(paths[1], image_shape, tmp_dir),
+        "image/c": _read_image(paths[2], image_shape, tmp_dir),
 
-            # For compatibility with FEC setup, maybe include a label
-            # for rating/mode that is always 3 which according to the
-            # scheme used in the FEC dataset corresponds to the first
-            # two images in a pair belonging closer in embedding space
-            # than those compared to the third.
-            "triplet_code": [3],
+        # For compatibility with FEC setup, maybe include a label
+        # for rating/mode that is always 3 which according to the
+        # scheme used in the FEC dataset corresponds to the first
+        # two images in a pair belonging closer in embedding space
+        # than those compared to the third.
+        "triplet_code": [3],
 
-            # These have identity and origin information in case this is needed
-            # for debugging later.
-            "path/a": paths[0],
-            "path/b": paths[1],
-            "path/c": paths[2]
-        }
+        # These have identity and origin information in case this is needed
+        # for debugging later.
+        "path/a": paths[0],
+        "path/b": paths[1],
+        "path/c": paths[2]
+    }
 
-        yield ex
+    yield ex
 
 
 @registry.register_problem
 class VggFace2(TripletImageProblem):
 
-    @property
-    def image_statistics(self):
-        # Mean and standard deviation per color channel
-        return {"mean": [0.508, 0.578, 0.233], "sd": [0.236, 0.204, 0.284]}
+  @property
+  def image_statistics(self):
+    # Mean and standard deviation per color channel
+    return {"mean": [0.508, 0.578, 0.233], "sd": [0.236, 0.204, 0.284]}
 
-    @property
-    def data_root(self):
-        return "gs://clarify-data/requires-eula/vggface2"
+  @property
+  def data_root(self):
+    return "gs://clarify-data/requires-eula/vggface2"
 
-    @property
-    def image_shape(self):
-        return (64, 64, 3)
+  @property
+  def image_shape(self):
+    return (64, 64, 3)
 
-    def _generator(self, data_root, tmp_dir, mode, how_many, image_shape,
-                   num_shards, shard_id):
-        return _generator(data_root, tmp_dir, mode, how_many, image_shape,
-                          num_shards, shard_id)
+  def _generator(self, data_root, tmp_dir, mode, how_many, image_shape,
+                 num_shards, shard_id):
+    return _generator(data_root, tmp_dir, mode, how_many, image_shape,
+                      num_shards, shard_id)
 
-    @property
-    def train_size(self):
-        # Here, the meaning of train_size is "the number of examples produced
-        # each time data generation for this problem is run" which may be at high
-        # multiplicity i.e. 1k per datagen replica. So if we want 1M examples we
-        # just run launch 1k datagen replicas. In part because we are generating
-        # examples by sampling there is no definitive total number of examples.
-        return 1000
+  @property
+  def train_size(self):
+    # Here, the meaning of train_size is "the number of examples produced
+    # each time data generation for this problem is run" which may be at high
+    # multiplicity i.e. 1k per datagen replica. So if we want 1M examples we
+    # just run launch 1k datagen replicas. In part because we are generating
+    # examples by sampling there is no definitive total number of examples.
+    return 1000
 
-    @property
-    def eval_size(self):
-        return 1000
+  @property
+  def eval_size(self):
+    return 1000
 
-    """
+  """
   # For computing dataset statistics
   @property
   def train_size(self):
@@ -208,72 +208,71 @@ class VggFace2(TripletImageProblem):
 @registry.register_problem
 class VggFace2Tiny(VggFace2):
 
-    @property
-    def name_override(self):
-        return "vgg_face2"
+  @property
+  def name_override(self):
+    return "vgg_face2"
 
-    @property
-    def train_size(self):
-        return 10
+  @property
+  def train_size(self):
+    return 10
 
-    @property
-    def eval_size(self):
-        return 10
+  @property
+  def eval_size(self):
+    return 10
 
 
 @registry.register_problem
 class VggFace2UdaFar(VggFace2):
 
-    @property
-    def name_override(self):
-        return "vgg_face2"
+  @property
+  def name_override(self):
+    return "vgg_face2"
 
-    @property
-    def uda_near_far(self):
-        return "far"
+  @property
+  def uda_near_far(self):
+    return "far"
 
-    def preprocess_example(self, example, mode, unused_hparams):
+  def preprocess_example(self, example, mode, unused_hparams):
 
-        def _preproc(image):
+    def _preproc(image):
 
-            image = image_aug.preprocess_image(
-                image,
-                mode,
-                resize_size=self.image_shape,
-                normalize=self.normalize_image,
-                image_statistics=self.image_statistics)
+      image = image_aug.preprocess_image(image,
+                                         mode,
+                                         resize_size=self.image_shape,
+                                         normalize=self.normalize_image,
+                                         image_statistics=self.image_statistics)
 
-            image.set_shape(self.image_shape)
+      image.set_shape(self.image_shape)
 
-            return image
+      return image
 
-        img = example["image/a"]
+    img = example["image/a"]
 
-        if self.uda_near_far == "far":
-            example["image/c"] = _preproc(example["image/c"])
-        elif self.uda_near_far == "near":
-            example["image/c"] = _preproc(example["image/b"])
-        else:
-            raise ValueError("uda_near_far should be either near or far")
+    if self.uda_near_far == "far":
+      example["image/c"] = _preproc(example["image/c"])
+    elif self.uda_near_far == "near":
+      example["image/c"] = _preproc(example["image/b"])
+    else:
+      raise ValueError("uda_near_far should be either near or far")
 
-        example["image/a"] = _preproc(img)
-        example["image/b"] = _preproc(img)
+    example["image/a"] = _preproc(img)
+    example["image/b"] = _preproc(img)
 
-        example["triplet_code"] = tf.cast(example["triplet_code"], tf.int64)
+    example["triplet_code"] = tf.cast(example["triplet_code"], tf.int64)
 
-        return example
+    return example
 
 
 @registry.register_problem
 class VggFace2UdaNear(VggFace2UdaFar):
 
-    @property
-    def name_override(self):
-        return "vgg_face2"
+  @property
+  def name_override(self):
+    return "vgg_face2"
 
-    @property
-    def uda_near_far(self):
-        return "near"
+  @property
+  def uda_near_far(self):
+    return "near"
 
 
 """

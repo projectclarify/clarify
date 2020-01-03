@@ -24,17 +24,17 @@ from tensor2tensor.utils import registry
 
 class TestAffectnetProblem(tf.test.TestCase):
 
-    def test_registry_lookups(self):
+  def test_registry_lookups(self):
 
-        problem_names = ["affectnet_base", "affectnet_tiny"]
+    problem_names = ["affectnet_base", "affectnet_tiny"]
 
-        for problem_name in problem_names:
-            _ = registry.problem(problem_name)
+    for problem_name in problem_names:
+      _ = registry.problem(problem_name)
 
-    def test_tiny_e2e(self):
-        pass
+  def test_tiny_e2e(self):
+    pass
 
 
 if __name__ == "__main__":
-    tf.logging.set_verbosity(tf.logging.INFO)
-    tf.test.main()
+  tf.logging.set_verbosity(tf.logging.INFO)
+  tf.test.main()

@@ -19,12 +19,12 @@ from google.cloud import pubsub_v1
 
 
 def publish(message, project, topic):
-    """Convert message object to dict and publish to topic."""
+  """Convert message object to dict and publish to topic."""
 
-    tf.logging.info("Publishing message: {}".format(message))
+  tf.logging.info("Publishing message: {}".format(message))
 
-    # Publish the message
-    publisher_client = pubsub_v1.PublisherClient()
-    topic_path = publisher_client.topic_path(project, topic)
-    data = json.dumps(message.__dict__).encode('utf-8')
-    publisher_client.publish(topic_path, data=data).result()
+  # Publish the message
+  publisher_client = pubsub_v1.PublisherClient()
+  topic_path = publisher_client.topic_path(project, topic)
+  data = json.dumps(message.__dict__).encode('utf-8')
+  publisher_client.publish(topic_path, data=data).result()

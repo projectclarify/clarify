@@ -46,7 +46,7 @@ def construct_job_command(remote_app_root,
                           train_args,
                           use_katib=False,
                           vendor_t2t=False):
-    """Construct a job command string.
+  """Construct a job command string.
 
   TODO: Consider refactoring as a jinja template.
   TODO: Separate core logging and operations that should always be part of
@@ -64,111 +64,111 @@ def construct_job_command(remote_app_root,
 
   """
 
-    cmd = []
+  cmd = []
 
-    pcml_fname = "pcml-0.0.1.tar.gz"
-    remote_path = "%s/%s" % (remote_app_root, pcml_fname)
+  pcml_fname = "pcml-0.0.1.tar.gz"
+  remote_path = "%s/%s" % (remote_app_root, pcml_fname)
 
-    cmd.append("unset TF_CONFIG")  # HACK
-    # TODO: Understand why not unsetting TF_CONFIG causes jobs to hang;
-    # likely having to do with our custom code that parses the TF_CONFIG
-    # into t2t_trainer FLAGS.
+  cmd.append("unset TF_CONFIG")  # HACK
+  # TODO: Understand why not unsetting TF_CONFIG causes jobs to hang;
+  # likely having to do with our custom code that parses the TF_CONFIG
+  # into t2t_trainer FLAGS.
 
-    # HACK ========================================================
-    # Datagen container needs ffmpeg and other deps that are there but
-    # don't want to occupy a GPU thus need non-gpu tensorflow and don't
-    # want to build another container at the moment.
-    # cmd.append("pip uninstall -y tensorflow; pip install
-    # tensorflow==1.13.1")
-    # =============================================================
+  # HACK ========================================================
+  # Datagen container needs ffmpeg and other deps that are there but
+  # don't want to occupy a GPU thus need non-gpu tensorflow and don't
+  # want to build another container at the moment.
+  # cmd.append("pip uninstall -y tensorflow; pip install
+  # tensorflow==1.13.1")
+  # =============================================================
 
-    # Install some dependencies
-    # TODO: Move this to the base container
-    cmd.append(("apt-get update && apt-get install -y "
-                "libsm6 libxext6 libxrender-dev libglib2.0-0 htop"))
+  # Install some dependencies
+  # TODO: Move this to the base container
+  cmd.append(("apt-get update && apt-get install -y "
+              "libsm6 libxext6 libxrender-dev libglib2.0-0 htop"))
 
-    # Copy down pcml code
-    cmd.append(("python -c 'import tensorflow as tf; "
-                "tf.gfile.Copy(\"%s\", \"/tmp/%s\", overwrite=True)'" %
-                (remote_path, pcml_fname)))
+  # Copy down pcml code
+  cmd.append(("python -c 'import tensorflow as tf; "
+              "tf.gfile.Copy(\"%s\", \"/tmp/%s\", overwrite=True)'" %
+              (remote_path, pcml_fname)))
 
-    # Decompress code tarball
-    cmd.append("cd /tmp; tar -xzvf /tmp/%s" % pcml_fname)
+  # Decompress code tarball
+  cmd.append("cd /tmp; tar -xzvf /tmp/%s" % pcml_fname)
 
-    # Install vendored t2t if requested
-    if vendor_t2t:
-        cmd.append("cd /tmp/pcml-0.0.1; pip install -e vendor/tensor2tensor")
+  # Install vendored t2t if requested
+  if vendor_t2t:
+    cmd.append("cd /tmp/pcml-0.0.1; pip install -e vendor/tensor2tensor")
 
-    # Install PCML
-    cmd.append("cd /tmp/pcml-0.0.1; pip install -e .")
+  # Install PCML
+  cmd.append("cd /tmp/pcml-0.0.1; pip install -e .")
 
-    # ====================
-    # HACK
-    # Experimental patch of tpu_estimator.py in exploration of
-    # https://github.com/tensorflow/tensorflow/issues/30869
-    cmd.append("python -m pcml.utils.patch_tpu_estimator")
-    # ====================
+  # ====================
+  # HACK
+  # Experimental patch of tpu_estimator.py in exploration of
+  # https://github.com/tensorflow/tensorflow/issues/30869
+  cmd.append("python -m pcml.utils.patch_tpu_estimator")
+  # ====================
 
-    # Print TensorFlow version
-    cmd.append("python -c 'import tensorflow as tf; print(tf.__version__)'")
+  # Print TensorFlow version
+  cmd.append("python -c 'import tensorflow as tf; print(tf.__version__)'")
 
-    # Verify the GPU is visible by nvidia-smi as well as tf device_lib
-    #cmd.append("nvidia-smi")
-    cmd.append(("python -c 'from tensorflow.python.client import device_lib; "
-                "print(device_lib.list_local_devices())'"))
+  # Verify the GPU is visible by nvidia-smi as well as tf device_lib
+  #cmd.append("nvidia-smi")
+  cmd.append(("python -c 'from tensorflow.python.client import device_lib; "
+              "print(device_lib.list_local_devices())'"))
 
-    # Log the TF_CONFIG
-    cmd.append("echo ${TF_CONFIG}")
+  # Log the TF_CONFIG
+  cmd.append("echo ${TF_CONFIG}")
 
-    # Construct the trainer command
-    #train_cmd = ["python", "-m", "pcml.launcher.experiment --generate_data"]
-    train_cmd = ["python", "-m", "pcml.launcher.experiment"]
-    train_cmd.extend(hack_dict_to_cli_args(train_args))
+  # Construct the trainer command
+  #train_cmd = ["python", "-m", "pcml.launcher.experiment --generate_data"]
+  train_cmd = ["python", "-m", "pcml.launcher.experiment"]
+  train_cmd.extend(hack_dict_to_cli_args(train_args))
 
-    # Finalize the train_cmd for non-tuning usage
-    train_cmd_str = " ".join(train_cmd)
+  # Finalize the train_cmd for non-tuning usage
+  train_cmd_str = " ".join(train_cmd)
 
-    if use_katib:
-        # Extend the train_cmd to template Katib-provided hyperparameters
-        # as command-line arguments
-        train_cmd_str += " --hparams='{{- with .HyperParameters}}{{- range .}}"
-        train_cmd_str += "{{.Name}}={{.Value}},{{- end}}{{- end}}'"
+  if use_katib:
+    # Extend the train_cmd to template Katib-provided hyperparameters
+    # as command-line arguments
+    train_cmd_str += " --hparams='{{- with .HyperParameters}}{{- range .}}"
+    train_cmd_str += "{{.Name}}={{.Value}},{{- end}}{{- end}}'"
 
-    cmd.append(train_cmd_str)
+  cmd.append(train_cmd_str)
 
-    # Finalize the complete command
-    cmd = "; ".join(cmd)
+  # Finalize the complete command
+  cmd = "; ".join(cmd)
 
-    return [cmd]
+  return [cmd]
 
 
 class T2TKubeExperiment(TFJob):
-    """A Job that runs a training experiment."""
+  """A Job that runs a training experiment."""
 
-    def __init__(self,
-                 app_root,
-                 image,
-                 num_worker_replicas=0,
-                 num_ps_replicas=0,
-                 cpu=1,
-                 memory="1Gi",
-                 master_gpu=0,
-                 worker_gpu=0,
-                 ps_gpu=0,
-                 selector_labels={},
-                 num_local_ssd=0,
-                 remote_app_root=None,
-                 train_args=None,
-                 annotations=None,
-                 use_tpu=False,
-                 tpu_type="v3",
-                 num_tpu_cores=0,
-                 volumes=[],
-                 use_katib=False,
-                 vendor_t2t=False,
-                 *args,
-                 **kwargs):
-        """Configure a T2TKubeExperiment object.
+  def __init__(self,
+               app_root,
+               image,
+               num_worker_replicas=0,
+               num_ps_replicas=0,
+               cpu=1,
+               memory="1Gi",
+               master_gpu=0,
+               worker_gpu=0,
+               ps_gpu=0,
+               selector_labels={},
+               num_local_ssd=0,
+               remote_app_root=None,
+               train_args=None,
+               annotations=None,
+               use_tpu=False,
+               tpu_type="v3",
+               num_tpu_cores=0,
+               volumes=[],
+               use_katib=False,
+               vendor_t2t=False,
+               *args,
+               **kwargs):
+    """Configure a T2TKubeExperiment object.
 
     Vars:
         app_root (str):
@@ -184,192 +184,191 @@ class T2TKubeExperiment(TFJob):
 
     """
 
-        # HACK: Should check type at arg parser level not here, this change
-        # is part of a larger change in way additional args are loaded i.e.
-        # parsing FLAGS for called apps instead of providing a dict template.
-        if isinstance(num_worker_replicas, str):
-            num_worker_replicas = int(num_worker_replicas)
+    # HACK: Should check type at arg parser level not here, this change
+    # is part of a larger change in way additional args are loaded i.e.
+    # parsing FLAGS for called apps instead of providing a dict template.
+    if isinstance(num_worker_replicas, str):
+      num_worker_replicas = int(num_worker_replicas)
 
-        nwr_not_int = (not isinstance(num_worker_replicas, int))
-        if nwr_not_int or num_worker_replicas < 0:
-            raise ValueError("The number of worker replicas must be an "
-                             "integer greater than or equal to zero.")
+    nwr_not_int = (not isinstance(num_worker_replicas, int))
+    if nwr_not_int or num_worker_replicas < 0:
+      raise ValueError("The number of worker replicas must be an "
+                       "integer greater than or equal to zero.")
 
-        if (not isinstance(num_ps_replicas, int) or num_ps_replicas < 0):
-            raise ValueError("The number of ps replicas must be an "
-                             "integer greater than or equal to zero.")
+    if (not isinstance(num_ps_replicas, int) or num_ps_replicas < 0):
+      raise ValueError("The number of ps replicas must be an "
+                       "integer greater than or equal to zero.")
 
-        cmd = construct_job_command(remote_app_root,
-                                    train_args,
-                                    use_katib=use_katib,
-                                    vendor_t2t=vendor_t2t)
+    cmd = construct_job_command(remote_app_root,
+                                train_args,
+                                use_katib=use_katib,
+                                vendor_t2t=vendor_t2t)
 
-        self._remote_app_root = remote_app_root
-        self._train_args = train_args
+    self._remote_app_root = remote_app_root
+    self._train_args = train_args
 
-        # TODO: For now, just run all components with the same resources.
+    # TODO: For now, just run all components with the same resources.
 
-        limits = {"cpu": cpu, "memory": memory}
+    limits = {"cpu": cpu, "memory": memory}
 
-        if not use_tpu and master_gpu > 0:
-            limits.update({"nvidia.com/gpu": master_gpu})
+    if not use_tpu and master_gpu > 0:
+      limits.update({"nvidia.com/gpu": master_gpu})
 
-        elif use_tpu and num_tpu_cores > 0:
-            request_type = "cloud-tpus.google.com/%s" % tpu_type
-            limits.update({request_type: num_tpu_cores})
+    elif use_tpu and num_tpu_cores > 0:
+      request_type = "cloud-tpus.google.com/%s" % tpu_type
+      limits.update({request_type: num_tpu_cores})
 
-        resources = Resources(limits=limits)
+    resources = Resources(limits=limits)
 
-        # HACK: For simplicity / development
-        master_resources = resources
-        worker_resources = resources
-        ps_resources = resources
+    # HACK: For simplicity / development
+    master_resources = resources
+    worker_resources = resources
+    ps_resources = resources
 
-        for v in volumes:
-            if not isinstance(v, AttachedVolume):
-                raise ValueError(
-                    "volume arguments must be of type AttachedVolume, saw %s" %
-                    v)
+    for v in volumes:
+      if not isinstance(v, AttachedVolume):
+        raise ValueError(
+            "volume arguments must be of type AttachedVolume, saw %s" % v)
 
-        if num_local_ssd > 0:
-            for i in range(num_local_ssd):
-                volumes.append(LocalSSD(disk_id=i))
+    if num_local_ssd > 0:
+      for i in range(num_local_ssd):
+        volumes.append(LocalSSD(disk_id=i))
 
-        if not volumes:
-            volumes = None
+    if not volumes:
+      volumes = None
 
-        replicas = [
-            TFJobReplica(replica_type="MASTER",
-                         num_replicas=1,
-                         command=["/bin/sh", "-c"],
-                         command_args=cmd,
-                         image=image,
-                         resources=master_resources,
-                         attached_volumes=volumes,
-                         node_selector=selector_labels,
-                         annotations=annotations)
-        ]
+    replicas = [
+        TFJobReplica(replica_type="MASTER",
+                     num_replicas=1,
+                     command=["/bin/sh", "-c"],
+                     command_args=cmd,
+                     image=image,
+                     resources=master_resources,
+                     attached_volumes=volumes,
+                     node_selector=selector_labels,
+                     annotations=annotations)
+    ]
 
-        if num_ps_replicas > 0:
-            replicas.append(
-                TFJobReplica(replica_type="PS",
-                             num_replicas=num_ps_replicas,
-                             command=["/bin/sh", "-c"],
-                             command_args=cmd,
-                             image=image,
-                             resources=ps_resources,
-                             attached_volumes=volumes,
-                             node_selector=selector_labels,
-                             annotations=annotations))
+    if num_ps_replicas > 0:
+      replicas.append(
+          TFJobReplica(replica_type="PS",
+                       num_replicas=num_ps_replicas,
+                       command=["/bin/sh", "-c"],
+                       command_args=cmd,
+                       image=image,
+                       resources=ps_resources,
+                       attached_volumes=volumes,
+                       node_selector=selector_labels,
+                       annotations=annotations))
 
-        if num_worker_replicas > 0:
-            replicas.append(
-                TFJobReplica(replica_type="WORKER",
-                             num_replicas=num_worker_replicas,
-                             command=["/bin/sh", "-c"],
-                             command_args=cmd,
-                             image=image,
-                             resources=worker_resources,
-                             attached_volumes=volumes,
-                             node_selector=selector_labels,
-                             annotations=annotations))
+    if num_worker_replicas > 0:
+      replicas.append(
+          TFJobReplica(replica_type="WORKER",
+                       num_replicas=num_worker_replicas,
+                       command=["/bin/sh", "-c"],
+                       command_args=cmd,
+                       image=image,
+                       resources=worker_resources,
+                       attached_volumes=volumes,
+                       node_selector=selector_labels,
+                       annotations=annotations))
 
-        super(T2TKubeExperiment, self).__init__(command="",
-                                                replicas=replicas,
-                                                *args,
-                                                **kwargs)
+    super(T2TKubeExperiment, self).__init__(command="",
+                                            replicas=replicas,
+                                            *args,
+                                            **kwargs)
 
 
 def tf_config_to_additional_flags():
-    """Read TF_CONFIG and set relevant t2t FLAGS."""
+  """Read TF_CONFIG and set relevant t2t FLAGS."""
 
-    if "TF_CONFIG" not in os.environ:
-        tf.logging.info("No TF_CONFIG present, returning dummy.")
-        task_type = "master"
-        tid = 0
-        #FLAGS.master = None
-        #FLAGS.ps_replicas = 0
-        #FLAGS.worker_id = tid
-        #FLAGS.worker_job = '/job:%s' % task_type
-        #FLAGS.worker_gpu = 0
-        #FLAGS.worker_replicas = 1
-        #FLAGS.schedule = 'train'
-        return task_type, 0
-
-    tf_config = os.environ["TF_CONFIG"]
-
-    tf_config = json.loads(tf_config)
-
-    tf.logging.info("Loaded TF_CONFIG: %s" % tf_config)
-
-    if "cluster" not in tf_config:
-        raise ValueError("TF_CONFIG environment variable should always "
-                         "have a 'cluster' field, saw %s" % tf_config)
-
-    cluster_spec = tf_config["cluster"]
-
-    if "master" not in cluster_spec or not cluster_spec["master"]:
-        raise ValueError("Expected at least one master defined in "
-                         "master field of cluster_spec.")
-
-    masters = cluster_spec["master"]
-    num_masters = len(masters)
-    tf.logging.info("num_masters: %s" % num_masters)
-
-    ps_tasks = cluster_spec.get("ps", [])
-    num_ps = len(ps_tasks)
-    tf.logging.info("num_ps: %s" % num_ps)
-
-    worker_tasks = cluster_spec.get("worker", [])
-    num_workers = len(worker_tasks)
-    tf.logging.info("worker_tasks: %s" % num_workers)
-
-    master_address = "grpc://%s" % masters[0]
-    tf.logging.info("master address: %s" % master_address)
-
-    tid = tf_config["task"]["index"]
-    task_type = tf_config["task"]["type"]
-
-    FLAGS.master = master_address
-    FLAGS.ps_replicas = num_ps
-
-    if task_type == "ps":
-        FLAGS.schedule = "run_std_server"
-        return task_type, tid
-
-    FLAGS.worker_id = tid
-    FLAGS.worker_job = '/job:%s' % task_type
-    FLAGS.worker_gpu = 0
-    FLAGS.worker_replicas = 1
-
-    FLAGS.sync = True
+  if "TF_CONFIG" not in os.environ:
+    tf.logging.info("No TF_CONFIG present, returning dummy.")
+    task_type = "master"
+    tid = 0
+    #FLAGS.master = None
+    #FLAGS.ps_replicas = 0
+    #FLAGS.worker_id = tid
+    #FLAGS.worker_job = '/job:%s' % task_type
+    #FLAGS.worker_gpu = 0
+    #FLAGS.worker_replicas = 1
     #FLAGS.schedule = 'train'
+    return task_type, 0
 
+  tf_config = os.environ["TF_CONFIG"]
+
+  tf_config = json.loads(tf_config)
+
+  tf.logging.info("Loaded TF_CONFIG: %s" % tf_config)
+
+  if "cluster" not in tf_config:
+    raise ValueError("TF_CONFIG environment variable should always "
+                     "have a 'cluster' field, saw %s" % tf_config)
+
+  cluster_spec = tf_config["cluster"]
+
+  if "master" not in cluster_spec or not cluster_spec["master"]:
+    raise ValueError("Expected at least one master defined in "
+                     "master field of cluster_spec.")
+
+  masters = cluster_spec["master"]
+  num_masters = len(masters)
+  tf.logging.info("num_masters: %s" % num_masters)
+
+  ps_tasks = cluster_spec.get("ps", [])
+  num_ps = len(ps_tasks)
+  tf.logging.info("num_ps: %s" % num_ps)
+
+  worker_tasks = cluster_spec.get("worker", [])
+  num_workers = len(worker_tasks)
+  tf.logging.info("worker_tasks: %s" % num_workers)
+
+  master_address = "grpc://%s" % masters[0]
+  tf.logging.info("master address: %s" % master_address)
+
+  tid = tf_config["task"]["index"]
+  task_type = tf_config["task"]["type"]
+
+  FLAGS.master = master_address
+  FLAGS.ps_replicas = num_ps
+
+  if task_type == "ps":
+    FLAGS.schedule = "run_std_server"
     return task_type, tid
+
+  FLAGS.worker_id = tid
+  FLAGS.worker_job = '/job:%s' % task_type
+  FLAGS.worker_gpu = 0
+  FLAGS.worker_replicas = 1
+
+  FLAGS.sync = True
+  #FLAGS.schedule = 'train'
+
+  return task_type, tid
 
 
 def _stage(local_app_root, remote_app_root):
-    """Stage data from `local_app_root` to `remote_app_root`.
+  """Stage data from `local_app_root` to `remote_app_root`.
 
   Args:
       local_app_root (str): Directory path on local FS.
       remote_app_root (str): Directory path on remote FS.
   """
 
-    if not os.path.exists(local_app_root):
-        raise ValueError("Can't stage from a non-existent source, "
-                         "saw %s" % local_app_root)
+  if not os.path.exists(local_app_root):
+    raise ValueError("Can't stage from a non-existent source, "
+                     "saw %s" % local_app_root)
 
-    shutil.copytree(local_app_root, remote_app_root)
+  shutil.copytree(local_app_root, remote_app_root)
 
 
 def _expect_non_negative_int(val):
 
-    if not isinstance(val, int):
-        raise ValueError("Expected integer value, saw %s" % val)
+  if not isinstance(val, int):
+    raise ValueError("Expected integer value, saw %s" % val)
 
-    if val < 0:
-        raise ValueError("Expected non-negative value, saw %s" % val)
+  if val < 0:
+    raise ValueError("Expected non-negative value, saw %s" % val)
 
 
 def build_accelerator_args(gpu_type="nvidia-tesla-k80",
@@ -379,7 +378,7 @@ def build_accelerator_args(gpu_type="nvidia-tesla-k80",
                            tpu_tf_version="1.13",
                            num_gpu_per_ps=0,
                            tpu_type="v3"):
-    """Build internal configs for use of accelerators.
+  """Build internal configs for use of accelerators.
 
   Returns:
     (dict, dict): Dictionary updats to the train_args and experiment_args
@@ -387,68 +386,67 @@ def build_accelerator_args(gpu_type="nvidia-tesla-k80",
 
   """
 
-    cfg = {
-        "use_tpu": use_tpu,
+  cfg = {
+      "use_tpu": use_tpu,
+      "num_tpu_cores": num_tpu_cores,
+      "num_gpu_per_worker": num_gpu_per_worker
+  }
+
+  _expect_non_negative_int(num_tpu_cores)
+  _expect_non_negative_int(num_gpu_per_worker)
+
+  if (use_tpu or num_tpu_cores > 0) and num_gpu_per_worker > 0:
+    raise ValueError("Saw request for both GPU and TPU accelerators, %s" % cfg)
+
+  if (not use_tpu or num_tpu_cores == 0) and (num_gpu_per_worker == 0):
+    return {}, {}  # Not using accelerators
+
+  if use_tpu and num_tpu_cores == 0:
+    raise ValueError("Saw conflicting use_tpu and num_tpu_cores, %s" % cfg)
+
+  if use_tpu:
+
+    extra_train_args = {"use_tpu": True}
+
+    extra_experiment_args = {
+        "annotations": {
+            "tf-version.cloud-tpus.google.com": tpu_tf_version
+        },
         "num_tpu_cores": num_tpu_cores,
-        "num_gpu_per_worker": num_gpu_per_worker
+        "use_tpu": True  # Used to signal using tpu at Kubernetes-level
     }
 
-    _expect_non_negative_int(num_tpu_cores)
-    _expect_non_negative_int(num_gpu_per_worker)
+    return extra_train_args, extra_experiment_args
 
-    if (use_tpu or num_tpu_cores > 0) and num_gpu_per_worker > 0:
-        raise ValueError("Saw request for both GPU and TPU accelerators, %s" %
-                         cfg)
+  else:
 
-    if (not use_tpu or num_tpu_cores == 0) and (num_gpu_per_worker == 0):
-        return {}, {}  # Not using accelerators
+    extra_train_args = {
+        "worker_gpu": num_gpu_per_worker,
+        "ps_gpu": num_gpu_per_ps,
+        "worker_gpu_memory_fraction": 0.95
+    }
 
-    if use_tpu and num_tpu_cores == 0:
-        raise ValueError("Saw conflicting use_tpu and num_tpu_cores, %s" % cfg)
+    extra_experiment_args = {}
 
-    if use_tpu:
-
-        extra_train_args = {"use_tpu": True}
-
-        extra_experiment_args = {
-            "annotations": {
-                "tf-version.cloud-tpus.google.com": tpu_tf_version
-            },
-            "num_tpu_cores": num_tpu_cores,
-            "use_tpu": True  # Used to signal using tpu at Kubernetes-level
-        }
-
-        return extra_train_args, extra_experiment_args
-
-    else:
-
-        extra_train_args = {
-            "worker_gpu": num_gpu_per_worker,
-            "ps_gpu": num_gpu_per_ps,
-            "worker_gpu_memory_fraction": 0.95
-        }
-
-        extra_experiment_args = {}
-
-        return extra_train_args, extra_experiment_args
+    return extra_train_args, extra_experiment_args
 
 
 def _replicate_checkpoint(source, target):
 
-    latest = tf.train.latest_checkpoint(source)
-    if not latest:
-        msg = "couldn't find latest ckpt to replicate"
-        raise ValueError(msg)
+  latest = tf.train.latest_checkpoint(source)
+  if not latest:
+    msg = "couldn't find latest ckpt to replicate"
+    raise ValueError(msg)
 
-    tf.logging.info("Found latest checkpoint {}".format(latest))
+  tf.logging.info("Found latest checkpoint {}".format(latest))
 
-    for filename in tf.gfile.ListDirectory(source):
-        tf.logging.debug("Ckpt dir filename: {}".format(filename))
-        source_path = os.path.join(source, filename)
-        prefix = latest + "."
-        tf.logging.debug("Filename prefix: {}".format(prefix))
-        if prefix in source_path or "checkpoint" in filename or "graph.pbtxt" in filename:
-            tf.gfile.Copy(source_path, os.path.join(target, filename))
+  for filename in tf.gfile.ListDirectory(source):
+    tf.logging.debug("Ckpt dir filename: {}".format(filename))
+    source_path = os.path.join(source, filename)
+    prefix = latest + "."
+    tf.logging.debug("Filename prefix: {}".format(prefix))
+    if prefix in source_path or "checkpoint" in filename or "graph.pbtxt" in filename:
+      tf.gfile.Copy(source_path, os.path.join(target, filename))
 
 
 def configure_experiment(base_name,
@@ -487,7 +485,7 @@ def configure_experiment(base_name,
                          stage_and_install=False,
                          continue_with_ckpt_dir=None,
                          **kwargs):
-    """Wrapper to construct args object and produce job scripts.
+  """Wrapper to construct args object and produce job scripts.
 
   Args:
       base_name (str): The base name to be used to identify the
@@ -497,19 +495,19 @@ def configure_experiment(base_name,
 
   """
 
-    # TODO: Address linter complaints about dangerous-default-value for
-    # those {} defaults above.
+  # TODO: Address linter complaints about dangerous-default-value for
+  # those {} defaults above.
 
-    # TODO: Address linter complaints about keyword-arg-before-vararg
+  # TODO: Address linter complaints about keyword-arg-before-vararg
 
-    # Generate a unique job name that includes `base_name`
-    job_name = generate_job_name(base_name)
+  # Generate a unique job name that includes `base_name`
+  job_name = generate_job_name(base_name)
 
-    # Construct remote app root and checkpoint output dirs
-    remote_app_root = "%s/%s" % (remote_base, job_name)
+  # Construct remote app root and checkpoint output dirs
+  remote_app_root = "%s/%s" % (remote_base, job_name)
 
-    checkpoint_output_dir = os.path.join(remote_app_root, "output")
-    """
+  checkpoint_output_dir = os.path.join(remote_app_root, "output")
+  """
   
   One can either re-use a checkpoint dir to continue training those parameters
   or use those as a starting point for a separate training timeline. The former
@@ -517,102 +515,102 @@ def configure_experiment(base_name,
   
   """
 
+  tf.logging.info(
+      "continue with ckpt dir setting: {}".format(continue_with_ckpt_dir))
+
+  if continue_with_ckpt_dir:
+
     tf.logging.info(
-        "continue with ckpt dir setting: {}".format(continue_with_ckpt_dir))
+        "Continuing from ckpt dir {}".format(continue_with_ckpt_dir))
 
-    if continue_with_ckpt_dir:
+    _replicate_checkpoint(source=continue_with_ckpt_dir,
+                          target=checkpoint_output_dir)
 
-        tf.logging.info(
-            "Continuing from ckpt dir {}".format(continue_with_ckpt_dir))
+  elif reuse_output_dir:
+    checkpoint_output_dir = reuse_output_dir
 
-        _replicate_checkpoint(source=continue_with_ckpt_dir,
-                              target=checkpoint_output_dir)
+  if use_katib:
+    checkpoint_output_dir = os.path.join(remote_app_root, "{{.WorkerID}}")
+    job_name = "{{.WorkerID}}"
 
-    elif reuse_output_dir:
-        checkpoint_output_dir = reuse_output_dir
+  volumes = []
 
-    if use_katib:
-        checkpoint_output_dir = os.path.join(remote_app_root, "{{.WorkerID}}")
-        job_name = "{{.WorkerID}}"
+  # Translate extra_hparams into a comma-separated 'key=value,...'
+  hparams = ""
+  for k, v in extra_hparams.items():
+    if hparams:
+      hparams += ","
+    hparams += "%s=%s" % (k, v)
+  hparams_str = "'%s'" % hparams
 
-    volumes = []
+  # Arguments for tensor2tensor t2t_trainer call
+  train_args = {
+      "problem": problem,
+      "model": model,
+      "hparams_set": hparams_set,
+      "data_dir": data_dir,
+      "output_dir": checkpoint_output_dir,
+      "train_steps": num_train_steps,
+      "eval_steps": num_eval_steps,
+      "schedule": schedule,
+      "profile": profile,
+      "log_device_placement": log_device_placement,
+      "worker_gpu": num_gpu_per_worker,
+      "ps_gpu": ps_gpu,
+      "save_checkpoints_secs": save_checkpoints_secs,
+      "dbgprofile": dbgprofile,
+      "ssd_mount_path": "/mnt/ssd0",
+      "tmp_dir": tmp_dir,
+      "worker_gpu_memory_fraction": 0.95,
+      # On the workers, the pcml code will reside at /tmp/pcml
+      "t2t_usr_dir": "/tmp/pcml/pcml",
+      "hparams": hparams_str,
+      "local_eval_frequency": local_eval_frequency
+  }
 
-    # Translate extra_hparams into a comma-separated 'key=value,...'
-    hparams = ""
-    for k, v in extra_hparams.items():
-        if hparams:
-            hparams += ","
-        hparams += "%s=%s" % (k, v)
-    hparams_str = "'%s'" % hparams
+  extra_train_args, extra_experiment_args = build_accelerator_args(
+      gpu_type=gpu_type,
+      num_gpu_per_worker=num_gpu_per_worker,
+      use_tpu=use_tpu,
+      num_tpu_cores=num_tpu_cores,
+      tpu_tf_version=tpu_tf_version)
 
-    # Arguments for tensor2tensor t2t_trainer call
-    train_args = {
-        "problem": problem,
-        "model": model,
-        "hparams_set": hparams_set,
-        "data_dir": data_dir,
-        "output_dir": checkpoint_output_dir,
-        "train_steps": num_train_steps,
-        "eval_steps": num_eval_steps,
-        "schedule": schedule,
-        "profile": profile,
-        "log_device_placement": log_device_placement,
-        "worker_gpu": num_gpu_per_worker,
-        "ps_gpu": ps_gpu,
-        "save_checkpoints_secs": save_checkpoints_secs,
-        "dbgprofile": dbgprofile,
-        "ssd_mount_path": "/mnt/ssd0",
-        "tmp_dir": tmp_dir,
-        "worker_gpu_memory_fraction": 0.95,
-        # On the workers, the pcml code will reside at /tmp/pcml
-        "t2t_usr_dir": "/tmp/pcml/pcml",
-        "hparams": hparams_str,
-        "local_eval_frequency": local_eval_frequency
-    }
+  train_args.update(extra_train_args)
 
-    extra_train_args, extra_experiment_args = build_accelerator_args(
-        gpu_type=gpu_type,
-        num_gpu_per_worker=num_gpu_per_worker,
-        use_tpu=use_tpu,
-        num_tpu_cores=num_tpu_cores,
-        tpu_tf_version=tpu_tf_version)
+  _compress_and_stage(app_root, remote_app_root)
 
-    train_args.update(extra_train_args)
+  experiment_args = {
+      "job_name": job_name,
+      "app_root": app_root,
+      "namespace": "kubeflow",
+      "image": base_image,
+      "smoke": True,
+      "train_args": train_args,
+      "cpu": trainer_cpu,
+      "memory": trainer_memory,
+      "num_gpu": num_gpu_per_worker,
+      "master_gpu": num_gpu_per_worker,
+      "ps_gpu": ps_gpu,
+      "worker_gpu": num_gpu_per_worker,
+      "num_local_ssd": 1,
+      "no_wait": True,
+      "num_worker_replicas": num_workers,
+      "num_ps_replicas": num_ps,
+      "selector_labels": selector_labels,
+      "remote_app_root": remote_app_root,
+      "volumes": volumes,
+      "use_katib": use_katib,
+      "tpu_type": tpu_type,
+      "vendor_t2t": vendor_t2t
+  }
 
-    _compress_and_stage(app_root, remote_app_root)
+  experiment_args.update(extra_experiment_args)
 
-    experiment_args = {
-        "job_name": job_name,
-        "app_root": app_root,
-        "namespace": "kubeflow",
-        "image": base_image,
-        "smoke": True,
-        "train_args": train_args,
-        "cpu": trainer_cpu,
-        "memory": trainer_memory,
-        "num_gpu": num_gpu_per_worker,
-        "master_gpu": num_gpu_per_worker,
-        "ps_gpu": ps_gpu,
-        "worker_gpu": num_gpu_per_worker,
-        "num_local_ssd": 1,
-        "no_wait": True,
-        "num_worker_replicas": num_workers,
-        "num_ps_replicas": num_ps,
-        "selector_labels": selector_labels,
-        "remote_app_root": remote_app_root,
-        "volumes": volumes,
-        "use_katib": use_katib,
-        "tpu_type": tpu_type,
-        "vendor_t2t": vendor_t2t
-    }
-
-    experiment_args.update(extra_experiment_args)
-
-    return T2TKubeExperiment(**experiment_args)
+  return T2TKubeExperiment(**experiment_args)
 
 
 def periodic_eval_old(args):
-    """Run eval by way of T2T Problem framework (graph mode).
+  """Run eval by way of T2T Problem framework (graph mode).
   
   Doesn't currently work for pcml primary models which is
   the reason eval is being done with Eager (in a separate
@@ -621,74 +619,74 @@ def periodic_eval_old(args):
   
   """
 
-    FLAGS = args[0]
-    time.sleep(10)  # startup delay
+  FLAGS = args[0]
+  time.sleep(10)  # startup delay
 
-    inter_eval_delay = 600
+  inter_eval_delay = 600
 
-    while True:
+  while True:
 
-        FLAGS.use_tpu = False  # Eval on VM not TPU.
-        FLAGS.schedule = "evaluate"
+    FLAGS.use_tpu = False  # Eval on VM not TPU.
+    FLAGS.schedule = "evaluate"
 
-        batch_size = 360
-        batch_size_arg = "batch_size=%s" % batch_size
-        extra_hparams = FLAGS.hparams.split(",")
+    batch_size = 360
+    batch_size_arg = "batch_size=%s" % batch_size
+    extra_hparams = FLAGS.hparams.split(",")
 
-        def _maybe_set_batch_size():
-            for i, hp in enumerate(extra_hparams):
-                if hp.startswith("batch_size="):
-                    extra_hparams[i] = batch_size_arg
-                    return ",".join(extra_hparams)
-            extra_hparams.append(batch_size_arg)
-            return ",".join(extra_hparams)
+    def _maybe_set_batch_size():
+      for i, hp in enumerate(extra_hparams):
+        if hp.startswith("batch_size="):
+          extra_hparams[i] = batch_size_arg
+          return ",".join(extra_hparams)
+      extra_hparams.append(batch_size_arg)
+      return ",".join(extra_hparams)
 
-        FLAGS.hparams = _maybe_set_batch_size()
+    FLAGS.hparams = _maybe_set_batch_size()
 
-        if FLAGS.hparams.startswith(","):
-            FLAGS.hparams = FLAGS.hparams[1:]
+    if FLAGS.hparams.startswith(","):
+      FLAGS.hparams = FLAGS.hparams[1:]
 
-        # Doesn't currently work
-        trainer_main(None)
+    # Doesn't currently work
+    trainer_main(None)
 
-        time.sleep(inter_eval_delay)
+    time.sleep(inter_eval_delay)
 
 
 def main(argv):
-    """Configure, setup logging, and train."""
+  """Configure, setup logging, and train."""
 
-    # This modifies the FLAGS global which is used by
-    # trainer_main.
-    _, _ = tf_config_to_additional_flags()
+  # This modifies the FLAGS global which is used by
+  # trainer_main.
+  _, _ = tf_config_to_additional_flags()
 
-    # HACK ==
-    tf.gfile.MakeDirs(FLAGS.output_dir)
-    tf.gfile.MakeDirs(FLAGS.data_dir)
-    #final_output_dir = FLAGS.output_dir
-    #FLAGS.output_dir = "/mnt/disks/ssd0"
-    # =======
+  # HACK ==
+  tf.gfile.MakeDirs(FLAGS.output_dir)
+  tf.gfile.MakeDirs(FLAGS.data_dir)
+  #final_output_dir = FLAGS.output_dir
+  #FLAGS.output_dir = "/mnt/disks/ssd0"
+  # =======
 
-    # Start evaluation running in Eager mode periodically
-    # in a background system process.
-    if FLAGS.use_tpu:
-        p = Process(target=trigger_eval,
-                    args=(FLAGS.output_dir, FLAGS.data_dir, FLAGS.eval_steps))
-        p.start()
+  # Start evaluation running in Eager mode periodically
+  # in a background system process.
+  if FLAGS.use_tpu:
+    p = Process(target=trigger_eval,
+                args=(FLAGS.output_dir, FLAGS.data_dir, FLAGS.eval_steps))
+    p.start()
 
-    # Run training
-    trainer_main(None)
+  # Run training
+  trainer_main(None)
 
-    #trigger_eval((FLAGS.output_dir,))
+  #trigger_eval((FLAGS.output_dir,))
 
-    # Stop the eval thread
-    if FLAGS.use_tpu:
-        # This doesn't have to be completely clean because any
-        # descendent processes will exit by virtue of the PID
-        # 1 process (and thus the Job) terminating. But it could
-        # be made to be using Popen instead of check_output.
-        p.terminate()
+  # Stop the eval thread
+  if FLAGS.use_tpu:
+    # This doesn't have to be completely clean because any
+    # descendent processes will exit by virtue of the PID
+    # 1 process (and thus the Job) terminating. But it could
+    # be made to be using Popen instead of check_output.
+    p.terminate()
 
 
 if __name__ == "__main__":
-    tf.logging.set_verbosity(tf.logging.DEBUG)
-    tf.app.run()
+  tf.logging.set_verbosity(tf.logging.DEBUG)
+  tf.app.run()

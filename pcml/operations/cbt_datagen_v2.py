@@ -43,77 +43,77 @@ from pcml.utils.fs_utils import get_pcml_root
 
 class CBTDatagenJobV2(PCMLJob):
 
-    def __init__(self,
-                 problem_name,
-                 project,
-                 instance,
-                 mode,
-                 job_name_prefix="cbt-datagen",
-                 image="gcr.io/clarify/basic-runtime:0.0.4",
-                 num_cpu=1,
-                 memory="6Gi",
-                 *args,
-                 **kwargs):
+  def __init__(self,
+               problem_name,
+               project,
+               instance,
+               mode,
+               job_name_prefix="cbt-datagen",
+               image="gcr.io/clarify/basic-runtime:0.0.4",
+               num_cpu=1,
+               memory="6Gi",
+               *args,
+               **kwargs):
 
-        cmd = "python -m pcml.operations.cbt_datagen_v2 "
-        cmd += "--problem_name=%s " % problem_name
-        cmd += "--project=%s " % project
-        cmd += "--instance=%s " % instance
-        cmd += "--mode=%s " % mode
+    cmd = "python -m pcml.operations.cbt_datagen_v2 "
+    cmd += "--problem_name=%s " % problem_name
+    cmd += "--project=%s " % project
+    cmd += "--instance=%s " % instance
+    cmd += "--mode=%s " % mode
 
-        command = ["/bin/sh", "-c"]
-        command_args = [cmd]
+    command = ["/bin/sh", "-c"]
+    command_args = [cmd]
 
-        job_name = "%s-%s" % (job_name_prefix, gen_timestamped_uid())
-        self.job_name_prefix = job_name_prefix
+    job_name = "%s-%s" % (job_name_prefix, gen_timestamped_uid())
+    self.job_name_prefix = job_name_prefix
 
-        super(CBTDatagenJobV2, self).__init__(job_name=job_name,
-                                              command=command,
-                                              command_args=command_args,
-                                              namespace="kubeflow",
-                                              image=image,
-                                              num_local_ssd=1,
-                                              resources=Resources(limits={
-                                                  "cpu": num_cpu,
-                                                  "memory": memory
-                                              }),
-                                              *args,
-                                              **kwargs)
+    super(CBTDatagenJobV2, self).__init__(job_name=job_name,
+                                          command=command,
+                                          command_args=command_args,
+                                          namespace="kubeflow",
+                                          image=image,
+                                          num_local_ssd=1,
+                                          resources=Resources(limits={
+                                              "cpu": num_cpu,
+                                              "memory": memory
+                                          }),
+                                          *args,
+                                          **kwargs)
 
 
 def log_flags(flags):
-    for key in flags:
-        tf.logging.info("%s: %s" % (key, getattr(flags, key)))
+  for key in flags:
+    tf.logging.info("%s: %s" % (key, getattr(flags, key)))
 
 
 def main(_):
 
-    log_flags(FLAGS)
+  log_flags(FLAGS)
 
-    prob = registry.problem(FLAGS.problem_name)
+  prob = registry.problem(FLAGS.problem_name)
 
-    prob.mode = FLAGS.mode
+  prob.mode = FLAGS.mode
 
-    prob.cbt_generate(project=FLAGS.project,
-                      instance=FLAGS.instance,
-                      mode=FLAGS.mode,
-                      shard_id=FLAGS.shard_id)
+  prob.cbt_generate(project=FLAGS.project,
+                    instance=FLAGS.instance,
+                    mode=FLAGS.mode,
+                    shard_id=FLAGS.shard_id)
 
 
 if __name__ == "__main__":
 
-    flags = tf.flags
-    FLAGS = flags.FLAGS
+  flags = tf.flags
+  FLAGS = flags.FLAGS
 
-    flags.DEFINE_string('mode', None, 'One of train, eval, or test.')
+  flags.DEFINE_string('mode', None, 'One of train, eval, or test.')
 
-    flags.DEFINE_string('project', None, 'A GCP project.')
+  flags.DEFINE_string('project', None, 'A GCP project.')
 
-    flags.DEFINE_string('instance', None, 'A Google Cloud BigTable instance.')
+  flags.DEFINE_string('instance', None, 'A Google Cloud BigTable instance.')
 
-    flags.DEFINE_string('problem_name', None, 'A registered t2t problem name.')
+  flags.DEFINE_string('problem_name', None, 'A registered t2t problem name.')
 
-    flags.DEFINE_integer('shard_id', -1, 'The shard ID.')
+  flags.DEFINE_integer('shard_id', -1, 'The shard ID.')
 
-    tf.logging.set_verbosity(tf.logging.INFO)
-    tf.app.run()
+  tf.logging.set_verbosity(tf.logging.INFO)
+  tf.app.run()

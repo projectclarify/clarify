@@ -34,35 +34,35 @@ TEST_CONFIG = Config()
 
 class TestEmbedImages(tf.test.TestCase):
 
-    def setUp(self):
-        self.test_run_tag = "clarify-test-{}-embed-images".format(
-            str(uuid.uuid4())[0:8])
-        self.staging = os.path.join(TEST_CONFIG.test_artifacts_root,
-                                    self.test_run_tag)
-        self.model_name = "mcl_dev"
-        self.problem_name = "dev_problem"
-        self.hparams_set_name = "mcl_res_ut_vtiny"
+  def setUp(self):
+    self.test_run_tag = "clarify-test-{}-embed-images".format(
+        str(uuid.uuid4())[0:8])
+    self.staging = os.path.join(TEST_CONFIG.test_artifacts_root,
+                                self.test_run_tag)
+    self.model_name = "mcl_dev"
+    self.problem_name = "dev_problem"
+    self.hparams_set_name = "mcl_res_ut_vtiny"
 
-    #def test_embed_images_fn(self):
-    #  embed_images.run()
+  #def test_embed_images_fn(self):
+  #  embed_images.run()
 
-    def test_e2e(self):
+  def test_e2e(self):
 
-        job = embed_images.EmbedImages(input_manifest="",
-                                       target_csv="",
-                                       ckpt_path="",
-                                       problem_name=self.problem_name,
-                                       model_name=self.model_name,
-                                       hparams_set_name=self.hparams_set_name,
-                                       staging_path=self.staging)
+    job = embed_images.EmbedImages(input_manifest="",
+                                   target_csv="",
+                                   ckpt_path="",
+                                   problem_name=self.problem_name,
+                                   model_name=self.model_name,
+                                   hparams_set_name=self.hparams_set_name,
+                                   staging_path=self.staging)
 
-        create_response = job.stage_and_batch_run()
+    create_response = job.stage_and_batch_run()
 
-        _testing_run_poll_and_check_job(
-            test_object=self,
-            create_response=create_response,
-            expect_in_logs=embed_images._SUCCESS_MESSAGE)
+    _testing_run_poll_and_check_job(
+        test_object=self,
+        create_response=create_response,
+        expect_in_logs=embed_images._SUCCESS_MESSAGE)
 
 
 if __name__ == "__main__":
-    tf.test.main()
+  tf.test.main()

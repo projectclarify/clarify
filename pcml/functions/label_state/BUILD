@@ -1,4 +1,3 @@
-
 package(default_visibility = ["//visibility:public"])
 
 load("@my_deps//:requirements.bzl", "requirement")
@@ -23,7 +22,7 @@ py_test(
     srcs = ["deploy_test.py"],
     deps = [
         "//pcml/functions/label_state:deploy",
-        "//pcml/utils:cfg_utils"
+        "//pcml/utils:cfg_utils",
     ],
 )
 
@@ -38,7 +37,7 @@ py_library(
         requirement("tensorflow"),
         requirement("numpy"),
         requirement("sklearn"),
-        requirement("google-cloud-firestore")
+        requirement("google-cloud-firestore"),
     ],
 )
 

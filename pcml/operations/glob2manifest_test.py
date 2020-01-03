@@ -28,25 +28,24 @@ from pcml.launcher.kube_test import _testing_run_poll_and_check_job
 
 class TestGlob2Manifest(tf.test.TestCase):
 
-    def test_glob2manifest_fn(self):
+  def test_glob2manifest_fn(self):
 
-        glob2manifest.run(
-            source_glob="gs://clarify-dev/tmp/03312019/pcml-new/*.py",
-            target_path="gs://clarify-dev/tmp/beam/devmanifest.txt")
+    glob2manifest.run(source_glob="gs://clarify-dev/tmp/03312019/pcml-new/*.py",
+                      target_path="gs://clarify-dev/tmp/beam/devmanifest.txt")
 
-    def test_e2e(self):
+  def test_e2e(self):
 
-        job = glob2manifest.Glob2Manifest(
-            source_glob="gs://clarify-dev/tmp/03312019/pcml-new/*.py",
-            target_path="gs://clarify-dev/tmp/beam/devmanifest.txt",
-            staging_path="gs://clarify-dev/dummy/staging")
+    job = glob2manifest.Glob2Manifest(
+        source_glob="gs://clarify-dev/tmp/03312019/pcml-new/*.py",
+        target_path="gs://clarify-dev/tmp/beam/devmanifest.txt",
+        staging_path="gs://clarify-dev/dummy/staging")
 
-        create_response = job.stage_and_batch_run()
+    create_response = job.stage_and_batch_run()
 
-        _testing_run_poll_and_check_job(test_object=self,
-                                        create_response=create_response,
-                                        expect_in_logs=None)
+    _testing_run_poll_and_check_job(test_object=self,
+                                    create_response=create_response,
+                                    expect_in_logs=None)
 
 
 if __name__ == "__main__":
-    tf.test.main()
+  tf.test.main()

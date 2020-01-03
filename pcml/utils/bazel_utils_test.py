@@ -23,26 +23,26 @@ from pcml.utils import bazel_utils
 
 class TestBazelUtils(tf.test.TestCase):
 
-    def test_run_command(self):
-        """Test we can run a simple bazel command."""
+  def test_run_command(self):
+    """Test we can run a simple bazel command."""
 
-        bazel_utils.bazel_command("bazel clean")
+    bazel_utils.bazel_command("bazel clean")
 
-    def test_build_and_push(self):
-        """Test we can build and push docker container with Bazel."""
+  def test_build_and_push(self):
+    """Test we can build and push docker container with Bazel."""
 
-        bazel_utils.bazel_command("; ".join([
-            "bazel clean", "bazel build //:trainer_image",
-            "bazel run //:push_trainer"
-        ]))
+    bazel_utils.bazel_command("; ".join([
+        "bazel clean", "bazel build //:trainer_image",
+        "bazel run //:push_trainer"
+    ]))
 
-        # Requires the test container to have push permissions
-        # to gcr.io/clarify
+    # Requires the test container to have push permissions
+    # to gcr.io/clarify
 
-        # So for now this just puts the whl and the installation
-        # script in /build and that needs to be run when the trainer
-        # starts up.
+    # So for now this just puts the whl and the installation
+    # script in /build and that needs to be run when the trainer
+    # starts up.
 
 
 if __name__ == "__main__":
-    tf.test.main()
+  tf.test.main()

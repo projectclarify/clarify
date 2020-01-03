@@ -25,16 +25,16 @@ from pcml.datasets.test_utils import get_test_data_path
 
 
 class TestTestUtils(tf.test.TestCase):
-    """Tests of test utils."""
+  """Tests of test utils."""
 
-    def test_temporary_directory(self):
+  def test_temporary_directory(self):
 
-        with TemporaryDirectory() as tmp_dir:
-            self.assertTrue(os.path.exists(tmp_dir))
+    with TemporaryDirectory() as tmp_dir:
+      self.assertTrue(os.path.exists(tmp_dir))
 
-    def test_get_test_data_path(self):
-        self.assertEqual(get_test_data_path().split('/')[-1], "test_data")
+  def test_get_test_data_path(self):
+    self.assertEqual(get_test_data_path().split('/')[-1], "test_data")
 
 
 if __name__ == "__main__":
-    tf.test.main()
+  tf.test.main()

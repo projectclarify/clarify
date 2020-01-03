@@ -23,5 +23,5 @@ from pcml.utils.cfg_utils import Config
 TEST_CONFIG = Config()
 
 if __name__ == "__main__":
-    tf.logging.set_verbosity(tf.logging.INFO)
-    tf.test.main()
+  tf.logging.set_verbosity(tf.logging.INFO)
+  tf.test.main()

@@ -24,9 +24,9 @@ from tensor2tensor.utils import registry
 
 @registry.register_problem
 class AffectnetBase(image_utils.ImageProblem):
-    pass
+  pass
 
 
 @registry.register_problem
 class AffectnetTiny(AffectnetBase):
-    pass
+  pass

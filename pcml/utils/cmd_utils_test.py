@@ -23,11 +23,11 @@ from pcml.utils import cmd_utils
 
 class TestCmdUtils(tf.test.TestCase):
 
-    def test_cmd_runs(self):
-        """Test that we can run a command."""
+  def test_cmd_runs(self):
+    """Test that we can run a command."""
 
-        _ = cmd_utils.run_and_output(["ls", "/tmp"])
+    _ = cmd_utils.run_and_output(["ls", "/tmp"])
 
 
 if __name__ == "__main__":
-    tf.test.main()
+  tf.test.main()

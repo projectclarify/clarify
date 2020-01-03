@@ -1,0 +1,40 @@
+FROM ubuntu:16.04
+
+ADD ./ /build
+
+RUN apt-get update
+
+RUN apt-get install -y pkg-config \
+                   zip \
+                   g++ \
+                   zlib1g-dev \
+                   unzip \
+                   ffmpeg \
+                   wget \
+                   curl \
+                   libsm6 \
+                   libxext6 \
+                   libxrender-dev \
+                   libglib2.0-0 \
+                   htop \
+                   git \
+                   python-dev \
+                   python-pip \
+                   python3-dev \
+                   python3-pip \
+                   sudo \
+                   vim
+
+RUN wget https://dl.google.com/go/go1.13.linux-amd64.tar.gz
+RUN tar -C /usr/local -xzvf go1.13.linux-amd64.tar.gz
+
+RUN echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+
+ENV BAZEL_VERSION="2.0.0"
+ENV SCRIPT="bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
+
+RUN cd $HOME && \
+    wget https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/$SCRIPT && \
+    chmod +x $SCRIPT && ./$SCRIPT --user
+
+RUN sh /build/tools/environments/install_tf_serving.sh

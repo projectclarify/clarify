@@ -22,13 +22,13 @@ from pcml.utils.cfg_utils import Config
 
 class TestConfigUtils(tf.test.TestCase):
 
-    def test_basic(self):
-        cfg = Config()
-        expected_attrs = ["project", "test_artifacts_root"]
+  def test_basic(self):
+    cfg = Config()
+    expected_attrs = ["project", "test_artifacts_root"]
 
-        for attr in expected_attrs:
-            self.assertTrue(hasattr(cfg, attr))
+    for attr in expected_attrs:
+      self.assertTrue(hasattr(cfg, attr))
 
 
 if __name__ == "__main__":
-    tf.test.main()
+  tf.test.main()

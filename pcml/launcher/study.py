@@ -49,7 +49,7 @@ def wait_for_condition(client,
                        timeout=datetime.timedelta(minutes=10),
                        polling_interval=datetime.timedelta(seconds=30),
                        status_callback=None):
-    """Waits until any of the specified conditions occur.
+  """Waits until any of the specified conditions occur.
 
   Args:
     client: K8s api client.
@@ -65,221 +65,218 @@ def wait_for_condition(client,
 
   """
 
-    crd_api = k8s_client.CustomObjectsApi(client)
-    end_time = datetime.datetime.now() + timeout
+  crd_api = k8s_client.CustomObjectsApi(client)
+  end_time = datetime.datetime.now() + timeout
 
-    while True:
+  while True:
 
-        thread = crd_api.get_namespaced_custom_object(STUDY_JOB_GROUP,
-                                                      version,
-                                                      namespace,
-                                                      STUDY_JOB_PLURAL,
-                                                      name,
-                                                      async_req=True)
+    thread = crd_api.get_namespaced_custom_object(STUDY_JOB_GROUP,
+                                                  version,
+                                                  namespace,
+                                                  STUDY_JOB_PLURAL,
+                                                  name,
+                                                  async_req=True)
 
-        results = None
-        try:
-            results = thread.get(TIMEOUT)
+    results = None
+    try:
+      results = thread.get(TIMEOUT)
 
-        except multiprocessing.TimeoutError:
-            logging.error(
-                ("Timeout trying to get studyJob %s/%s." % (namespace, name)))
+    except multiprocessing.TimeoutError:
+      logging.error(
+          ("Timeout trying to get studyJob %s/%s." % (namespace, name)))
 
-        except Exception as e:
-            logging.error(("There was a problem waiting for StudyJob "
-                           "%s/%s; Exception: %s" % (namespace, name, e)))
-            raise
+    except Exception as e:
+      logging.error(("There was a problem waiting for StudyJob "
+                     "%s/%s; Exception: %s" % (namespace, name, e)))
+      raise
 
-        if results:
-            if status_callback:
-                status_callback(results)
+    if results:
+      if status_callback:
+        status_callback(results)
 
-            condition = results.get("status", {}).get("condition")
-            if condition in expected_condition:
-                return results
+      condition = results.get("status", {}).get("condition")
+      if condition in expected_condition:
+        return results
 
-        if datetime.datetime.now() + polling_interval > end_time:
-            raise multiprocessing.TimeoutError(
-                ("Timeout waiting for studyJob %s in namespace %s "
-                 " to enter one of the conditions %s " %
-                 (name, namespace, expected_condition)), results)
+    if datetime.datetime.now() + polling_interval > end_time:
+      raise multiprocessing.TimeoutError(
+          ("Timeout waiting for studyJob %s in namespace %s "
+           " to enter one of the conditions %s " %
+           (name, namespace, expected_condition)), results)
 
-        time.sleep(polling_interval.seconds)
+    time.sleep(polling_interval.seconds)
 
 
 def create_study_job(client, spec, version="v1alpha1"):
-    """Create a studyJob.
+  """Create a studyJob.
 
   Args:
     client: A K8s api client.
     spec: The spec for the job.
   """
 
-    crd_api = k8s_client.CustomObjectsApi(client)
+  crd_api = k8s_client.CustomObjectsApi(client)
 
-    try:
+  try:
 
-        namespace = spec["metadata"].get("namespace", "default")
+    namespace = spec["metadata"].get("namespace", "default")
 
-        thread = crd_api.create_namespaced_custom_object(STUDY_JOB_GROUP,
-                                                         version,
-                                                         namespace,
-                                                         STUDY_JOB_PLURAL,
-                                                         spec,
-                                                         async_req=True)
+    thread = crd_api.create_namespaced_custom_object(STUDY_JOB_GROUP,
+                                                     version,
+                                                     namespace,
+                                                     STUDY_JOB_PLURAL,
+                                                     spec,
+                                                     async_req=True)
 
-        api_response = thread.get(TIMEOUT)
+    api_response = thread.get(TIMEOUT)
 
-        tf.logging.info(
-            ("Created studyJob %s" % api_response["metadata"]["name"]))
+    tf.logging.info(("Created studyJob %s" % api_response["metadata"]["name"]))
 
-        return api_response
+    return api_response
 
-    except rest.ApiException as e:
+  except rest.ApiException as e:
 
-        message = ""
+    message = ""
 
-        if e.message:
-            message = e.message
+    if e.message:
+      message = e.message
 
-        if e.body:
+    if e.body:
 
-            try:
+      try:
 
-                body = json.loads(e.body)
+        body = json.loads(e.body)
 
-            except ValueError:
+      except ValueError:
 
-                # There was a problem parsing the body of the response as json.
-                tf.logging.error(
-                    ("Exception when calling DefaultApi->"
-                     "apis_fqdn_v1_namespaces_namespace_resource_post. "
-                     "body: %s" % e.body))
-
-                raise
-
-            message = body.get("message")
-
+        # There was a problem parsing the body of the response as json.
         tf.logging.error(("Exception when calling DefaultApi->"
-                          "apis_fqdn_v1_namespaces_namespace_resource_post: "
-                          "%s" % message))
+                          "apis_fqdn_v1_namespaces_namespace_resource_post. "
+                          "body: %s" % e.body))
 
-        raise e
+        raise
+
+      message = body.get("message")
+
+    tf.logging.error(("Exception when calling DefaultApi->"
+                      "apis_fqdn_v1_namespaces_namespace_resource_post: "
+                      "%s" % message))
+
+    raise e
 
 
 def delete_study_job(client, name, namespace, version="v1alpha1"):
-    """Delete a StudyJob by `name` in `namespace`."""
+  """Delete a StudyJob by `name` in `namespace`."""
 
-    crd_api = k8s_client.CustomObjectsApi(client)
+  crd_api = k8s_client.CustomObjectsApi(client)
 
-    try:
+  try:
 
-        body = {
-            "propagationPolicy": "Foreground",
-        }
+    body = {
+        "propagationPolicy": "Foreground",
+    }
 
-        tf.logging.info("Deleting studyJob %s/%s", namespace, name)
+    tf.logging.info("Deleting studyJob %s/%s", namespace, name)
 
-        thread = crd_api.delete_namespaced_custom_object(STUDY_JOB_GROUP,
-                                                         version,
-                                                         namespace,
-                                                         STUDY_JOB_PLURAL,
-                                                         name,
-                                                         body,
-                                                         async_req=True)
+    thread = crd_api.delete_namespaced_custom_object(STUDY_JOB_GROUP,
+                                                     version,
+                                                     namespace,
+                                                     STUDY_JOB_PLURAL,
+                                                     name,
+                                                     body,
+                                                     async_req=True)
 
-        api_response = thread.get(TIMEOUT)
+    api_response = thread.get(TIMEOUT)
 
-        tf.logging.info(("Deleting studyJob %s/%s returned: %s" %
-                         (namespace, name, api_response)))
+    tf.logging.info(("Deleting studyJob %s/%s returned: %s" %
+                     (namespace, name, api_response)))
 
-        return api_response
+    return api_response
 
-    except rest.ApiException as e:
+  except rest.ApiException as e:
 
-        message = ""
+    message = ""
 
-        if e.message:
-            message = e.message
+    if e.message:
+      message = e.message
 
-        if e.body:
+    if e.body:
 
-            try:
-                body = json.loads(e.body)
+      try:
+        body = json.loads(e.body)
 
-            except ValueError:
+      except ValueError:
 
-                # There was a problem parsing the body of the response as json.
-                logging.error(
-                    ("Exception when calling DefaultApi->"
-                     "apis_fqdn_v1_namespaces_namespace_resource_delete. "
-                     "body: %s" % e.body))
+        # There was a problem parsing the body of the response as json.
+        logging.error(("Exception when calling DefaultApi->"
+                       "apis_fqdn_v1_namespaces_namespace_resource_delete. "
+                       "body: %s" % e.body))
 
-                raise
+        raise
 
-            message = body.get("message")
+      message = body.get("message")
 
-        tf.logging.error(("Exception when calling DefaultApi->"
-                          "apis_fqdn_v1_namespaces_namespace_resource_delete: "
-                          "%s" % message))
+    tf.logging.error(("Exception when calling DefaultApi->"
+                      "apis_fqdn_v1_namespaces_namespace_resource_delete: "
+                      "%s" % message))
 
-        raise e
+    raise e
 
 
 def parameter_configs_from_t2t_rhp(study_rhp):
 
-    parameter_configs = []
+  parameter_configs = []
 
-    def _maybe_prefix(name):
-        #if not name.startswith("--"):
-        #name = "--hp_%s" % name
-        return name
+  def _maybe_prefix(name):
+    #if not name.startswith("--"):
+    #name = "--hp_%s" % name
+    return name
 
-    def to_str(thing):
-        if isinstance(thing, list):
-            return [str(p) for p in thing]
-        else:
-            return str(thing)
+  def to_str(thing):
+    if isinstance(thing, list):
+      return [str(p) for p in thing]
+    else:
+      return str(thing)
 
-    for name, parameter_config in study_rhp._categorical_params.items():
-        parameter_configs.append({
-            "name": _maybe_prefix(name),
-            "parametertype": "categorical",
-            "feasible": {
-                "list": to_str(parameter_config[1])
-            }
-        })
+  for name, parameter_config in study_rhp._categorical_params.items():
+    parameter_configs.append({
+        "name": _maybe_prefix(name),
+        "parametertype": "categorical",
+        "feasible": {
+            "list": to_str(parameter_config[1])
+        }
+    })
 
-    for name, parameter_config in study_rhp._discrete_params.items():
-        parameter_configs.append({
-            "name": _maybe_prefix(name),
-            "parametertype": "discrete",
-            "feasible": {
-                "list": to_str(parameter_config[1])
-            }
-        })
+  for name, parameter_config in study_rhp._discrete_params.items():
+    parameter_configs.append({
+        "name": _maybe_prefix(name),
+        "parametertype": "discrete",
+        "feasible": {
+            "list": to_str(parameter_config[1])
+        }
+    })
 
-    for name, parameter_config in study_rhp._float_params.items():
-        parameter_configs.append({
-            "name": _maybe_prefix(name),
-            "parametertype": "double",
-            "feasible": {
-                "min": to_str(parameter_config[1]),
-                "max": to_str(parameter_config[2])
-            }
-        })
+  for name, parameter_config in study_rhp._float_params.items():
+    parameter_configs.append({
+        "name": _maybe_prefix(name),
+        "parametertype": "double",
+        "feasible": {
+            "min": to_str(parameter_config[1]),
+            "max": to_str(parameter_config[2])
+        }
+    })
 
-    for name, parameter_config in study_rhp._int_params.items():
-        parameter_configs.append({
-            "name": _maybe_prefix(name),
-            "parametertype": "int",
-            "feasible": {
-                "min": to_str(parameter_config[1]),
-                "max": to_str(parameter_config[2])
-            }
-        })
+  for name, parameter_config in study_rhp._int_params.items():
+    parameter_configs.append({
+        "name": _maybe_prefix(name),
+        "parametertype": "int",
+        "feasible": {
+            "min": to_str(parameter_config[1]),
+            "max": to_str(parameter_config[2])
+        }
+    })
 
-    return parameter_configs
+  return parameter_configs
 
 
 metrics_collector_template_old = """apiVersion: batch/v1beta1
@@ -322,7 +319,7 @@ spec:
 
 
 def get_metrics_collector_template(base_logs_path):
-    return """apiVersion: batch/v1beta1
+  return """apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: "{{.WorkerID}}"
@@ -354,159 +351,158 @@ spec:
 
 class KatibBayesianOptParams(object):
 
-    def __init__(self,
-                 N="100",
-                 model_type="gp",
-                 max_features="auto",
-                 length_scale="0.5",
-                 noise="0.0005",
-                 nu="1.5",
-                 kernel_type="matern",
-                 n_estimators="50",
-                 mode="pi",
-                 trade_off="0.01",
-                 burn_in="10"):
-        self.params = {
-            "N": N,
-            "model_type": model_type,
-            "max_features": max_features,
-            "length_scale": length_scale,
-            "noise": noise,
-            "nu": nu,
-            "kernel_type": kernel_type,
-            "n_estimators": n_estimators,
-            "mode": mode,
-            "trade_off": trade_off,
-            "burn_in": burn_in
-        }
+  def __init__(self,
+               N="100",
+               model_type="gp",
+               max_features="auto",
+               length_scale="0.5",
+               noise="0.0005",
+               nu="1.5",
+               kernel_type="matern",
+               n_estimators="50",
+               mode="pi",
+               trade_off="0.01",
+               burn_in="10"):
+    self.params = {
+        "N": N,
+        "model_type": model_type,
+        "max_features": max_features,
+        "length_scale": length_scale,
+        "noise": noise,
+        "nu": nu,
+        "kernel_type": kernel_type,
+        "n_estimators": n_estimators,
+        "mode": mode,
+        "trade_off": trade_off,
+        "burn_in": burn_in
+    }
 
-    def render(self):
+  def render(self):
 
-        res = []
+    res = []
 
-        for key, value in self.params.items():
-            res.append({"name": key, "value": str(value)})
+    for key, value in self.params.items():
+      res.append({"name": key, "value": str(value)})
 
-        return res
+    return res
 
 
 class T2TKubeStudy(object):
 
-    def __init__(self,
-                 study_name,
-                 study_ranged_hparams,
-                 experiment,
-                 owner="me",
-                 optimization_type="maximize",
-                 metrics_names=["accuracy"],
-                 suggestion_algorithm="bayesianoptimization",
-                 suggestion_parameters=KatibBayesianOptParams(),
-                 suggestion_request_number=1,
-                 api_version=STUDY_JOB_API_VERSION):
+  def __init__(self,
+               study_name,
+               study_ranged_hparams,
+               experiment,
+               owner="me",
+               optimization_type="maximize",
+               metrics_names=["accuracy"],
+               suggestion_algorithm="bayesianoptimization",
+               suggestion_parameters=KatibBayesianOptParams(),
+               suggestion_request_number=1,
+               api_version=STUDY_JOB_API_VERSION):
 
-        algorithm_to_hparams = {
-            "bayesianoptimization": KatibBayesianOptParams,
-        }
+    algorithm_to_hparams = {
+        "bayesianoptimization": KatibBayesianOptParams,
+    }
 
-        if suggestion_algorithm not in algorithm_to_hparams:
-            raise ValueError("Unsupported algorithm: %s" % suggestion_algorithm)
+    if suggestion_algorithm not in algorithm_to_hparams:
+      raise ValueError("Unsupported algorithm: %s" % suggestion_algorithm)
 
-        expected_type = algorithm_to_hparams[suggestion_algorithm]
+    expected_type = algorithm_to_hparams[suggestion_algorithm]
 
-        if not isinstance(suggestion_parameters,
-                          algorithm_to_hparams[suggestion_algorithm]):
+    if not isinstance(suggestion_parameters,
+                      algorithm_to_hparams[suggestion_algorithm]):
 
-            raise ValueError(
-                ("for algorithm %s expected suggestion_parameters "
-                 "arg of type %s" % (suggestion_algorithm, expected_type)))
+      raise ValueError(
+          ("for algorithm %s expected suggestion_parameters "
+           "arg of type %s" % (suggestion_algorithm, expected_type)))
 
-        # pylint: disable=invalid-name
-        self.apiVersion = api_version
+    # pylint: disable=invalid-name
+    self.apiVersion = api_version
 
-        self.kind = STUDY_JOB_KIND
+    self.kind = STUDY_JOB_KIND
 
-        self.metadata = {
-            "name": study_name,
-            "labels": {
-                "controller-tools.k8s.io": "1.0"
-            },
-            "namespace": "kubeflow"
-        }
+    self.metadata = {
+        "name": study_name,
+        "labels": {
+            "controller-tools.k8s.io": "1.0"
+        },
+        "namespace": "kubeflow"
+    }
 
-        study_rhp = common_hparams.RangedHParams()
-        registry.ranged_hparams(study_ranged_hparams)(study_rhp)
+    study_rhp = common_hparams.RangedHParams()
+    registry.ranged_hparams(study_ranged_hparams)(study_rhp)
 
-        parameter_configs = parameter_configs_from_t2t_rhp(study_rhp)
+    parameter_configs = parameter_configs_from_t2t_rhp(study_rhp)
 
-        job_yaml = yaml.dump(experiment.as_dict(),
-                             default_flow_style=False,
-                             width=99999)
+    job_yaml = yaml.dump(experiment.as_dict(),
+                         default_flow_style=False,
+                         width=99999)
 
-        mc_template = get_metrics_collector_template(
-            experiment._remote_app_root)
+    mc_template = get_metrics_collector_template(experiment._remote_app_root)
 
-        self.spec = {
-            "studyName": study_name,
-            "owner": owner,
-            "optimizationtype": optimization_type,
-            "metricsnames": metrics_names,
-            "parameterconfigs": parameter_configs,
-            "workerSpec": {
-                "goTemplate": {
-                    "rawTemplate": job_yaml
-                }
-            },
-            "suggestionSpec": {
-                "suggestionAlgorithm": suggestion_algorithm,
-                "requestNumber": suggestion_request_number,
-                "suggestionParameters": suggestion_parameters.render()
-            },
-            "metricsCollectorSpec": {
-                "goTemplate": {
-                    "rawTemplate": mc_template
-                }
+    self.spec = {
+        "studyName": study_name,
+        "owner": owner,
+        "optimizationtype": optimization_type,
+        "metricsnames": metrics_names,
+        "parameterconfigs": parameter_configs,
+        "workerSpec": {
+            "goTemplate": {
+                "rawTemplate": job_yaml
+            }
+        },
+        "suggestionSpec": {
+            "suggestionAlgorithm": suggestion_algorithm,
+            "requestNumber": suggestion_request_number,
+            "suggestionParameters": suggestion_parameters.render()
+        },
+        "metricsCollectorSpec": {
+            "goTemplate": {
+                "rawTemplate": mc_template
             }
         }
+    }
 
-    def as_dict(self):
-        return dict_prune_private(object_as_dict(self))
+  def as_dict(self):
+    return dict_prune_private(object_as_dict(self))
 
-    def create(self):
+  def create(self):
 
-        kubernetes.config.load_kube_config()
+    kubernetes.config.load_kube_config()
 
-        crd_client = kubernetes.client.CustomObjectsApi()
+    crd_client = kubernetes.client.CustomObjectsApi()
 
-        job_dict = self.as_dict()
+    job_dict = self.as_dict()
 
-        logging.debug("Running StudyJob with name %s..." %
-                      job_dict["metadata"]["name"])
+    logging.debug("Running StudyJob with name %s..." %
+                  job_dict["metadata"]["name"])
 
-        response = crd_client.create_namespaced_custom_object(
-            STUDY_JOB_GROUP,
-            STUDY_JOB_VERSION,
-            job_dict["metadata"]["namespace"],
-            STUDY_JOB_PLURAL,
-            body=job_dict)
+    response = crd_client.create_namespaced_custom_object(
+        STUDY_JOB_GROUP,
+        STUDY_JOB_VERSION,
+        job_dict["metadata"]["namespace"],
+        STUDY_JOB_PLURAL,
+        body=job_dict)
 
-        return response, job_dict
+    return response, job_dict
 
-    def delete(self):
+  def delete(self):
 
-        kubernetes.config.load_kube_config()
+    kubernetes.config.load_kube_config()
 
-        crd_client = kubernetes.client.CustomObjectsApi()
+    crd_client = kubernetes.client.CustomObjectsApi()
 
-        name = self.metadata["name"]
-        namespace = self.metadata["namespace"]
+    name = self.metadata["name"]
+    namespace = self.metadata["namespace"]
 
-        body = kubernetes.client.V1DeleteOptions()
+    body = kubernetes.client.V1DeleteOptions()
 
-        response = crd_client.delete_namespaced_custom_object(STUDY_JOB_GROUP,
-                                                              STUDY_JOB_VERSION,
-                                                              namespace,
-                                                              STUDY_JOB_PLURAL,
-                                                              name,
-                                                              body=body)
+    response = crd_client.delete_namespaced_custom_object(STUDY_JOB_GROUP,
+                                                          STUDY_JOB_VERSION,
+                                                          namespace,
+                                                          STUDY_JOB_PLURAL,
+                                                          name,
+                                                          body=body)
 
-        return response
+    return response

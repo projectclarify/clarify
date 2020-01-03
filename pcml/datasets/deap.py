@@ -43,22 +43,22 @@ DEFAULT_DEAP_ROOT = "gs://clarify-data/requires-eula/deap/"
 
 
 def _raw_data_verifier(tmp_dir, test_mode=False):
-    """Raw data verifier for DEAP dataset."""
-    preproc_python_dir = os.path.join(DEFAULT_DEAP_ROOT, "preproc_python/*")
-    files = get_input_file_paths(preproc_python_dir, True, 1)
-    for file in files:
-        if not file.endswith(".dat"):
-            raise ValueError("Expected file with suffix .dat, saw %s" % file)
-    if not len(files) == 32:
-        raise ValueError(("Expected 32 subjects in preproc_python subdir, "
-                          "saw %s" % len(files)))
+  """Raw data verifier for DEAP dataset."""
+  preproc_python_dir = os.path.join(DEFAULT_DEAP_ROOT, "preproc_python/*")
+  files = get_input_file_paths(preproc_python_dir, True, 1)
+  for file in files:
+    if not file.endswith(".dat"):
+      raise ValueError("Expected file with suffix .dat, saw %s" % file)
+  if not len(files) == 32:
+    raise ValueError(("Expected 32 subjects in preproc_python subdir, "
+                      "saw %s" % len(files)))
 
 
 def maybe_get_deap_data(tmp_dir,
                         deap_root=DEFAULT_DEAP_ROOT,
                         is_training=True,
                         training_fraction=0.9):
-    """Maybe download DEAP data.
+  """Maybe download DEAP data.
 
   Args:
     tmp_dir(str): A local path where temporary files can
@@ -71,91 +71,91 @@ def maybe_get_deap_data(tmp_dir,
 
   """
 
-    preproc_python_dir = os.path.join(deap_root, "preproc_python/*")
-    input_paths = get_input_file_paths(preproc_python_dir, is_training,
-                                       training_fraction)
+  preproc_python_dir = os.path.join(deap_root, "preproc_python/*")
+  input_paths = get_input_file_paths(preproc_python_dir, is_training,
+                                     training_fraction)
 
-    paths = []
-    for i, path in enumerate(input_paths):
-        fname = path.split("/")[-1]
-        res_path = generator_utils.maybe_download(tmp_dir, fname, path)
-        yield res_path
+  paths = []
+  for i, path in enumerate(input_paths):
+    fname = path.split("/")[-1]
+    res_path = generator_utils.maybe_download(tmp_dir, fname, path)
+    yield res_path
 
 
 def load_deap_meta(local_deap_root):
 
-    participant_ratings = pd.read_csv(
-        os.path.join(local_deap_root, "meta", "participant_ratings.csv"))
-    online_ratings = pd.read_csv(
-        os.path.join(local_deap_root, "meta", "online_ratings.csv"))
-    video_list = pd.read_csv(
-        os.path.join(local_deap_root, "meta", "video_list.csv"))
+  participant_ratings = pd.read_csv(
+      os.path.join(local_deap_root, "meta", "participant_ratings.csv"))
+  online_ratings = pd.read_csv(
+      os.path.join(local_deap_root, "meta", "online_ratings.csv"))
+  video_list = pd.read_csv(
+      os.path.join(local_deap_root, "meta", "video_list.csv"))
 
-    return {
-        "participant_ratings": participant_ratings,
-        "online_ratings": online_ratings,
-        "video_list": video_list
-    }
+  return {
+      "participant_ratings": participant_ratings,
+      "online_ratings": online_ratings,
+      "video_list": video_list
+  }
 
 
 def _parse_deap_metadata(local_deap_root):
-    """Build a participant ratings"""
+  """Build a participant ratings"""
 
-    raw_meta = load_deap_meta(local_deap_root)
+  raw_meta = load_deap_meta(local_deap_root)
 
-    dataset = {}
+  dataset = {}
 
-    for i, pid in enumerate(raw_meta["participant_ratings"]["Participant_id"]):
-        tid = raw_meta["participant_ratings"]["Trial"][i]
-        exp = raw_meta["participant_ratings"]["Experiment_id"][i]
-        start = raw_meta["participant_ratings"]["Start_time"][i]
-        data = {
-            "pid": pid,
-            "tid": tid,
-            "exp": exp,
-            "start": start,
-            "valence": raw_meta["participant_ratings"]["Valence"][i],
-            "arousal": raw_meta["participant_ratings"]["Arousal"][i],
-            "dominance": raw_meta["participant_ratings"]["Dominance"][i],
-            "liking": raw_meta["participant_ratings"]["Liking"][i],
-            "familiarity": raw_meta["participant_ratings"]["Familiarity"][i]
-        }
-        if pid not in dataset:
-            dataset[pid] = {}
-        dataset[pid][tid] = data
+  for i, pid in enumerate(raw_meta["participant_ratings"]["Participant_id"]):
+    tid = raw_meta["participant_ratings"]["Trial"][i]
+    exp = raw_meta["participant_ratings"]["Experiment_id"][i]
+    start = raw_meta["participant_ratings"]["Start_time"][i]
+    data = {
+        "pid": pid,
+        "tid": tid,
+        "exp": exp,
+        "start": start,
+        "valence": raw_meta["participant_ratings"]["Valence"][i],
+        "arousal": raw_meta["participant_ratings"]["Arousal"][i],
+        "dominance": raw_meta["participant_ratings"]["Dominance"][i],
+        "liking": raw_meta["participant_ratings"]["Liking"][i],
+        "familiarity": raw_meta["participant_ratings"]["Familiarity"][i]
+    }
+    if pid not in dataset:
+      dataset[pid] = {}
+    dataset[pid][tid] = data
 
 
 def _preprocess_trial_data(acquired_data, layout, channel_data):
-    """Reconcile acquired labels with layout; clip and standardize."""
+  """Reconcile acquired labels with layout; clip and standardize."""
 
-    # Build a lookup dict for acquired data keyed on channel name
-    acquired_data_lookup = {}
-    for i, d in enumerate(acquired_data):
-        key = channel_data[i][0]
-        min_val, max_val = channel_data[i][1]
-        d_standardized = clip_and_standardize(d, min_val, max_val)
-        acquired_data_lookup[key] = d_standardized
+  # Build a lookup dict for acquired data keyed on channel name
+  acquired_data_lookup = {}
+  for i, d in enumerate(acquired_data):
+    key = channel_data[i][0]
+    min_val, max_val = channel_data[i][1]
+    d_standardized = clip_and_standardize(d, min_val, max_val)
+    acquired_data_lookup[key] = d_standardized
 
-    # Build a lookup dict for layout positions keyed on channel name
-    layout_data_lookup = {}
-    for i, k in enumerate(layout.names):
-        layout_data_lookup[k] = layout.pos[i]
+  # Build a lookup dict for layout positions keyed on channel name
+  layout_data_lookup = {}
+  for i, k in enumerate(layout.names):
+    layout_data_lookup[k] = layout.pos[i]
 
-    sensor_traces = []
-    sensor_positions = []
-    channels = []
+  sensor_traces = []
+  sensor_positions = []
+  channels = []
 
-    for key, data in acquired_data_lookup.items():
-        if key in layout_data_lookup:
-            sensor_traces.append(data)
-            sensor_positions.append(layout_data_lookup[key])
-            channels.append(key)
+  for key, data in acquired_data_lookup.items():
+    if key in layout_data_lookup:
+      sensor_traces.append(data)
+      sensor_positions.append(layout_data_lookup[key])
+      channels.append(key)
 
-    sensor_traces = np.asarray(sensor_traces)
-    sensor_positions = np.asarray(sensor_positions)
-    channels = np.asarray(channels)
+  sensor_traces = np.asarray(sensor_traces)
+  sensor_positions = np.asarray(sensor_positions)
+  channels = np.asarray(channels)
 
-    return (sensor_traces, sensor_positions, acquired_data_lookup, channels)
+  return (sensor_traces, sensor_positions, acquired_data_lookup, channels)
 
 
 # All of the channels expected to be present in DEAP bdf files
@@ -191,40 +191,40 @@ def clip_and_standardize(data,
                          max_val,
                          vocab_size=256,
                          dtype=np.int32):
-    """Given a signal on [min_val, max_val] yield signal on [-1, 1]."""
+  """Given a signal on [min_val, max_val] yield signal on [-1, 1]."""
 
-    assert min_val < max_val
+  assert min_val < max_val
 
-    # Compute the width of the clipping range.
-    width = (max_val - min_val)
+  # Compute the width of the clipping range.
+  width = (max_val - min_val)
 
-    # If [min_val, max_val] is not centered compute the delta
-    # that would be needed to center it.
-    delta = (max_val - width / 2.0)
+  # If [min_val, max_val] is not centered compute the delta
+  # that would be needed to center it.
+  delta = (max_val - width / 2.0)
 
-    # Shift the clipping range to be centered
-    min_val, max_val = min_val - delta, max_val - delta
+  # Shift the clipping range to be centered
+  min_val, max_val = min_val - delta, max_val - delta
 
-    std = data.astype(np.float32)
+  std = data.astype(np.float32)
 
-    # Shift the data the same amount as the clipping range
-    std -= delta
+  # Shift the data the same amount as the clipping range
+  std -= delta
 
-    # Apply the clip
-    std = np.clip(std, min_val, max_val)
+  # Apply the clip
+  std = np.clip(std, min_val, max_val)
 
-    # Transform [a,b] to [-1,1]
-    std = std / (width / 2)
+  # Transform [a,b] to [-1,1]
+  std = std / (width / 2)
 
-    std *= vocab_size / 2
+  std *= vocab_size / 2
 
-    std = std.astype(dtype)
+  std = std.astype(dtype)
 
-    return std
+  return std
 
 
 def load_preprocessed_deap_data(deap_acquisition_path):
-    """
+  """
   
   Notes:
     * Load raw data from file.
@@ -233,61 +233,61 @@ def load_preprocessed_deap_data(deap_acquisition_path):
 
   """
 
-    with open(deap_acquisition_path, "rb") as f:
-        raw_data = pickle.load(f, encoding="latin1")
+  with open(deap_acquisition_path, "rb") as f:
+    raw_data = pickle.load(f, encoding="latin1")
 
-    # Labels start with an intensity value in [0,10]
-    labels = clip_and_standardize(raw_data["labels"], 0.0, 10.0)
+  # Labels start with an intensity value in [0,10]
+  labels = clip_and_standardize(raw_data["labels"], 0.0, 10.0)
 
-    biosemi_layout = mne.channels.layout.read_layout("biosemi.lay")
+  biosemi_layout = mne.channels.layout.read_layout("biosemi.lay")
 
-    rec_positions = None
-    reconciled_acquisition_data = []
-    raw_data_lookups = []
-    matched_channels = []
-    for trial_data in raw_data["data"]:
-        rec_data, rec_positions, raw_data_lookup, chan = _preprocess_trial_data(
-            acquired_data=trial_data,
-            layout=biosemi_layout,
-            channel_data=DEAP_BDF_CHANNELS)
-        reconciled_acquisition_data.append(rec_data)
-        raw_data_lookups.append(raw_data_lookup)
-        matched_channels.append(chan)
-    return (reconciled_acquisition_data, rec_positions, raw_data_lookups,
-            labels, matched_channels)
+  rec_positions = None
+  reconciled_acquisition_data = []
+  raw_data_lookups = []
+  matched_channels = []
+  for trial_data in raw_data["data"]:
+    rec_data, rec_positions, raw_data_lookup, chan = _preprocess_trial_data(
+        acquired_data=trial_data,
+        layout=biosemi_layout,
+        channel_data=DEAP_BDF_CHANNELS)
+    reconciled_acquisition_data.append(rec_data)
+    raw_data_lookups.append(raw_data_lookup)
+    matched_channels.append(chan)
+  return (reconciled_acquisition_data, rec_positions, raw_data_lookups, labels,
+          matched_channels)
 
 
 def _tiled_subsample_example(example, subsample_width, subsample_step):
-    subrange_keys = [
-        "eeg/raw", "physio/hEOG", "physio/vEOG", "physio/zEMG", "physio/tEMG",
-        "physio/GSR", "physio/rAMP", "physio/plethysmograph", "physio/temp"
-    ]
-    max_len = len(example["physio/temp"])  # HACK
-    if subsample_width <= 0 or subsample_step <= 0:
-        raise ValueError("subsample width and step must be natural numbers")
-    for i in range(max_len):
-        # The most we'll ever iterate is max_len.
-        # zero-based.
-        interval_start = i * subsample_step
-        interval_end = interval_start + subsample_width
-        if interval_end > max_len:
-            return
-        subsampled_example = example.copy()
-        for key in subrange_keys:
-            feature = example[key]
-            shape = np.asarray(feature).shape
-            if len(shape) == 1:
-                subsampled_example[key] = feature[interval_start:interval_end]
-            elif len(shape) == 2:
-                subsampled_example[key] = [
-                    thing[interval_start:interval_end] for thing in feature
-                ]
-            else:
-                # There's probably a better way to slice by the last dimension using
-                # numpy... idk maybe something like this?
-                # subsampled_example[key] = feature[..., interval_start:interval_end]
-                raise NotImplementedError()
-        yield subsampled_example
+  subrange_keys = [
+      "eeg/raw", "physio/hEOG", "physio/vEOG", "physio/zEMG", "physio/tEMG",
+      "physio/GSR", "physio/rAMP", "physio/plethysmograph", "physio/temp"
+  ]
+  max_len = len(example["physio/temp"])  # HACK
+  if subsample_width <= 0 or subsample_step <= 0:
+    raise ValueError("subsample width and step must be natural numbers")
+  for i in range(max_len):
+    # The most we'll ever iterate is max_len.
+    # zero-based.
+    interval_start = i * subsample_step
+    interval_end = interval_start + subsample_width
+    if interval_end > max_len:
+      return
+    subsampled_example = example.copy()
+    for key in subrange_keys:
+      feature = example[key]
+      shape = np.asarray(feature).shape
+      if len(shape) == 1:
+        subsampled_example[key] = feature[interval_start:interval_end]
+      elif len(shape) == 2:
+        subsampled_example[key] = [
+            thing[interval_start:interval_end] for thing in feature
+        ]
+      else:
+        # There's probably a better way to slice by the last dimension using
+        # numpy... idk maybe something like this?
+        # subsampled_example[key] = feature[..., interval_start:interval_end]
+        raise NotImplementedError()
+    yield subsampled_example
 
 
 def _generator(tmp_dir,
@@ -297,7 +297,7 @@ def _generator(tmp_dir,
                is_training=True,
                training_fraction=0.9,
                vocab_size=256):
-    """Generator for base training examples from the DEAP dataset.
+  """Generator for base training examples from the DEAP dataset.
 
   Notes:
 
@@ -347,148 +347,147 @@ def _generator(tmp_dir,
       training.
 
   """
-    ct = 0
+  ct = 0
 
-    def _flatten(list_or_array):
-        return np.asarray(list_or_array).flatten().tolist()
+  def _flatten(list_or_array):
+    return np.asarray(list_or_array).flatten().tolist()
 
-    for acquisition_path in maybe_get_deap_data(
-            tmp_dir, is_training=is_training,
-            training_fraction=training_fraction):
-        trials, positions, raw, labels, chan = load_preprocessed_deap_data(
-            acquisition_path)
-        for i, trial_reconciled in enumerate(trials):
-            example = {
-                "eeg/raw": trial_reconciled,
-                "eeg/positions": positions,
-                "eeg/channels": chan[i],
+  for acquisition_path in maybe_get_deap_data(
+      tmp_dir, is_training=is_training, training_fraction=training_fraction):
+    trials, positions, raw, labels, chan = load_preprocessed_deap_data(
+        acquisition_path)
+    for i, trial_reconciled in enumerate(trials):
+      example = {
+          "eeg/raw": trial_reconciled,
+          "eeg/positions": positions,
+          "eeg/channels": chan[i],
 
-                # -----
-                # TODO (maybe):
-                # Currently foregoing encoding of EEG as GIFs until we
-                # actually need to combine datasets with two different
-                # electrode placements - averaging signal and producing
-                # a traditional-looking cortical heatmap loses all the
-                # fine detail of the signal. Even when needing to combine
-                # electrode placements we might do better to just provide
-                # the vector of placements together with the raw sensor data
-                # instead of mapping this into a common image.
-                # "eeg/encoded": None,
-                # -----
-                "physio/hEOG": raw[i]["hEOG"],
-                "physio/vEOG": raw[i]["vEOG"],
-                "physio/zEMG": raw[i]["zEMG"],
-                "physio/tEMG": raw[i]["tEMG"],
-                "physio/GSR": raw[i]["GSR"],
-                "physio/rAMP": raw[i]["rAMP"],
-                "physio/plethysmograph": raw[i]["plethysmograph"],
-                "physio/temp": raw[i]["temp"],
+          # -----
+          # TODO (maybe):
+          # Currently foregoing encoding of EEG as GIFs until we
+          # actually need to combine datasets with two different
+          # electrode placements - averaging signal and producing
+          # a traditional-looking cortical heatmap loses all the
+          # fine detail of the signal. Even when needing to combine
+          # electrode placements we might do better to just provide
+          # the vector of placements together with the raw sensor data
+          # instead of mapping this into a common image.
+          # "eeg/encoded": None,
+          # -----
+          "physio/hEOG": raw[i]["hEOG"],
+          "physio/vEOG": raw[i]["vEOG"],
+          "physio/zEMG": raw[i]["zEMG"],
+          "physio/tEMG": raw[i]["tEMG"],
+          "physio/GSR": raw[i]["GSR"],
+          "physio/rAMP": raw[i]["rAMP"],
+          "physio/plethysmograph": raw[i]["plethysmograph"],
+          "physio/temp": raw[i]["temp"],
 
-                # valence, arousal, dominance, liking
-                "affect/trial_selfreport": labels[i],
-            }
+          # valence, arousal, dominance, liking
+          "affect/trial_selfreport": labels[i],
+      }
 
-            for subsampled in _tiled_subsample_example(example, subsample_width,
-                                                       subsample_step):
-                for key, value in subsampled.items():
-                    subsampled[key] = _flatten(value)
-                yield subsampled
-                ct += 1
-                if isinstance(how_many, int) and ct >= how_many:
-                    return
+      for subsampled in _tiled_subsample_example(example, subsample_width,
+                                                 subsample_step):
+        for key, value in subsampled.items():
+          subsampled[key] = _flatten(value)
+        yield subsampled
+        ct += 1
+        if isinstance(how_many, int) and ct >= how_many:
+          return
 
 
 @registry.register_problem
 class DeapProblemBase(problem.Problem):
 
-    @property
-    def problem_code(self):
-        return 1234
+  @property
+  def problem_code(self):
+    return 1234
 
-    @property
-    def trial_subsample_hparams(self):
-        return {"width": 100, "step": 10}
+  @property
+  def trial_subsample_hparams(self):
+    return {"width": 100, "step": 10}
 
-    @property
-    def training_fraction(self):
-        return 0.9
+  @property
+  def training_fraction(self):
+    return 0.9
 
-    def generator(self, tmp_dir, max_nbr_cases, is_training):
-        w, s = self.trial_subsample_hparams.values()
-        return _generator(tmp_dir=tmp_dir,
-                          subsample_width=w,
-                          subsample_step=s,
-                          how_many=max_nbr_cases,
-                          is_training=is_training,
-                          training_fraction=self.training_fraction)
+  def generator(self, tmp_dir, max_nbr_cases, is_training):
+    w, s = self.trial_subsample_hparams.values()
+    return _generator(tmp_dir=tmp_dir,
+                      subsample_width=w,
+                      subsample_step=s,
+                      how_many=max_nbr_cases,
+                      is_training=is_training,
+                      training_fraction=self.training_fraction)
 
-    @property
-    def train_size(self):
-        return 100
+  @property
+  def train_size(self):
+    return 100
 
-    @property
-    def dev_size(self):
-        return 100
+  @property
+  def dev_size(self):
+    return 100
 
-    @property
-    def num_shards(self):
-        return 1
+  @property
+  def num_shards(self):
+    return 1
 
-    def generate_data(self, data_dir, tmp_dir, task_id=-1):
+  def generate_data(self, data_dir, tmp_dir, task_id=-1):
 
-        generator_utils.generate_dataset_and_shuffle(
-            self.generator(tmp_dir, self.train_size, is_training=True),
-            self.training_filepaths(data_dir, self.num_shards, shuffled=True),
-            self.generator(tmp_dir, self.dev_size, is_training=False),
-            self.dev_filepaths(data_dir, 1, shuffled=True),
-            shuffle=True)
+    generator_utils.generate_dataset_and_shuffle(
+        self.generator(tmp_dir, self.train_size, is_training=True),
+        self.training_filepaths(data_dir, self.num_shards, shuffled=True),
+        self.generator(tmp_dir, self.dev_size, is_training=False),
+        self.dev_filepaths(data_dir, 1, shuffled=True),
+        shuffle=True)
 
-    @property
-    def num_self_report_affect_classes(self):
-        return 4
+  @property
+  def num_self_report_affect_classes(self):
+    return 4
 
-    def feature_encoders(self, data_dir):
-        del data_dir
+  def feature_encoders(self, data_dir):
+    del data_dir
 
-        return {
-            #"video": text_encoder.ImageEncoder(channels=self.video_shape[3]),
-        }
+    return {
+        #"video": text_encoder.ImageEncoder(channels=self.video_shape[3]),
+    }
 
-    def get_eeg_shape(self):
-        return (len(DEAP_EXPECTED_MAPPED_EEG_CHANNELS),
-                self.trial_subsample_hparams["width"])
+  def get_eeg_shape(self):
+    return (len(DEAP_EXPECTED_MAPPED_EEG_CHANNELS),
+            self.trial_subsample_hparams["width"])
 
-    def example_reading_spec(self):
+  def example_reading_spec(self):
 
-        num_classes = self.num_self_report_affect_classes
-        eeg_shape = self.get_eeg_shape()
+    num_classes = self.num_self_report_affect_classes
+    eeg_shape = self.get_eeg_shape()
 
-        data_fields = {
-            "eeg/raw":
-                tf.FixedLenFeature((32 * 100,), dtype=tf.int64),
-            "affect/trial_selfreport":
-                tf.FixedLenFeature([num_classes], dtype=tf.int64),
-        }
+    data_fields = {
+        "eeg/raw":
+            tf.FixedLenFeature((32 * 100,), dtype=tf.int64),
+        "affect/trial_selfreport":
+            tf.FixedLenFeature([num_classes], dtype=tf.int64),
+    }
 
-        data_items_to_decoders = {
-            "eeg":
-                tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="eeg/raw"),
-            "targets":
-                tf.contrib.slim.tfexample_decoder.Tensor(
-                    tensor_key="affect/trial_selfreport")
-        }
+    data_items_to_decoders = {
+        "eeg":
+            tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="eeg/raw"),
+        "targets":
+            tf.contrib.slim.tfexample_decoder.Tensor(
+                tensor_key="affect/trial_selfreport")
+    }
 
-        return data_fields, data_items_to_decoders
+    return data_fields, data_items_to_decoders
 
-    def hparams(self, defaults, unused_model_hparams):
-        p = defaults
-        p.modality = {"eeg": "IdentityModality", "targets": "SymbolModality"}
+  def hparams(self, defaults, unused_model_hparams):
+    p = defaults
+    p.modality = {"eeg": "IdentityModality", "targets": "SymbolModality"}
 
-        # Ugh this isn't necessary #HACK clarify how to remove it
-        p.vocab_size = {
-            "eeg": 256,
-            "targets": 256,
-        }
+    # Ugh this isn't necessary #HACK clarify how to remove it
+    p.vocab_size = {
+        "eeg": 256,
+        "targets": 256,
+    }
 
-    def preprocess_example(self, example, mode, hparams):
-        return example
+  def preprocess_example(self, example, mode, hparams):
+    return example

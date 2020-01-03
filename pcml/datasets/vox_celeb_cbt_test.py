@@ -39,104 +39,102 @@ TEST_CONFIG = Config()
 
 class TestProblem(tf.test.TestCase):
 
-    def setUp(self):
+  def setUp(self):
 
-        self.project = TEST_CONFIG.get("project")
-        self.instance = TEST_CONFIG.get("test_cbt_instance")
-        self.tmpdir = tempfile.mkdtemp()
-        self.test_run_tag = "clarify-test-{}-vox-cbt".format(
-            str(uuid.uuid4())[0:8])
-        self.prefix = "train"
-        self.problem_name = "vox_celeb_cbt"
-        self.staging = os.path.join(TEST_CONFIG.test_artifacts_root,
-                                    self.test_run_tag)
-        self.manifest_path = "gs://clarify-dev/test/extract/manifest.csv"
-        self.source_table_name = self.test_run_tag + "s"
+    self.project = TEST_CONFIG.get("project")
+    self.instance = TEST_CONFIG.get("test_cbt_instance")
+    self.tmpdir = tempfile.mkdtemp()
+    self.test_run_tag = "clarify-test-{}-vox-cbt".format(str(uuid.uuid4())[0:8])
+    self.prefix = "train"
+    self.problem_name = "vox_celeb_cbt"
+    self.staging = os.path.join(TEST_CONFIG.test_artifacts_root,
+                                self.test_run_tag)
+    self.manifest_path = "gs://clarify-dev/test/extract/manifest.csv"
+    self.source_table_name = self.test_run_tag + "s"
 
-        # Populate a table with some raw data to sample
-        self.source_selection = cbt_utils.RawVideoSelection(
-            project=self.project,
-            instance=self.instance,
-            table=self.source_table_name,
-            prefix=self.prefix)
+    # Populate a table with some raw data to sample
+    self.source_selection = cbt_utils.RawVideoSelection(
+        project=self.project,
+        instance=self.instance,
+        table=self.source_table_name,
+        prefix=self.prefix)
 
-        extract.extract_to_cbt(manifest_path=self.manifest_path,
-                               shard_id=0,
-                               num_shards=1,
-                               project=self.project,
-                               instance=self.instance,
-                               table=self.source_table_name,
-                               target_prefix=self.prefix,
-                               tmp_dir=tempfile.mkdtemp())
+    extract.extract_to_cbt(manifest_path=self.manifest_path,
+                           shard_id=0,
+                           num_shards=1,
+                           project=self.project,
+                           instance=self.instance,
+                           table=self.source_table_name,
+                           target_prefix=self.prefix,
+                           tmp_dir=tempfile.mkdtemp())
 
-    def test_lookup(self):
+  def test_lookup(self):
 
-        problem = registry.problem(self.problem_name)
+    problem = registry.problem(self.problem_name)
 
-    def test_example_generator(self):
+  def test_example_generator(self):
 
-        problem = registry.problem(self.problem_name)
+    problem = registry.problem(self.problem_name)
 
-        sample_generator = self.source_selection.sample_av_correspondence_examples(
-            frames_per_video=problem.video_shape[0], max_num_samples=10)
+    sample_generator = self.source_selection.sample_av_correspondence_examples(
+        frames_per_video=problem.video_shape[0], max_num_samples=10)
 
-        example_generator = vox_celeb_cbt.example_generator(
-            raw_sampler=sample_generator,
-            video_shape=problem.video_shape,
-            audio_shape=problem.audio_shape,
-            max_examples=100,
-            augmentation_hparams=problem.augmentation_hparams)
+    example_generator = vox_celeb_cbt.example_generator(
+        raw_sampler=sample_generator,
+        video_shape=problem.video_shape,
+        audio_shape=problem.audio_shape,
+        max_examples=100,
+        augmentation_hparams=problem.augmentation_hparams)
 
-        example = example_generator.__next__()
+    example = example_generator.__next__()
 
-        for key in ["audio", "video", "targets"]:
-            self.assertTrue(key in example)
+    for key in ["audio", "video", "targets"]:
+      self.assertTrue(key in example)
 
-        #np.reshape(np.asarray(example["audio"]), audio_shape)
-        np.reshape(np.asarray(example["video"]), problem.video_shape)
+    #np.reshape(np.asarray(example["audio"]), audio_shape)
+    np.reshape(np.asarray(example["video"]), problem.video_shape)
 
-    def test_datagen_in_batch(self):
+  def test_datagen_in_batch(self):
 
-        problem = registry.problem(self.problem_name)
+    problem = registry.problem(self.problem_name)
 
-        target_table_name = self.test_run_tag + "bt"
+    target_table_name = self.test_run_tag + "bt"
 
-        job = cbt_datagen.CBTDatagenJob(
-            problem_name=self.problem_name,
-            project=self.project,
-            bigtable_instance=self.instance,
-            bigtable_source_table_name=self.source_table_name,
-            bigtable_target_table_name=target_table_name,
-            prefix=self.prefix,
-            staging_path=self.staging,
-            node_selector={"type": "datagen-small"})
+    job = cbt_datagen.CBTDatagenJob(
+        problem_name=self.problem_name,
+        project=self.project,
+        bigtable_instance=self.instance,
+        bigtable_source_table_name=self.source_table_name,
+        bigtable_target_table_name=target_table_name,
+        prefix=self.prefix,
+        staging_path=self.staging,
+        node_selector={"type": "datagen-small"})
 
-        create_responses = job.launch_shard_parallel_jobs(num_shards=1)
+    create_responses = job.launch_shard_parallel_jobs(num_shards=1)
 
-        for create_response in create_responses:
-            _testing_run_poll_and_check_job(test_object=self,
-                                            create_response=create_response,
-                                            expect_in_logs="Completed datagen.")
+    for create_response in create_responses:
+      _testing_run_poll_and_check_job(test_object=self,
+                                      create_response=create_response,
+                                      expect_in_logs="Completed datagen.")
 
-        tfexample_selection = cbt_utils.TFExampleSelection(
-            project=self.project,
-            instance=self.instance,
-            table=target_table_name,
-            prefix=self.prefix)
+    tfexample_selection = cbt_utils.TFExampleSelection(project=self.project,
+                                                       instance=self.instance,
+                                                       table=target_table_name,
+                                                       prefix=self.prefix)
 
-        example_iterator = tfexample_selection.iterate_tfexamples()
+    example_iterator = tfexample_selection.iterate_tfexamples()
 
-        ex = example_iterator.__next__()
+    ex = example_iterator.__next__()
 
-        recv_audio = ex.features.feature['audio'].float_list.value
-        recv_video = ex.features.feature['video'].float_list.value
-        recv_target = ex.features.feature['targets'].int64_list.value
+    recv_audio = ex.features.feature['audio'].float_list.value
+    recv_video = ex.features.feature['video'].float_list.value
+    recv_target = ex.features.feature['targets'].int64_list.value
 
-        #_ = np.reshape(recv_audio, problem.audio_shape)
-        _ = np.reshape(recv_video, problem.video_shape)
-        _ = np.reshape(recv_target, (1))
+    #_ = np.reshape(recv_audio, problem.audio_shape)
+    _ = np.reshape(recv_video, problem.video_shape)
+    _ = np.reshape(recv_target, (1))
 
-    """
+  """
   def test_extract_generate_and_fetch_via_dataset(self):
 
     problem_obj = registry.problem(problem_name)
@@ -157,4 +155,4 @@ class TestProblem(tf.test.TestCase):
 
 
 if __name__ == "__main__":
-    tf.test.main()
+  tf.test.main()

@@ -24,33 +24,31 @@ from tensor2tensor.utils import registry
 
 class TestPercepSimilarityModel(tf.test.TestCase):
 
-    def setUp(self):
-        self.model_name = "percep_similarity_triplet_emb"
-        self.problem_name = "fec_tiny"
-        self.hparams_name = "percep_similarity_triplet_emb_tiny"
+  def setUp(self):
+    self.model_name = "percep_similarity_triplet_emb"
+    self.problem_name = "fec_tiny"
+    self.hparams_name = "percep_similarity_triplet_emb_tiny"
 
-    def test_registry_lookups(self):
+  def test_registry_lookups(self):
 
-        model_names = [
-            "percep_similarity_triplet_emb",
-            "percep_similarity_triplet_classify"
-        ]
+    model_names = [
+        "percep_similarity_triplet_emb", "percep_similarity_triplet_classify"
+    ]
 
-        for model_name in model_names:
-            _ = registry.model(model_name)
+    for model_name in model_names:
+      _ = registry.model(model_name)
 
-        hparams_sets = [
-            "percep_similarity_triplet_emb",
-            "percep_similarity_triplet_emb_tiny"
-        ]
+    hparams_sets = [
+        "percep_similarity_triplet_emb", "percep_similarity_triplet_emb_tiny"
+    ]
 
-        for hparams_set in hparams_sets:
-            _ = registry.hparams(hparams_set)
+    for hparams_set in hparams_sets:
+      _ = registry.hparams(hparams_set)
 
-    def test_tiny_e2e(self):
-        pass
+  def test_tiny_e2e(self):
+    pass
 
 
 if __name__ == "__main__":
-    tf.logging.set_verbosity(tf.logging.INFO)
-    tf.test.main()
+  tf.logging.set_verbosity(tf.logging.INFO)
+  tf.test.main()
