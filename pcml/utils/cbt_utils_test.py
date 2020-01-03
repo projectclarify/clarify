@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Additional distributed datagen and augmentation problem defs."""
 
 from __future__ import absolute_import
@@ -44,40 +43,49 @@ class TestCBTUtils(tf.test.TestCase):
     self.project = TEST_CONFIG.get("project")
     self.instance = TEST_CONFIG.get("test_cbt_instance")
     self.tmpdir = tempfile.mkdtemp()
-    self.table = "clarify-test-{}-cbt-utils".format(
-      str(uuid.uuid4())[0:8]
-    )
+    self.table = "clarify-test-{}-cbt-utils".format(str(uuid.uuid4())[0:8])
 
   def test_helper_models(self):
     """Currently these don't enforce types of the nested objects."""
 
-    vm = cbt_utils.VideoMeta(video_length=1, audio_length=1,
-                             shard_id=0, video_id=0,
+    vm = cbt_utils.VideoMeta(video_length=1,
+                             audio_length=1,
+                             shard_id=0,
+                             video_id=0,
                              audio_block_size=1000)
     vm.as_dict()
 
-    sampling_meta00 = {'frame_skip_size': 0,
-                       'frame_shift': 0,
-                       'frame_sample_bounds': [178, 192],
-                       'audio_sample_bounds': [315056, 341604]}
+    sampling_meta00 = {
+        'frame_skip_size': 0,
+        'frame_shift': 0,
+        'frame_sample_bounds': [178, 192],
+        'audio_sample_bounds': [315056, 341604]
+    }
 
-    abm = {"min_query_block": 1,
-          "max_query_block": 3,
-          "num_query_blocks": 3,
-          "query_start": 100,
-          "query_end": 200}
+    abm = {
+        "min_query_block": 1,
+        "max_query_block": 3,
+        "num_query_blocks": 3,
+        "query_start": 100,
+        "query_end": 200
+    }
 
-    avcs = cbt_utils.AVCorrespondenceSample(video=np.array([1,2,3]),
-                                  audio=np.array([1,2,3]),
-                                  labels={"same_video": 1,
-                                          "overlap": 0},
-                                  meta={"video_source": vm,
-                                        "audio_source": vm,
-                                        "video_sample_meta": sampling_meta00,
-                                        "audio_sample_meta": sampling_meta00,
-                                        "audio_keys": ["foo"],
-                                        "frame_keys": ["foo", "foo"],
-                                        "audio_block_meta": abm})
+    avcs = cbt_utils.AVCorrespondenceSample(
+        video=np.array([1, 2, 3]),
+        audio=np.array([1, 2, 3]),
+        labels={
+            "same_video": 1,
+            "overlap": 0
+        },
+        meta={
+            "video_source": vm,
+            "audio_source": vm,
+            "video_sample_meta": sampling_meta00,
+            "audio_sample_meta": sampling_meta00,
+            "audio_keys": ["foo"],
+            "frame_keys": ["foo", "foo"],
+            "audio_block_meta": abm
+        })
 
     serialized = avcs.serialize()
 
@@ -94,19 +102,15 @@ class TestCBTUtils(tf.test.TestCase):
     table_tag = "{}-meta".format(self.table)
     prefix = "train"
 
-    selection = cbt_utils.RawVideoSelection(
-      project=self.project,
-      instance=self.instance,
-      table=table_tag,
-      prefix=prefix
-    )
+    selection = cbt_utils.RawVideoSelection(project=self.project,
+                                            instance=self.instance,
+                                            table=table_tag,
+                                            prefix=prefix)
 
-    sent_meta = cbt_utils.VideoShardMeta(
-      shard_id=0,
-      num_videos=1,
-      status="finished",
-      num_shards=1
-    )
+    sent_meta = cbt_utils.VideoShardMeta(shard_id=0,
+                                         num_videos=1,
+                                         status="finished",
+                                         num_shards=1)
 
     selection.set_shard_meta(sent_meta)
 
@@ -116,8 +120,7 @@ class TestCBTUtils(tf.test.TestCase):
 
     self.assertTrue(train_meta_key in recv_meta)
 
-    self.assertEqual(recv_meta[train_meta_key].as_dict(),
-                     sent_meta.as_dict())
+    self.assertEqual(recv_meta[train_meta_key].as_dict(), sent_meta.as_dict())
 
   def test_generate_av_correspondence_examples(self):
 
@@ -129,15 +132,14 @@ class TestCBTUtils(tf.test.TestCase):
     greyscale = True
     num_channels = 1
 
-    selection = cbt_utils.RawVideoSelection(
-      project=self.project,
-      instance=self.instance,
-      table=table_tag,
-      prefix=prefix
-    )
+    selection = cbt_utils.RawVideoSelection(project=self.project,
+                                            instance=self.instance,
+                                            table=table_tag,
+                                            prefix=prefix)
 
     extract.extract_to_cbt(manifest_path=manifest_path,
-                           shard_id=0, num_shards=1,
+                           shard_id=0,
+                           num_shards=1,
                            project=self.project,
                            instance=self.instance,
                            table=table_tag,
@@ -149,7 +151,7 @@ class TestCBTUtils(tf.test.TestCase):
                            audio_block_size=1000)
 
     selection_meta = selection.lookup_shard_metadata()
-    
+
     train_meta_key = "train_meta_{}".format(_lex_index(0)).encode()
 
     self.assertTrue(selection_meta[train_meta_key].num_videos == 1)
@@ -157,8 +159,7 @@ class TestCBTUtils(tf.test.TestCase):
     video_meta = selection._get_random_video_meta(selection_meta)
 
     generator = selection.sample_av_correspondence_examples(
-        frames_per_video=frames_per_video,
-        max_num_samples=1)
+        frames_per_video=frames_per_video, max_num_samples=1)
 
     sample = generator.__next__()
 
@@ -180,7 +181,7 @@ class TestCBTUtils(tf.test.TestCase):
       self.assertEqual(sample.labels["overlap"], overlap)
       self.assertEqual(type(sample.video), np.ndarray)
       self.assertEqual(type(sample.audio), np.ndarray)
-      
+
       reshaped = np.reshape(sample.video, video_shape)
       flat = sample.video.flatten().tolist()
       self.assertTrue(isinstance(flat[0], int))
@@ -190,40 +191,37 @@ class TestCBTUtils(tf.test.TestCase):
     #_verify(negative_different, 0, 0)
 
     generator = selection.sample_av_correspondence_examples(
-        frames_per_video=frames_per_video,
-        max_num_samples=1, keys_only=True)
+        frames_per_video=frames_per_video, max_num_samples=1, keys_only=True)
 
     sample = generator.__next__()
-    
+
     serialized = sample["positive_same"].serialize()
 
   def test_tfexampleselection_e2e(self):
 
     table_tag = "{}-tfexe2e".format(self.table)
     prefix = "train_"
-    video_shape = (4,16,16,3)
+    video_shape = (4, 16, 16, 3)
     audio_shape = (1234)
     mock_num_examples = 100
 
-    selection = cbt_utils.TFExampleSelection(
-      project=self.project,
-      instance=self.instance,
-      table=table_tag,
-      prefix=prefix
-    )
+    selection = cbt_utils.TFExampleSelection(project=self.project,
+                                             instance=self.instance,
+                                             table=table_tag,
+                                             prefix=prefix)
 
     # Check that the test table is empty
     self.assertTrue(not selection.rows_at_least(1))
 
     def _dummy_generator(n):
       for _ in range(n + 1):
-        video = np.random.randint(0,255,video_shape).astype(np.uint8)
-        audio = np.random.randint(0,255,audio_shape).astype(np.uint8)
-        target_label = np.random.randint(0,2,(1)).astype(np.uint8)
+        video = np.random.randint(0, 255, video_shape).astype(np.uint8)
+        audio = np.random.randint(0, 255, audio_shape).astype(np.uint8)
+        target_label = np.random.randint(0, 2, (1)).astype(np.uint8)
         yield {
-          "audio": audio.tolist(),
-          "video": video.flatten().tolist(),
-          "target": target_label.tolist()
+            "audio": audio.tolist(),
+            "video": video.flatten().tolist(),
+            "target": target_label.tolist()
         }
 
     """
@@ -246,7 +244,7 @@ class TestCBTUtils(tf.test.TestCase):
     """
 
     num_records_loaded = selection.random_load_from_generator(
-      generator=_dummy_generator(mock_num_examples))
+        generator=_dummy_generator(mock_num_examples))
 
     self.assertEqual(num_records_loaded, mock_num_examples)
 
@@ -254,7 +252,7 @@ class TestCBTUtils(tf.test.TestCase):
     # of 26 and a prefix tag length of 4 the probability of having
     # more than 50 collisions is low... like < (50/(26^4))^50...
     # 9e-199 that's almost 1/(2*googles).
-    self.assertTrue(selection.rows_at_least(0.5*mock_num_examples))
+    self.assertTrue(selection.rows_at_least(0.5 * mock_num_examples))
 
     example_iterator = selection.iterate_tfexamples()
 
@@ -268,7 +266,6 @@ class TestCBTUtils(tf.test.TestCase):
     _ = np.reshape(recv_video, video_shape)
     _ = np.reshape(recv_target, (1))
 
-
   def test_e2e_via_problem(self):
 
     table_tag = "{}-prob".format(self.table)
@@ -278,15 +275,14 @@ class TestCBTUtils(tf.test.TestCase):
     source_table_tag = table_tag + "s"
     target_table_tag = table_tag + "t"
 
-    source_selection = cbt_utils.RawVideoSelection(
-      project=self.project,
-      instance=self.instance,
-      table=source_table_tag,
-      prefix=prefix
-    )
+    source_selection = cbt_utils.RawVideoSelection(project=self.project,
+                                                   instance=self.instance,
+                                                   table=source_table_tag,
+                                                   prefix=prefix)
 
     extract.extract_to_cbt(manifest_path=manifest_path,
-                           shard_id=0, num_shards=1,
+                           shard_id=0,
+                           num_shards=1,
                            project=self.project,
                            instance=self.instance,
                            table=source_table_tag,
@@ -297,18 +293,16 @@ class TestCBTUtils(tf.test.TestCase):
 
     example_generator = test_problem.sampling_generator(source_selection)
 
-    target_selection = cbt_utils.TFExampleSelection(
-      project=self.project,
-      instance=self.instance,
-      table=table_tag + "t",
-      prefix=prefix)
+    target_selection = cbt_utils.TFExampleSelection(project=self.project,
+                                                    instance=self.instance,
+                                                    table=table_tag + "t",
+                                                    prefix=prefix)
 
     num_records_loaded = target_selection.random_load_from_generator(
-      generator=example_generator)
+        generator=example_generator)
 
     self.assertTrue(num_records_loaded > 0)
 
 
 if __name__ == "__main__":
-  tf.logging.set_verbosity(tf.logging.INFO)
   tf.test.main()

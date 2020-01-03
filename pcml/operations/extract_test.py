@@ -32,8 +32,7 @@ from pcml.utils.cfg_utils import Config
 TEST_CONFIG = Config()
 
 
-def furnish_test_artifacts_path(test_artifacts_root,
-                                test_name="untitled"):
+def furnish_test_artifacts_path(test_artifacts_root, test_name="untitled"):
   uid = str(uuid.uuid4())
   return os.path.join(test_artifacts_root, uid, test_name)
 
@@ -41,7 +40,7 @@ def furnish_test_artifacts_path(test_artifacts_root,
 class TestExtract(tf.test.TestCase):
 
   def setUp(self):
-    
+
     self.artifacts_path = furnish_test_artifacts_path(
         test_artifacts_root=TEST_CONFIG.get("test_artifacts_root"),
         test_name="operations/extract")
@@ -50,14 +49,12 @@ class TestExtract(tf.test.TestCase):
       test_video_manifest_path = TEST_CONFIG.get("test_video_manifest_path")
       if isinstance(test_video_manifest_path, str):
         self.manifest_path = test_video_manifest_path
-    
+
     if not hasattr(self, "manifest_path"):
-      self.manifest_path = os.path.join(self.artifacts_path,
-                                        "manifest.csv")
-    
+      self.manifest_path = os.path.join(self.artifacts_path, "manifest.csv")
+
       vox_celeb_root = TEST_CONFIG.get("vox_celeb_data_root")
-      test_video = os.path.join(vox_celeb_root,
-                                "dev/mp4/id00012/21Uxsk56VDQ",
+      test_video = os.path.join(vox_celeb_root, "dev/mp4/id00012/21Uxsk56VDQ",
                                 "00001.mp4")
 
       with tf.gfile.Open(self.manifest_path, "w") as manifest:
@@ -67,9 +64,7 @@ class TestExtract(tf.test.TestCase):
     self.instance = TEST_CONFIG.get("test_cbt_instance")
     self.tmpdir = tempfile.mkdtemp()
 
-    self.table = "clarify-test-{}-extract".format(
-      str(uuid.uuid4())[0:8]
-    )
+    self.table = "clarify-test-{}-extract".format(str(uuid.uuid4())[0:8])
 
   def test_extract_given_sharding(self):
 
@@ -79,8 +74,7 @@ class TestExtract(tf.test.TestCase):
 
     for shard_id in range(num_shards):
 
-      shard_subset = extract.subset_given_sharding(
-          array, shard_id, num_shards)
+      shard_subset = extract.subset_given_sharding(array, shard_id, num_shards)
 
       reconstructed.extend(shard_subset)
 
@@ -92,16 +86,16 @@ class TestExtract(tf.test.TestCase):
     table_name = "{}-fn".format(self.table)
     target_prefix = "train"
 
-    selection = cbt_utils.RawVideoSelection(
-        project=self.project,
-        instance=self.instance,
-        table=table_name,
-        prefix=target_prefix)
+    selection = cbt_utils.RawVideoSelection(project=self.project,
+                                            instance=self.instance,
+                                            table=table_name,
+                                            prefix=target_prefix)
 
     self.assertTrue(not selection.rows_at_least(10))
 
     extract.extract_to_cbt(manifest_path=self.manifest_path,
-                           shard_id=0, num_shards=1,
+                           shard_id=0,
+                           num_shards=1,
                            project=self.project,
                            instance=self.instance,
                            table=table_name,
@@ -134,14 +128,14 @@ class TestExtract(tf.test.TestCase):
 
     for create_response in create_responses:
       _testing_run_poll_and_check_job(
-        test_object=self, create_response=create_response,
-        expect_in_logs="Batch extraction complete.")
+          test_object=self,
+          create_response=create_response,
+          expect_in_logs="Batch extraction complete.")
 
-    selection = cbt_utils.RawVideoSelection(
-      project=self.project,
-      instance=self.instance,
-      table=table_name,
-      prefix="train")
+    selection = cbt_utils.RawVideoSelection(project=self.project,
+                                            instance=self.instance,
+                                            table=table_name,
+                                            prefix="train")
 
     # TODO: The test should not only check that the job completes
     # without error but also that there is data in a new table that was
@@ -149,12 +143,10 @@ class TestExtract(tf.test.TestCase):
     self.assertTrue(selection.rows_at_least(10))
 
     shard_metadata = selection.lookup_shard_metadata()
-    expected_shard_metadata = cbt_utils.VideoShardMeta(
-      num_videos=1,
-      status="finished",
-      shard_id=0,
-      num_shards=1
-    )
+    expected_shard_metadata = cbt_utils.VideoShardMeta(num_videos=1,
+                                                       status="finished",
+                                                       shard_id=0,
+                                                       num_shards=1)
 
     self.assertTrue(isinstance(shard_metadata, dict))
     self.assertTrue("train_meta_0" in shard_metadata)

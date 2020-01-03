@@ -47,21 +47,6 @@ py_test(
 )
 
 py_library(
-    name = "bazel_utils",
-    srcs = ["bazel_utils.py"],
-    deps = ["//pcml/utils:fs_utils"],
-)
-
-py_test(
-    name = "bazel_utils_test",
-    srcs = ["bazel_utils_test.py"],
-    deps = [
-        "//pcml/utils:bazel_utils",
-        requirement("tensorflow"),
-    ],
-)
-
-py_library(
     name = "cbt_utils",
     srcs = ["cbt_utils.py"],
     deps = [
@@ -92,6 +77,7 @@ py_library(
     srcs = ["cfg_utils.py"],
     deps = [
         "//pcml/utils:fs_utils",
+        "//pcml:test_config",
         requirement("tensorflow"),
     ],
 )
@@ -124,7 +110,7 @@ py_library(
     name = "dev_utils",
     srcs = ["dev_utils.py"],
     deps = [
-        "//pcml/utils:test_utils",
+        "//pcml/utils:cfg_utils",
         requirement("grpcio"),
         requirement("tensor2tensor"),
         requirement("tensorflow"),
@@ -143,24 +129,6 @@ py_test(
 )
 
 py_library(
-    name = "test_utils",
-    srcs = ["test_utils.py"],
-    deps = [
-        "//pcml/utils:fs_utils",
-        requirement("tensorflow"),
-    ],
-)
-
-py_test(
-    name = "test_utils_test",
-    srcs = ["test_utils_test.py"],
-    deps = [
-        "//pcml/utils:test_utils",
-        requirement("tensorflow"),
-    ],
-)
-
-py_library(
     name = "fs_utils",
     srcs = ["fs_utils.py"],
     deps = [requirement("tensorflow")],
@@ -173,21 +141,6 @@ py_test(
         "//pcml/utils:fs_utils",
         requirement("tensorflow"),
     ],
-)
-
-py_library(
-    name = "patch_tpu_estimator",
-    srcs = ["patch_tpu_estimator.py"],
-    deps = [
-        requirement("tensorflow"),
-        requirement("tensorflow_estimator"),
-    ],
-)
-
-py_library(
-    name = "serving_utils",
-    srcs = ["serving_utils.py"],
-    deps = [requirement("tensorflow")],
 )
 
 py_library(

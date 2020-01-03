@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """A kubernetes Job to embed a collection of images in tf.Eager mode."""
 
 from __future__ import absolute_import
@@ -28,7 +27,6 @@ Modes = tf.estimator.ModeKeys  # pylint: disable=invalid-name
 
 from pcml.launcher.kube import PCMLJob
 from pcml.launcher.kube import gen_timestamped_uid
-
 
 _SUCCESS_MESSAGE = "Successfully completed batch image embedding."
 
@@ -56,16 +54,18 @@ class EmbedImages(PCMLJob):
     job_name_prefix = "embed-images"
     job_name = "%s-%s" % (job_name_prefix, gen_timestamped_uid())
 
-    super(EmbedImages, self).__init__(
-      job_name=job_name,
-      command=command,
-      command_args=command_args,
-      namespace="kubeflow",
-      image="gcr.io/clarify/basic-runtime:0.0.3",
-      *args, **kwargs)
+    super(EmbedImages,
+          self).__init__(job_name=job_name,
+                         command=command,
+                         command_args=command_args,
+                         namespace="kubeflow",
+                         image="gcr.io/clarify/basic-runtime:0.0.3",
+                         *args,
+                         **kwargs)
 
 
-def run(input_manifest, target_csv, ckpt_path, problem_name, model_name, hparams_set_name):
+def run(input_manifest, target_csv, ckpt_path, problem_name, model_name,
+        hparams_set_name):
 
   problem_obj = registry.problem(problem_name)
   hparams = registry.hparams_set(hparams_set_name)
@@ -74,10 +74,8 @@ def run(input_manifest, target_csv, ckpt_path, problem_name, model_name, hparams
   mode = "predict"
   ModelObj = registry.model(model_name)
 
-  with tfe.restore_variables_on_create(
-    tf.train.latest_checkpoint(ckpt_path)):
+  with tfe.restore_variables_on_create(tf.train.latest_checkpoint(ckpt_path)):
     model = ModelObj(hparams, mode, p_hparams)
-
   """
 
   Question: Should the same problem that was used in training be used to iterate images
@@ -93,12 +91,8 @@ def main(_):
 
   tf.logging.set_verbosity(tf.logging.INFO)
 
-  run(FLAGS.input_manifest,
-      FLAGS.target_csv,
-      FLAGS.ckpt_path,
-      FLAGS.problem_name,
-      FLAGS.model_name,
-      FLAGS.hparams_set_name)
+  run(FLAGS.input_manifest, FLAGS.target_csv, FLAGS.ckpt_path,
+      FLAGS.problem_name, FLAGS.model_name, FLAGS.hparams_set_name)
 
   tf.logging.info(_SUCCESS_MESSAGE)
 
@@ -114,17 +108,14 @@ if __name__ == "__main__":
   flags.DEFINE_string('target_csv', None,
                       'CSV path to which to write embeddings and labels.')
 
-  flags.DEFINE_string('ckpt_path', None,
-                      'Path to model checkpoints to restore')
+  flags.DEFINE_string('ckpt_path', None, 'Path to model checkpoints to restore')
 
   flags.DEFINE_string('problem_name', None,
                       'T2T problem name (possibly dummy).')
 
-  flags.DEFINE_string('model_name', None,
-                      'T2T model name.')
+  flags.DEFINE_string('model_name', None, 'T2T model name.')
 
-  flags.DEFINE_string('hparams_set_name', None,
-                      'T2T hparams set name.')
+  flags.DEFINE_string('hparams_set_name', None, 'T2T hparams set name.')
 
   tf.logging.set_verbosity(tf.logging.INFO)
   tf.app.run()

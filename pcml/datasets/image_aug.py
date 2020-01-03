@@ -15,7 +15,10 @@ import tensorflow as tf
 
 
 # From tensor2tensor/data_generators/imagenet.py
-def preprocess_image(image, mode, resize_size=None, normalize=True,
+def preprocess_image(image,
+                     mode,
+                     resize_size=None,
+                     normalize=True,
                      image_statistics=None,
                      crop_area_min=0.50,
                      contrast_lower=0.2,
@@ -33,19 +36,20 @@ def preprocess_image(image, mode, resize_size=None, normalize=True,
   assert resize_size[0] == resize_size[1]
   image_size = resize_size[0]
 
-  if normalize: image = tf.to_float(image) / 255.0
+  if normalize:
+    image = tf.to_float(image) / 255.0
 
-  brightness_delta = tf.random.uniform(
-    shape=(),
-    minval=brightness_delta_min,
-    maxval=brightness_delta_max,
-    dtype=tf.dtypes.float32,
-    seed=None,
-    name=None)
+  brightness_delta = tf.random.uniform(shape=(),
+                                       minval=brightness_delta_min,
+                                       maxval=brightness_delta_max,
+                                       dtype=tf.dtypes.float32,
+                                       seed=None,
+                                       name=None)
 
   if mode == tf.estimator.ModeKeys.TRAIN:
     image = _random_crop(image, size=image_size, area_min=crop_area_min)
-    if normalize: image = _normalize(image, mean_rgb, stddev_rgb)
+    if normalize:
+      image = _normalize(image, mean_rgb, stddev_rgb)
     image = _flip(image)
 
     image = tf.image.adjust_brightness(image, delta=brightness_delta)
@@ -61,7 +65,8 @@ def preprocess_image(image, mode, resize_size=None, normalize=True,
     # Might want to remove this at inference time as it may not be
     # applicable whereas we intend to have trained models that are
     # invariant to this...
-    if normalize: image = _normalize(image, mean_rgb, stddev_rgb)
+    if normalize:
+      image = _normalize(image, mean_rgb, stddev_rgb)
 
     image = _center_crop(image, image_size)
 
@@ -90,15 +95,14 @@ def _crop(image, offset_height, offset_width, crop_height, crop_width):
   """
   original_shape = tf.shape(image)
 
-  rank_assertion = tf.Assert(
-      tf.equal(tf.rank(image), 3), ["Rank of image must be equal to 3."])
+  rank_assertion = tf.Assert(tf.equal(tf.rank(image), 3),
+                             ["Rank of image must be equal to 3."])
   with tf.control_dependencies([rank_assertion]):
     cropped_shape = tf.stack([crop_height, crop_width, original_shape[2]])
 
   size_assertion = tf.Assert(
-      tf.logical_and(
-          tf.greater_equal(original_shape[0], crop_height),
-          tf.greater_equal(original_shape[1], crop_width)),
+      tf.logical_and(tf.greater_equal(original_shape[0], crop_height),
+                     tf.greater_equal(original_shape[1], crop_width)),
       ["Crop size greater than the image size."])
 
   offsets = tf.to_int32(tf.stack([offset_height, offset_width, 0]))
@@ -139,7 +143,8 @@ def distorted_bounding_box_crop(image,
   Returns:
     (cropped image `Tensor`, distorted bbox `Tensor`).
   """
-  with tf.name_scope(scope, default_name="distorted_bounding_box_crop",
+  with tf.name_scope(scope,
+                     default_name="distorted_bounding_box_crop",
                      values=[image, bbox]):
     # Each bounding box has shape [1, num_boxes, box coords] and
     # the coordinates are ordered [ymin, xmin, ymax, xmax].
@@ -169,14 +174,14 @@ def distorted_bounding_box_crop(image,
 def _random_crop(image, size, area_min=0.08):
   """Make a random crop of (`size` x `size`)."""
   bbox = tf.constant([0.0, 0.0, 1.0, 1.0], dtype=tf.float32, shape=[1, 1, 4])
-  random_image, bbox = distorted_bounding_box_crop(
-      image,
-      bbox,
-      min_object_covered=0.1,
-      aspect_ratio_range=(3. / 4, 4. / 3.),
-      area_range=(area_min, 1.0),
-      max_attempts=1,
-      scope=None)
+  random_image, bbox = distorted_bounding_box_crop(image,
+                                                   bbox,
+                                                   min_object_covered=0.1,
+                                                   aspect_ratio_range=(3. / 4,
+                                                                       4. / 3.),
+                                                   area_range=(area_min, 1.0),
+                                                   max_attempts=1,
+                                                   scope=None)
   bad = _at_least_x_are_true(tf.shape(image), tf.shape(random_image), 3)
 
   image = tf.cond(

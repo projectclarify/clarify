@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of MAHNOB-HCI problem definitions."""
 
 from __future__ import absolute_import
@@ -34,8 +33,9 @@ class TestMahnobProblem(tf.test.TestCase):
 
     paths = mahnob_hci.maybe_get_data(TESTING_TMP,
                                       mahnob_hci.DEFAULT_DATA_ROOT).next()
-    expected_keys = ["video_path", "audio_path", "guide_cut_path",
-                     "all_data_path"]
+    expected_keys = [
+        "video_path", "audio_path", "guide_cut_path", "all_data_path"
+    ]
     for key in expected_keys:
       self.assertTrue(key in paths.keys())
 

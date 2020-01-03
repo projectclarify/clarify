@@ -32,7 +32,11 @@ class TestParseTFConfig(tf.test.TestCase):
         u'cluster': {
             u'master': [u'enhance-0401-0010-882a-master-5sq4-0:2222']
         },
-        u'task': {u'index': 0, u'type': u'master'}})
+        u'task': {
+            u'index': 0,
+            u'type': u'master'
+        }
+    })
 
     flags = tf_config_to_additional_flags()
     tf.logging.info(flags)

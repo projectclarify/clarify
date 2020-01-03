@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """DEAP problem definitions."""
 
 from __future__ import absolute_import
@@ -40,7 +39,6 @@ from tensor2tensor.utils import registry
 
 from tensor2tensor.layers import modalities
 
-
 DEFAULT_DEAP_ROOT = "gs://clarify-data/requires-eula/deap/"
 
 
@@ -56,7 +54,9 @@ def _raw_data_verifier(tmp_dir, test_mode=False):
                       "saw %s" % len(files)))
 
 
-def maybe_get_deap_data(tmp_dir, deap_root=DEFAULT_DEAP_ROOT, is_training=True,
+def maybe_get_deap_data(tmp_dir,
+                        deap_root=DEFAULT_DEAP_ROOT,
+                        is_training=True,
                         training_fraction=0.9):
   """Maybe download DEAP data.
 
@@ -72,8 +72,7 @@ def maybe_get_deap_data(tmp_dir, deap_root=DEFAULT_DEAP_ROOT, is_training=True,
   """
 
   preproc_python_dir = os.path.join(deap_root, "preproc_python/*")
-  input_paths = get_input_file_paths(preproc_python_dir,
-                                     is_training,
+  input_paths = get_input_file_paths(preproc_python_dir, is_training,
                                      training_fraction)
 
   paths = []
@@ -85,9 +84,12 @@ def maybe_get_deap_data(tmp_dir, deap_root=DEFAULT_DEAP_ROOT, is_training=True,
 
 def load_deap_meta(local_deap_root):
 
-  participant_ratings = pd.read_csv(os.path.join(local_deap_root, "meta", "participant_ratings.csv"))
-  online_ratings = pd.read_csv(os.path.join(local_deap_root, "meta", "online_ratings.csv"))
-  video_list = pd.read_csv(os.path.join(local_deap_root, "meta", "video_list.csv"))
+  participant_ratings = pd.read_csv(
+      os.path.join(local_deap_root, "meta", "participant_ratings.csv"))
+  online_ratings = pd.read_csv(
+      os.path.join(local_deap_root, "meta", "online_ratings.csv"))
+  video_list = pd.read_csv(
+      os.path.join(local_deap_root, "meta", "video_list.csv"))
 
   return {
       "participant_ratings": participant_ratings,
@@ -108,15 +110,15 @@ def _parse_deap_metadata(local_deap_root):
     exp = raw_meta["participant_ratings"]["Experiment_id"][i]
     start = raw_meta["participant_ratings"]["Start_time"][i]
     data = {
-      "pid": pid,
-      "tid": tid,
-      "exp": exp,
-      "start": start,
-      "valence": raw_meta["participant_ratings"]["Valence"][i],
-      "arousal": raw_meta["participant_ratings"]["Arousal"][i],
-      "dominance": raw_meta["participant_ratings"]["Dominance"][i],
-      "liking": raw_meta["participant_ratings"]["Liking"][i],
-      "familiarity": raw_meta["participant_ratings"]["Familiarity"][i]
+        "pid": pid,
+        "tid": tid,
+        "exp": exp,
+        "start": start,
+        "valence": raw_meta["participant_ratings"]["Valence"][i],
+        "arousal": raw_meta["participant_ratings"]["Arousal"][i],
+        "dominance": raw_meta["participant_ratings"]["Dominance"][i],
+        "liking": raw_meta["participant_ratings"]["Liking"][i],
+        "familiarity": raw_meta["participant_ratings"]["Familiarity"][i]
     }
     if pid not in dataset:
       dataset[pid] = {}
@@ -153,35 +155,42 @@ def _preprocess_trial_data(acquired_data, layout, channel_data):
   sensor_positions = np.asarray(sensor_positions)
   channels = np.asarray(channels)
 
-  return (sensor_traces, sensor_positions, acquired_data_lookup,
-          channels)
+  return (sensor_traces, sensor_positions, acquired_data_lookup, channels)
+
 
 # All of the channels expected to be present in DEAP bdf files
 # along with the ranges to which the signal from those channels
 # should be clipped.
-DEAP_BDF_CHANNELS = [
-  ('Fp1', (-20, 20)), ('AF3', (-20, 20)), ('F3', (-20, 20)), ('F7', (-20, 20)),
-  ('FC5', (-20, 20)), ('FC1', (-20, 20)), ('C3', (-20, 20)), ('T7', (-20, 20)),
-  ('CP5', (-20, 20)), ('CP1', (-20, 20)), ('P3', (-20, 20)), ('P7', (-20, 20)),
-  ('PO3', (-20, 20)), ('O1', (-20, 20)), ('Oz', (-20, 20)), ('Pz', (-20, 20)),
-  ('Fp2', (-20, 20)), ('AF4', (-20, 20)), ('Fz', (-20, 20)), ('F4', (-20, 20)),
-  ('F8', (-20, 20)), ('FC6', (-20, 20)), ('FC2', (-20, 20)), ('Cz', (-20, 20)),
-  ('C4', (-20, 20)), ('T8', (-20, 20)), ('CP6', (-20, 20)), ('CP2', (-20, 20)),
-  ('P4', (-20, 20)), ('P8', (-20, 20)), ('PO4', (-20, 20)), ('O2', (-20, 20)),
-  ('hEOG', (-400, 0)), ('vEOG', (0, 500)), ('zEMG', (-120, 120)),
-  ('tEMG', (-100, 100)), ('GSR', (-10000, 10000)), ('rAMP', (-2000, 2000)),
-  ('plethysmograph', (-20000, 20000)), ('temp', (-0.1, 0.1))
-]
+DEAP_BDF_CHANNELS = [('Fp1', (-20, 20)), ('AF3', (-20, 20)), ('F3', (-20, 20)),
+                     ('F7', (-20, 20)), ('FC5', (-20, 20)), ('FC1', (-20, 20)),
+                     ('C3', (-20, 20)), ('T7', (-20, 20)), ('CP5', (-20, 20)),
+                     ('CP1', (-20, 20)), ('P3', (-20, 20)), ('P7', (-20, 20)),
+                     ('PO3', (-20, 20)), ('O1', (-20, 20)), ('Oz', (-20, 20)),
+                     ('Pz', (-20, 20)), ('Fp2', (-20, 20)), ('AF4', (-20, 20)),
+                     ('Fz', (-20, 20)), ('F4', (-20, 20)), ('F8', (-20, 20)),
+                     ('FC6', (-20, 20)), ('FC2', (-20, 20)), ('Cz', (-20, 20)),
+                     ('C4', (-20, 20)), ('T8', (-20, 20)), ('CP6', (-20, 20)),
+                     ('CP2', (-20, 20)), ('P4', (-20, 20)), ('P8', (-20, 20)),
+                     ('PO4', (-20, 20)), ('O2', (-20, 20)), ('hEOG', (-400, 0)),
+                     ('vEOG', (0, 500)), ('zEMG', (-120, 120)),
+                     ('tEMG', (-100, 100)), ('GSR', (-10000, 10000)),
+                     ('rAMP', (-2000, 2000)),
+                     ('plethysmograph', (-20000, 20000)), ('temp', (-0.1, 0.1))]
 
 # The channels of DEAP_BDF_CHANNELS we expect to be able to relate
 # to a the Biosemi layout from mne's biosemi.lay.
 DEAP_EXPECTED_MAPPED_EEG_CHANNELS = [
-    "P3", "Pz", "O2", "O1", "FC5", "P4", "T8", "Fz", "AF4", "PO4",
-    "AF3", "FC1", "FC2", "P7", "FC6", "T7", "P8", "PO3", "C3", "Fp1",
-    "Oz", "Fp2", "F3", "F4", "F7", "F8", "Cz", "CP1", "CP2", "C4",
-    "CP5", "CP6"]
+    "P3", "Pz", "O2", "O1", "FC5", "P4", "T8", "Fz", "AF4", "PO4", "AF3", "FC1",
+    "FC2", "P7", "FC6", "T7", "P8", "PO3", "C3", "Fp1", "Oz", "Fp2", "F3", "F4",
+    "F7", "F8", "Cz", "CP1", "CP2", "C4", "CP5", "CP6"
+]
 
-def clip_and_standardize(data, min_val, max_val, vocab_size=256, dtype=np.int32):
+
+def clip_and_standardize(data,
+                         min_val,
+                         max_val,
+                         vocab_size=256,
+                         dtype=np.int32):
   """Given a signal on [min_val, max_val] yield signal on [-1, 1]."""
 
   assert min_val < max_val
@@ -191,7 +200,7 @@ def clip_and_standardize(data, min_val, max_val, vocab_size=256, dtype=np.int32)
 
   # If [min_val, max_val] is not centered compute the delta
   # that would be needed to center it.
-  delta = (max_val - width/2.0)
+  delta = (max_val - width / 2.0)
 
   # Shift the clipping range to be centered
   min_val, max_val = min_val - delta, max_val - delta
@@ -205,9 +214,9 @@ def clip_and_standardize(data, min_val, max_val, vocab_size=256, dtype=np.int32)
   std = np.clip(std, min_val, max_val)
 
   # Transform [a,b] to [-1,1]
-  std = std/(width/2)
+  std = std / (width / 2)
 
-  std *= vocab_size/2
+  std *= vocab_size / 2
 
   std = std.astype(dtype)
 
@@ -238,27 +247,28 @@ def load_preprocessed_deap_data(deap_acquisition_path):
   matched_channels = []
   for trial_data in raw_data["data"]:
     rec_data, rec_positions, raw_data_lookup, chan = _preprocess_trial_data(
-      acquired_data=trial_data,
-      layout=biosemi_layout,
-      channel_data=DEAP_BDF_CHANNELS)
+        acquired_data=trial_data,
+        layout=biosemi_layout,
+        channel_data=DEAP_BDF_CHANNELS)
     reconciled_acquisition_data.append(rec_data)
     raw_data_lookups.append(raw_data_lookup)
     matched_channels.append(chan)
-  return (reconciled_acquisition_data, rec_positions, raw_data_lookups,
-          labels, matched_channels)
+  return (reconciled_acquisition_data, rec_positions, raw_data_lookups, labels,
+          matched_channels)
 
 
 def _tiled_subsample_example(example, subsample_width, subsample_step):
-  subrange_keys = ["eeg/raw", "physio/hEOG", "physio/vEOG", "physio/zEMG",
-                   "physio/tEMG", "physio/GSR", "physio/rAMP",
-                   "physio/plethysmograph", "physio/temp"]
-  max_len = len(example["physio/temp"])# HACK
+  subrange_keys = [
+      "eeg/raw", "physio/hEOG", "physio/vEOG", "physio/zEMG", "physio/tEMG",
+      "physio/GSR", "physio/rAMP", "physio/plethysmograph", "physio/temp"
+  ]
+  max_len = len(example["physio/temp"])  # HACK
   if subsample_width <= 0 or subsample_step <= 0:
     raise ValueError("subsample width and step must be natural numbers")
   for i in range(max_len):
     # The most we'll ever iterate is max_len.
     # zero-based.
-    interval_start = i*subsample_step
+    interval_start = i * subsample_step
     interval_end = interval_start + subsample_width
     if interval_end > max_len:
       return
@@ -269,7 +279,9 @@ def _tiled_subsample_example(example, subsample_width, subsample_step):
       if len(shape) == 1:
         subsampled_example[key] = feature[interval_start:interval_end]
       elif len(shape) == 2:
-        subsampled_example[key] = [thing[interval_start:interval_end] for thing in feature]
+        subsampled_example[key] = [
+            thing[interval_start:interval_end] for thing in feature
+        ]
       else:
         # There's probably a better way to slice by the last dimension using
         # numpy... idk maybe something like this?
@@ -278,8 +290,13 @@ def _tiled_subsample_example(example, subsample_width, subsample_step):
     yield subsampled_example
 
 
-def _generator(tmp_dir, subsample_width=100, subsample_step=10, how_many=None,
-               is_training=True, training_fraction=0.9, vocab_size=256):
+def _generator(tmp_dir,
+               subsample_width=100,
+               subsample_step=10,
+               how_many=None,
+               is_training=True,
+               training_fraction=0.9,
+               vocab_size=256):
   """Generator for base training examples from the DEAP dataset.
 
   Notes:
@@ -335,11 +352,10 @@ def _generator(tmp_dir, subsample_width=100, subsample_step=10, how_many=None,
   def _flatten(list_or_array):
     return np.asarray(list_or_array).flatten().tolist()
 
-  for acquisition_path in maybe_get_deap_data(tmp_dir,
-                                              is_training=is_training,
-                                              training_fraction=training_fraction):
+  for acquisition_path in maybe_get_deap_data(
+      tmp_dir, is_training=is_training, training_fraction=training_fraction):
     trials, positions, raw, labels, chan = load_preprocessed_deap_data(
-    acquisition_path)
+        acquisition_path)
     for i, trial_reconciled in enumerate(trials):
       example = {
           "eeg/raw": trial_reconciled,
@@ -358,7 +374,6 @@ def _generator(tmp_dir, subsample_width=100, subsample_step=10, how_many=None,
           # instead of mapping this into a common image.
           # "eeg/encoded": None,
           # -----
-          
           "physio/hEOG": raw[i]["hEOG"],
           "physio/vEOG": raw[i]["vEOG"],
           "physio/zEMG": raw[i]["zEMG"],
@@ -367,15 +382,13 @@ def _generator(tmp_dir, subsample_width=100, subsample_step=10, how_many=None,
           "physio/rAMP": raw[i]["rAMP"],
           "physio/plethysmograph": raw[i]["plethysmograph"],
           "physio/temp": raw[i]["temp"],
-          
+
           # valence, arousal, dominance, liking
           "affect/trial_selfreport": labels[i],
-
       }
-      
-      for subsampled in _tiled_subsample_example(
-        example, subsample_width, subsample_step
-      ):
+
+      for subsampled in _tiled_subsample_example(example, subsample_width,
+                                                 subsample_step):
         for key, value in subsampled.items():
           subsampled[key] = _flatten(value)
         yield subsampled
@@ -402,11 +415,11 @@ class DeapProblemBase(problem.Problem):
   def generator(self, tmp_dir, max_nbr_cases, is_training):
     w, s = self.trial_subsample_hparams.values()
     return _generator(tmp_dir=tmp_dir,
-                          subsample_width=w,
-                          subsample_step=s,
-                          how_many=max_nbr_cases,
-                          is_training=is_training,
-                          training_fraction=self.training_fraction)
+                      subsample_width=w,
+                      subsample_step=s,
+                      how_many=max_nbr_cases,
+                      is_training=is_training,
+                      training_fraction=self.training_fraction)
 
   @property
   def train_size(self):
@@ -437,7 +450,7 @@ class DeapProblemBase(problem.Problem):
     del data_dir
 
     return {
-      #"video": text_encoder.ImageEncoder(channels=self.video_shape[3]),
+        #"video": text_encoder.ImageEncoder(channels=self.video_shape[3]),
     }
 
   def get_eeg_shape(self):
@@ -450,23 +463,25 @@ class DeapProblemBase(problem.Problem):
     eeg_shape = self.get_eeg_shape()
 
     data_fields = {
-      "eeg/raw": tf.FixedLenFeature((32*100,), dtype=tf.int64),
-      "affect/trial_selfreport": tf.FixedLenFeature([num_classes], dtype=tf.int64),
+        "eeg/raw":
+            tf.FixedLenFeature((32 * 100,), dtype=tf.int64),
+        "affect/trial_selfreport":
+            tf.FixedLenFeature([num_classes], dtype=tf.int64),
     }
 
     data_items_to_decoders = {
-      "eeg": tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="eeg/raw"),
-      "targets": tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="affect/trial_selfreport")
+        "eeg":
+            tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="eeg/raw"),
+        "targets":
+            tf.contrib.slim.tfexample_decoder.Tensor(
+                tensor_key="affect/trial_selfreport")
     }
 
     return data_fields, data_items_to_decoders
 
   def hparams(self, defaults, unused_model_hparams):
     p = defaults
-    p.modality = {
-        "eeg": "IdentityModality",
-        "targets": "SymbolModality"
-    }
+    p.modality = {"eeg": "IdentityModality", "targets": "SymbolModality"}
 
     # Ugh this isn't necessary #HACK clarify how to remove it
     p.vocab_size = {

@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of utilities supporting data generation code."""
 
 from __future__ import absolute_import
@@ -34,7 +33,7 @@ from pcml.datasets.utils import array2gif
 
 tfe = tf.contrib.eager
 tfe.enable_eager_execution()
-Modes = tf.estimator.ModeKeys  # pylint: disable=invalid-name  
+Modes = tf.estimator.ModeKeys  # pylint: disable=invalid-name
 
 
 class TestMultiProblemUtils(tf.test.TestCase):
@@ -50,12 +49,12 @@ class TestMultiProblemUtils(tf.test.TestCase):
   """
 
   def test_gen_dummy_schedule(self):
-    
+
     num_problems = 10
     steps_per_problem = 10
 
-    schedule = gen_dummy_schedule(
-        num_problems=num_problems, steps_per_problem=steps_per_problem)
+    schedule = gen_dummy_schedule(num_problems=num_problems,
+                                  steps_per_problem=steps_per_problem)
 
     assert schedule[0] == "step"
     assert len(schedule[1]) == num_problems

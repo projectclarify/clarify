@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Development helper utility."""
 
 from __future__ import absolute_import
@@ -33,8 +32,6 @@ from tensor2tensor.serving import serving_utils
 from tensor2tensor.utils import trainer_lib
 from tensor2tensor.utils import registry
 from tensor2tensor.utils import decoding
-
-from pcml.utils.test_utils import maybe_get_tfms_path
 
 #import os
 #os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = ""
@@ -112,10 +109,20 @@ def wait_for_server_ready(server):
 class T2TDevHelper(object):
   """Datagen, train, export, and query served model."""
 
-  def __init__(self, model_name, problem_name, hparams_set, queries,
-               output_dir=None, data_dir=None, model_dir=None,
-               tmp_dir=None, export_dir=None, decode_hparams="",
-               default_tmp=None, tfms_path=None, mode="train"):
+  def __init__(self,
+               model_name,
+               problem_name,
+               hparams_set,
+               queries,
+               output_dir=None,
+               data_dir=None,
+               model_dir=None,
+               tmp_dir=None,
+               export_dir=None,
+               decode_hparams="",
+               default_tmp=None,
+               tfms_path=None,
+               mode="train"):
 
     self.model_name = model_name
     self.model = registry.model(model_name)
@@ -134,9 +141,8 @@ class T2TDevHelper(object):
     self.data_dir = data_dir if data_dir is not None else tmp
     self.model_dir = model_dir if model_dir is not None else tmp
     self.tmp_dir = tmp_dir if tmp_dir is not None else tmp
-    self.export_dir = (
-        export_dir if export_dir is not None else tmp + "/export"
-    )
+    self.export_dir = (export_dir if export_dir is not None else tmp +
+                       "/export")
 
     self.decode_hparams = decode_hparams
 
@@ -157,22 +163,20 @@ class T2TDevHelper(object):
   def train(self, use_tpu=False, schedule="train"):
     """Run training."""
 
-    exp_fn = trainer_lib.create_experiment_fn(
-        self.model_name,
-        self.problem_name,
-        self.data_dir,
-        train_steps=10,
-        eval_steps=1,
-        min_eval_frequency=9,
-        use_tpu=use_tpu,
-        schedule=schedule)
+    exp_fn = trainer_lib.create_experiment_fn(self.model_name,
+                                              self.problem_name,
+                                              self.data_dir,
+                                              train_steps=10,
+                                              eval_steps=1,
+                                              min_eval_frequency=9,
+                                              use_tpu=use_tpu,
+                                              schedule=schedule)
 
-    run_config = trainer_lib.create_run_config(
-        model_name=self.model_name,
-        model_dir=self.model_dir,
-        num_gpus=0,
-        use_tpu=use_tpu,
-        schedule=schedule)
+    run_config = trainer_lib.create_run_config(model_name=self.model_name,
+                                               model_dir=self.model_dir,
+                                               num_gpus=0,
+                                               use_tpu=use_tpu,
+                                               schedule=schedule)
 
     hparams = registry.hparams(self.hparams_set)
 
@@ -191,58 +195,34 @@ class T2TDevHelper(object):
 
     problem = hparams.problem
 
-    run_config = trainer_lib.create_run_config(
-        model_name=self.model_name,
-        model_dir=self.model_dir,
-        num_gpus=0,
-        use_tpu=False
-    )
+    run_config = trainer_lib.create_run_config(model_name=self.model_name,
+                                               model_dir=self.model_dir,
+                                               num_gpus=0,
+                                               use_tpu=False)
 
     estimator = trainer_lib.create_estimator(
         self.model_name,
         hparams,
         run_config,
-        decode_hparams=decoding.decode_hparams(self.decode_hparams)
-    )
+        decode_hparams=decoding.decode_hparams(self.decode_hparams))
 
     exporter = tf.estimator.FinalExporter(
-        "exporter",
-        lambda: problem.serving_input_fn(hparams),
-        as_text=True
-    )
+        "exporter", lambda: problem.serving_input_fn(hparams), as_text=True)
 
-    exporter.export(
-        estimator,
-        self.export_dir,
-        checkpoint_path=tf.train.latest_checkpoint(self.model_dir),
-        eval_result=None,
-        is_the_final_export=True
-    )
-
-  def maybe_lookup_tfms_path(self):
-    """Look up the path to tensorflow_model_server."""
-
-    tfms_path = self.tf_model_server_path
-
-    if tfms_path is None:
-
-      tfms_path = maybe_get_tfms_path()
-
-      if tfms_path is None:
-        raise ValueError("Could not obtain tensorflow_model_server path.")
-
-    self.tf_model_server_path = tfms_path
+    exporter.export(estimator,
+                    self.export_dir,
+                    checkpoint_path=tf.train.latest_checkpoint(self.model_dir),
+                    eval_result=None,
+                    is_the_final_export=True)
 
   def serve(self):
     """Serve a SavedModel."""
 
-    self.maybe_lookup_tfms_path()
+    if not self.tf_model_server_path:
+      raise ValueError("Need to set `tf_model_server_path` attr.")
 
-    _, server, _ = run_server(
-        self.model_name,
-        self.export_dir,
-        self.tf_model_server_path
-    )
+    _, server, _ = run_server(self.model_name, self.export_dir,
+                              self.tf_model_server_path)
 
     wait_for_server_ready(server)
 
@@ -256,16 +236,12 @@ class T2TDevHelper(object):
     problem = hparams.problem
 
     request_fn = serving_utils.make_grpc_request_fn(
-        servable_name=self.model_name,
-        server=server,
-        timeout_secs=timeout_secs)
+        servable_name=self.model_name, server=server, timeout_secs=timeout_secs)
 
     responses = []
 
     for query in queries:
-      response = serving_utils.predict(query,
-                                       problem,
-                                       request_fn)
+      response = serving_utils.predict(query, problem, request_fn)
       responses.append(response)
 
     return responses
@@ -299,15 +275,14 @@ class T2TDevHelper(object):
   def eager_get_nth_example(self, n, batch_size=2):
 
     if self.train_dataset is None:
-      train_dataset = self.problem.dataset(Modes.TRAIN,
-                                           data_dir=self.data_dir)
+      train_dataset = self.problem.dataset(Modes.TRAIN, data_dir=self.data_dir)
       self.train_dataset = train_dataset.repeat(None).batch(batch_size)
 
     for _ in range(n):
       ex = tfe.Iterator(self.train_dataset).next()
 
     return ex
-  
+
   def _lookup_hparams(self):
 
     self.hparams = registry.hparams(self.hparams_set)
@@ -317,11 +292,7 @@ class T2TDevHelper(object):
   def get_model_instance(self, mode=Modes.TRAIN):
     """Get an instantiated instance of self.model."""
 
-    model = self.model(
-        self.hparams,
-        mode,
-        self.p_hparams
-    )
+    model = self.model(self.hparams, mode, self.p_hparams)
 
     return model
 

@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of common test utils related to data generators."""
 
 from __future__ import absolute_import
@@ -35,7 +34,7 @@ class TestTestUtils(tf.test.TestCase):
 
   def test_get_test_data_path(self):
     self.assertEqual(get_test_data_path().split('/')[-1], "test_data")
-    
+
 
 if __name__ == "__main__":
   tf.test.main()

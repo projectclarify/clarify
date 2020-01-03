@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Extend t2t-trainer with startup tasks."""
 
 from __future__ import absolute_import
@@ -39,12 +38,13 @@ import time
 
 from pcml.operations.eval import trigger_eval
 
-
 # HACK: To be able to read data from BigTable
 #os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = ""
 
 
-def construct_job_command(remote_app_root, train_args, use_katib=False, 
+def construct_job_command(remote_app_root,
+                          train_args,
+                          use_katib=False,
                           vendor_t2t=False):
   """Construct a job command string.
 
@@ -69,7 +69,7 @@ def construct_job_command(remote_app_root, train_args, use_katib=False,
   pcml_fname = "pcml-0.0.1.tar.gz"
   remote_path = "%s/%s" % (remote_app_root, pcml_fname)
 
-  cmd.append("unset TF_CONFIG") # HACK
+  cmd.append("unset TF_CONFIG")  # HACK
   # TODO: Understand why not unsetting TF_CONFIG causes jobs to hang;
   # likely having to do with our custom code that parses the TF_CONFIG
   # into t2t_trainer FLAGS.
@@ -84,19 +84,13 @@ def construct_job_command(remote_app_root, train_args, use_katib=False,
 
   # Install some dependencies
   # TODO: Move this to the base container
-  cmd.append(
-      ("apt-get update && apt-get install -y "
-       "libsm6 libxext6 libxrender-dev libglib2.0-0 htop")
-  )
+  cmd.append(("apt-get update && apt-get install -y "
+              "libsm6 libxext6 libxrender-dev libglib2.0-0 htop"))
 
   # Copy down pcml code
-  cmd.append(
-      ("python -c 'import tensorflow as tf; "
-       "tf.gfile.Copy(\"%s\", \"/tmp/%s\", overwrite=True)'" % (
-           remote_path, pcml_fname
-       )
-      )
-  )
+  cmd.append(("python -c 'import tensorflow as tf; "
+              "tf.gfile.Copy(\"%s\", \"/tmp/%s\", overwrite=True)'" %
+              (remote_path, pcml_fname)))
 
   # Decompress code tarball
   cmd.append("cd /tmp; tar -xzvf /tmp/%s" % pcml_fname)
@@ -120,10 +114,8 @@ def construct_job_command(remote_app_root, train_args, use_katib=False,
 
   # Verify the GPU is visible by nvidia-smi as well as tf device_lib
   #cmd.append("nvidia-smi")
-  cmd.append(
-      ("python -c 'from tensorflow.python.client import device_lib; "
-       "print(device_lib.list_local_devices())'")
-  )
+  cmd.append(("python -c 'from tensorflow.python.client import device_lib; "
+              "print(device_lib.list_local_devices())'"))
 
   # Log the TF_CONFIG
   cmd.append("echo ${TF_CONFIG}")
@@ -174,7 +166,8 @@ class T2TKubeExperiment(TFJob):
                volumes=[],
                use_katib=False,
                vendor_t2t=False,
-               *args, **kwargs):
+               *args,
+               **kwargs):
     """Configure a T2TKubeExperiment object.
 
     Vars:
@@ -202,12 +195,12 @@ class T2TKubeExperiment(TFJob):
       raise ValueError("The number of worker replicas must be an "
                        "integer greater than or equal to zero.")
 
-    if (not isinstance(num_ps_replicas, int) or
-        num_ps_replicas < 0):
+    if (not isinstance(num_ps_replicas, int) or num_ps_replicas < 0):
       raise ValueError("The number of ps replicas must be an "
                        "integer greater than or equal to zero.")
 
-    cmd = construct_job_command(remote_app_root, train_args,
+    cmd = construct_job_command(remote_app_root,
+                                train_args,
                                 use_katib=use_katib,
                                 vendor_t2t=vendor_t2t)
 
@@ -216,10 +209,7 @@ class T2TKubeExperiment(TFJob):
 
     # TODO: For now, just run all components with the same resources.
 
-    limits = {
-        "cpu": cpu,
-        "memory": memory
-    }
+    limits = {"cpu": cpu, "memory": memory}
 
     if not use_tpu and master_gpu > 0:
       limits.update({"nvidia.com/gpu": master_gpu})
@@ -269,8 +259,7 @@ class T2TKubeExperiment(TFJob):
                        resources=ps_resources,
                        attached_volumes=volumes,
                        node_selector=selector_labels,
-                       annotations=annotations)
-      )
+                       annotations=annotations))
 
     if num_worker_replicas > 0:
       replicas.append(
@@ -282,12 +271,12 @@ class T2TKubeExperiment(TFJob):
                        resources=worker_resources,
                        attached_volumes=volumes,
                        node_selector=selector_labels,
-                       annotations=annotations)
-      )
+                       annotations=annotations))
 
     super(T2TKubeExperiment, self).__init__(command="",
                                             replicas=replicas,
-                                            *args, **kwargs)
+                                            *args,
+                                            **kwargs)
 
 
 def tf_config_to_additional_flags():
@@ -384,9 +373,11 @@ def _expect_non_negative_int(val):
 
 def build_accelerator_args(gpu_type="nvidia-tesla-k80",
                            num_gpu_per_worker=1,
-                           use_tpu=False, num_tpu_cores=0,
+                           use_tpu=False,
+                           num_tpu_cores=0,
                            tpu_tf_version="1.13",
-                           num_gpu_per_ps=0, tpu_type="v3"):
+                           num_gpu_per_ps=0,
+                           tpu_type="v3"):
   """Build internal configs for use of accelerators.
 
   Returns:
@@ -405,27 +396,24 @@ def build_accelerator_args(gpu_type="nvidia-tesla-k80",
   _expect_non_negative_int(num_gpu_per_worker)
 
   if (use_tpu or num_tpu_cores > 0) and num_gpu_per_worker > 0:
-    raise ValueError(
-        "Saw request for both GPU and TPU accelerators, %s" % cfg)
+    raise ValueError("Saw request for both GPU and TPU accelerators, %s" % cfg)
 
   if (not use_tpu or num_tpu_cores == 0) and (num_gpu_per_worker == 0):
-    return {}, {} # Not using accelerators
+    return {}, {}  # Not using accelerators
 
   if use_tpu and num_tpu_cores == 0:
     raise ValueError("Saw conflicting use_tpu and num_tpu_cores, %s" % cfg)
 
   if use_tpu:
 
-    extra_train_args = {
-        "use_tpu": True
-    }
+    extra_train_args = {"use_tpu": True}
 
     extra_experiment_args = {
         "annotations": {
             "tf-version.cloud-tpus.google.com": tpu_tf_version
         },
         "num_tpu_cores": num_tpu_cores,
-        "use_tpu": True # Used to signal using tpu at Kubernetes-level
+        "use_tpu": True  # Used to signal using tpu at Kubernetes-level
     }
 
     return extra_train_args, extra_experiment_args
@@ -444,7 +432,7 @@ def build_accelerator_args(gpu_type="nvidia-tesla-k80",
 
 
 def _replicate_checkpoint(source, target):
-    
+
   latest = tf.train.latest_checkpoint(source)
   if not latest:
     msg = "couldn't find latest ckpt to replicate"
@@ -519,7 +507,6 @@ def configure_experiment(base_name,
   remote_app_root = "%s/%s" % (remote_base, job_name)
 
   checkpoint_output_dir = os.path.join(remote_app_root, "output")
-
   """
   
   One can either re-use a checkpoint dir to continue training those parameters
@@ -527,12 +514,14 @@ def configure_experiment(base_name,
   is specified via reuse_output_dir and the latter via continue_with_ckpt_dir.
   
   """
-  
-  tf.logging.info("continue with ckpt dir setting: {}".format(continue_with_ckpt_dir))
+
+  tf.logging.info(
+      "continue with ckpt dir setting: {}".format(continue_with_ckpt_dir))
 
   if continue_with_ckpt_dir:
-    
-    tf.logging.info("Continuing from ckpt dir {}".format(continue_with_ckpt_dir))
+
+    tf.logging.info(
+        "Continuing from ckpt dir {}".format(continue_with_ckpt_dir))
 
     _replicate_checkpoint(source=continue_with_ckpt_dir,
                           target=checkpoint_output_dir)
@@ -541,8 +530,7 @@ def configure_experiment(base_name,
     checkpoint_output_dir = reuse_output_dir
 
   if use_katib:
-    checkpoint_output_dir = os.path.join(remote_app_root,
-                                         "{{.WorkerID}}")
+    checkpoint_output_dir = os.path.join(remote_app_root, "{{.WorkerID}}")
     job_name = "{{.WorkerID}}"
 
   volumes = []
@@ -585,8 +573,7 @@ def configure_experiment(base_name,
       num_gpu_per_worker=num_gpu_per_worker,
       use_tpu=use_tpu,
       num_tpu_cores=num_tpu_cores,
-      tpu_tf_version=tpu_tf_version
-  )
+      tpu_tf_version=tpu_tf_version)
 
   train_args.update(extra_train_args)
 
@@ -633,13 +620,13 @@ def periodic_eval_old(args):
   """
 
   FLAGS = args[0]
-  time.sleep(10) # startup delay
+  time.sleep(10)  # startup delay
 
   inter_eval_delay = 600
 
   while True:
 
-    FLAGS.use_tpu = False # Eval on VM not TPU.
+    FLAGS.use_tpu = False  # Eval on VM not TPU.
     FLAGS.schedule = "evaluate"
 
     batch_size = 360
@@ -681,7 +668,7 @@ def main(argv):
 
   # Start evaluation running in Eager mode periodically
   # in a background system process.
-  if FLAGS.use_tpu :
+  if FLAGS.use_tpu:
     p = Process(target=trigger_eval,
                 args=(FLAGS.output_dir, FLAGS.data_dir, FLAGS.eval_steps))
     p.start()

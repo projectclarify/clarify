@@ -1,3 +1,5 @@
+package(default_visibility = ["//visibility:public"])
+
 py_library(
     name = "__init__",
     srcs = ["__init__.py"],
@@ -12,4 +14,9 @@ py_library(
         "//pcml/models:modality_correspondence",
         "//pcml/models:percep_similarity_emb",
     ],
+)
+
+py_library(
+    name = "test_config",
+    srcs = ["test_config.py"],
 )

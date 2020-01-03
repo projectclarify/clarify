@@ -52,12 +52,10 @@ class TestT2TExperiment(tf.test.TestCase):
         remote_base="gs://clarify-models-us-central1/experiments",
         selector_labels={
             "cloud.google.com/gke-accelerator": "nvidia-tesla-k80"
-        }
-    )
+        })
 
     # TODO: No longer works since refactor. Maybe fix.
     # i.e. this combination of model, problem, and hparams.
-
     """
     create_response, job_dict = experiment.batch_run()
 
@@ -69,7 +67,6 @@ class TestT2TExperiment(tf.test.TestCase):
             'physical_device_desc: "device: XLA_GPU device"'
         ])
     """
-
 
   def test_e2e_tpu_dev(self):
     """E2E tests of dev problem and model on a v3 TPU.
@@ -107,9 +104,7 @@ class TestT2TExperiment(tf.test.TestCase):
         use_tpu=True,
         num_tpu_cores=8,
         tpu_tf_version="1.13",
-        selector_labels={"type": "tpu-host"}
-    )
-
+        selector_labels={"type": "tpu-host"})
     """
     create_response, job_dict = experiment.batch_run()
 
@@ -161,10 +156,7 @@ class TestT2TExperiment(tf.test.TestCase):
                      "example-scaleup4"),
         selector_labels={
             "cloud.google.com/gke-accelerator": "nvidia-tesla-k80"
-        }
-    )
-
-
+        })
     """
 
     create_response, job_dict = experiment.batch_run()
@@ -216,9 +208,7 @@ class TestT2TExperiment(tf.test.TestCase):
         use_tpu=True,
         num_tpu_cores=8,
         tpu_tf_version="1.13",
-        selector_labels={"type": "tpu-host"}
-    )
-
+        selector_labels={"type": "tpu-host"})
     """
 
     create_response, job_dict = experiment.batch_run()
@@ -267,9 +257,7 @@ class TestT2TExperiment(tf.test.TestCase):
                      "example-scaleup"),
         selector_labels={
             "cloud.google.com/gke-accelerator": "nvidia-tesla-k80"
-        }
-    )
-
+        })
     """
 
     create_response, job_dict = experiment.batch_run()
@@ -321,8 +309,7 @@ class TestT2TExperiment(tf.test.TestCase):
         use_tpu=True,
         num_tpu_cores=8,
         tpu_tf_version="1.13",
-        selector_labels={"type": "tpu-host"}
-    )
+        selector_labels={"type": "tpu-host"})
 
     create_response, _ = experiment.batch_run()
 

@@ -1,0 +1,18 @@
+FROM gcr.io/kubeflow-images-public/tensorflow-1.14.0-notebook-cpu:v0.7.0
+
+USER root
+
+ADD ./ /build
+
+RUN sudo usermod -aG sudo jovyan
+RUN echo "jovyan:Docker!" | chpasswd
+
+RUN sh /build/tools/environments/install_base.sh
+RUN sh /build/tools/environments/install_tf.sh
+RUN sh /build/tools/environments/install_bazel.sh
+
+RUN rm -rf /home/jovyan/.cache
+RUN chown -R jovyan:root /home/jovyan
+RUN chown -R jovyan:root /build
+
+user jovyan

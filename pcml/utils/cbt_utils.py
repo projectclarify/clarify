@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Additional distributed datagen and augmentation problem defs."""
 
 from __future__ import absolute_import
@@ -33,21 +32,24 @@ from tensor2tensor.data_generators.generator_utils import to_example
 
 from collections import namedtuple
 
-
 MAX_ALLOWABLE_FRAME_AUDIO_KEY_SUFFIX = 9999
 
 
 class BigTableSelection(object):
 
-  def __init__(self, project, instance, table,
+  def __init__(self,
+               project,
+               instance,
+               table,
                column_families,
                prefix=None,
                sa_key_path=None,
                column_qualifier=None,
                column_family=None,
-               *args, **kwargs):
+               *args,
+               **kwargs):
 
-    self.project = project    
+    self.project = project
     self.instance_name = instance
     self.prefix = prefix
     self.column_qualifier = column_qualifier
@@ -69,14 +71,14 @@ class BigTableSelection(object):
     self.column_family = column_family
 
     self.table_name = table
-    
+
     self.materialize(sa_key_path=sa_key_path)
 
   def materialize(self, sa_key_path=None):
 
     if isinstance(sa_key_path, str):
-      self.client = bigtable.Client.from_service_account_json(
-        sa_key_path, admin=True)
+      self.client = bigtable.Client.from_service_account_json(sa_key_path,
+                                                              admin=True)
     else:
       self.client = bigtable.Client(admin=True)
 
@@ -105,9 +107,7 @@ class BigTableSelection(object):
       if not prefix.endswith(".*"):
         prefix += ".*"
 
-      row_filter = row_filters.RowKeyRegexFilter(
-        regex=prefix
-      )
+      row_filter = row_filters.RowKeyRegexFilter(regex=prefix)
 
     partial_rows = table.read_rows(filter_=row_filter)
 
@@ -128,12 +128,14 @@ class BigTableSelection(object):
     return i > min_rows
 
   def as_dict(self):
-    return {"table_name": self.table_name,
-            "instance_name": self.instance_name,
-            "row_key_prefix": self.prefix,
-            "column_families": self.column_families,
-            "column_family": self.column_family,
-            "column_qualifier": self.column_qualifier}
+    return {
+        "table_name": self.table_name,
+        "instance_name": self.instance_name,
+        "row_key_prefix": self.prefix,
+        "column_families": self.column_families,
+        "column_family": self.column_family,
+        "column_qualifier": self.column_qualifier
+    }
 
 
 def _expect_type(obj, t):
@@ -141,10 +143,12 @@ def _expect_type(obj, t):
     msg = "Expected numpy.ndarray, saw {}".format(type(obj))
     raise ValueError(msg)
 
+
 def _maybe_decode_bytes(obj):
   if isinstance(obj, bytes):
     return obj.decode()
   return obj
+
 
 class AVCorrespondenceSample(object):
 
@@ -192,15 +196,13 @@ class AVCorrespondenceSample(object):
   @meta.setter
   def meta(self, x):
     _expect_type(x, dict)
-    for key in ["video_source",
-                "audio_source",
-                "video_sample_meta",
-                "audio_sample_meta",
-                "audio_keys",
-                "frame_keys",
-                "audio_block_meta"]:
+    for key in [
+        "video_source", "audio_source", "video_sample_meta",
+        "audio_sample_meta", "audio_keys", "frame_keys", "audio_block_meta"
+    ]:
       if not key in x:
-        raise ValueError("Meta should contain key {}, saw {}".format(key, x.keys()))
+        raise ValueError("Meta should contain key {}, saw {}".format(
+            key, x.keys()))
     assert len(x.keys()) == 7
     assert isinstance(x["video_source"], VideoMeta)
     assert isinstance(x["audio_source"], VideoMeta)
@@ -208,28 +210,33 @@ class AVCorrespondenceSample(object):
 
   def as_dict(self):
     return {
-      "video": self.video.tolist(),
-      "audio": self.audio.tolist(),
-      "labels": self.labels,
-      "meta": {
-        "audio_source": self.meta["audio_source"].as_dict(),
-        "video_source": self.meta["video_source"].as_dict(),
-        "video_sample_meta": self.meta["video_sample_meta"],
-        "audio_sample_meta": self.meta["audio_sample_meta"],
-        "audio_keys": self.meta["audio_keys"],
-        "frame_keys": self.meta["frame_keys"],
-        "audio_block_meta": self.meta["audio_block_meta"]
-      }
+        "video": self.video.tolist(),
+        "audio": self.audio.tolist(),
+        "labels": self.labels,
+        "meta": {
+            "audio_source": self.meta["audio_source"].as_dict(),
+            "video_source": self.meta["video_source"].as_dict(),
+            "video_sample_meta": self.meta["video_sample_meta"],
+            "audio_sample_meta": self.meta["audio_sample_meta"],
+            "audio_keys": self.meta["audio_keys"],
+            "frame_keys": self.meta["frame_keys"],
+            "audio_block_meta": self.meta["audio_block_meta"]
+        }
     }
 
   def dump_keys(self):
     # For convenience of parsing in golang
     abm = self.meta["audio_block_meta"]
     return {
-      "audioKeys": [_maybe_decode_bytes(key) for key in self.meta["audio_keys"]],
-      "frameKeys": [_maybe_decode_bytes(key) for key in self.meta["frame_keys"]],
-      "audioSampleBounds": [int(abm["query_start"]), int(abm["query_end"])],
-      "labels": self.labels
+        "audioKeys": [
+            _maybe_decode_bytes(key) for key in self.meta["audio_keys"]
+        ],
+        "frameKeys": [
+            _maybe_decode_bytes(key) for key in self.meta["frame_keys"]
+        ],
+        "audioSampleBounds": [int(abm["query_start"]),
+                              int(abm["query_end"])],
+        "labels": self.labels
     }
 
   def serialize(self):
@@ -239,7 +246,12 @@ class AVCorrespondenceSample(object):
 
 class VideoMeta(object):
 
-  def __init__(self, video_length, audio_length, video_id, shard_id, audio_block_size=256):
+  def __init__(self,
+               video_length,
+               audio_length,
+               video_id,
+               shard_id,
+               audio_block_size=256):
     self.video_length = video_length
     self.audio_length = audio_length
     self.video_id = video_id
@@ -293,11 +305,13 @@ class VideoMeta(object):
     self._audio_block_size = x
 
   def as_dict(self):
-    return {"video_length": self.video_length,
-            "audio_length": self.audio_length,
-            "video_id": self.video_id,
-            "shard_id": self.shard_id,
-            "audio_block_size": self.audio_block_size}
+    return {
+        "video_length": self.video_length,
+        "audio_length": self.audio_length,
+        "video_id": self.video_id,
+        "shard_id": self.shard_id,
+        "audio_block_size": self.audio_block_size
+    }
 
 
 class VideoShardMeta(object):
@@ -345,14 +359,16 @@ class VideoShardMeta(object):
     self._num_shards = x
 
   def as_dict(self):
-    return {"num_videos": self.num_videos,
-            "shard_id": self.shard_id,
-            "status": self.status,
-            "num_shards": self.num_shards}
+    return {
+        "num_videos": self.num_videos,
+        "shard_id": self.shard_id,
+        "status": self.status,
+        "num_shards": self.num_shards
+    }
 
 
 def _validate_shard_meta_key(key):
-  
+
   # Validating its basic structure not whether its encoded or not
   if isinstance(key, bytes):
     key = key.decode()
@@ -361,14 +377,12 @@ def _validate_shard_meta_key(key):
   if len(key_array) is not 2:
     expected_form = "{train|eval|test}_meta"
     raise ValueError("Meta row keys should have form {}, saw {}".format(
-      expected_form, key
-    ))
+        expected_form, key))
   prefix, meta = key_array
   expected_prefixes = ["train", "eval", "test"]
   if prefix not in expected_prefixes:
     raise ValueError("Unexpected prefix {}, not in {}".format(
-      prefix, expected_prefixes
-    ))
+        prefix, expected_prefixes))
 
   assert meta == "meta"
 
@@ -388,9 +402,7 @@ def _compose_av_write(table, key, value, column_family, key_tag=None):
   elif isinstance(value, list):
     value = bytes(value)
   elif not isinstance(value, bytes):
-    msg = "Tried to write unrecognized type: {}".format(
-      type(value)
-    )
+    msg = "Tried to write unrecognized type: {}".format(type(value))
     raise ValueError(msg)
 
   # Compose key and obtain row
@@ -404,8 +416,8 @@ def _compose_av_write(table, key, value, column_family, key_tag=None):
   row.set_cell(column_family_id=column_family,
                column=column_family,
                value=value,
-               timestamp=datetime.datetime(1970,1,1))
-               #timestamp=datetime.datetime.utcnow())
+               timestamp=datetime.datetime(1970, 1, 1))
+  #timestamp=datetime.datetime.utcnow())
 
   return row
 
@@ -414,18 +426,20 @@ def audio_blocks_for_indices(start, end, block_size):
 
   query_length = end - start
 
-  min_query_block = int(math.floor(start/block_size))
-  max_query_block = int(math.floor(end/block_size))
+  min_query_block = int(math.floor(start / block_size))
+  max_query_block = int(math.floor(end / block_size))
   num_query_blocks = max_query_block - min_query_block + 1
 
-  query_start = start - min_query_block*block_size
+  query_start = start - min_query_block * block_size
   query_end = query_start + query_length
 
-  return {"min_query_block": min_query_block,
-          "max_query_block": max_query_block,
-          "num_query_blocks": num_query_blocks,
-          "query_start": query_start,
-          "query_end": query_end}
+  return {
+      "min_query_block": min_query_block,
+      "max_query_block": max_query_block,
+      "num_query_blocks": num_query_blocks,
+      "query_start": query_start,
+      "query_end": query_end
+  }
 
 
 def _lex_index(idx):
@@ -477,14 +491,17 @@ def make_shard_meta_common_prefix(table_prefix):
   key = "{}_meta_.".format(table_prefix)
   return key
 
+
 def make_shard_meta_first_key(table_prefix):
   """Construct the key for an individual shard's meta."""
   key = "{}_meta_{}".format(table_prefix, _lex_index(0))
   return key
 
+
 def make_shard_meta_last_key(table_prefix, num_shards):
   key = "{}_meta_{}".format(table_prefix, _lex_index(num_shards))
   return key
+
 
 def make_video_meta_key(table_prefix, shard_id, video_id):
   """Construct a key for an individual video's metadata."""
@@ -517,10 +534,9 @@ class RawVideoSelection(BigTableSelection):
         # Defining these here instead of each time
         # the object is created makes this less
         # fragile.
-        column_families=["audio",
-                         "meta",
-                         "video_frames"],
-        *args, **kwargs)
+        column_families=["audio", "meta", "video_frames"],
+        *args,
+        **kwargs)
 
   def set_shard_meta(self, shard_meta):
     if not isinstance(shard_meta, VideoShardMeta):
@@ -532,16 +548,14 @@ class RawVideoSelection(BigTableSelection):
     #key = "{}_meta".format(self.prefix).encode()
     #_validate_shard_meta_key(key)
 
-    key = make_shard_meta_key(
-      table_prefix=self.prefix,
-      shard_id=shard_meta.shard_id
-    )
+    key = make_shard_meta_key(table_prefix=self.prefix,
+                              shard_id=shard_meta.shard_id)
 
     row = self.table.row(key)
     row.set_cell(column_family_id="meta",
                  column="meta",
                  value=json.dumps(shard_meta.as_dict()),
-                 timestamp=datetime.datetime(1970,1,1))
+                 timestamp=datetime.datetime(1970, 1, 1))
     self.table.mutate_rows([row])
 
   def lookup_shard_metadata(self, num_shards=99999, ignore_unfinished=False):
@@ -555,11 +569,11 @@ class RawVideoSelection(BigTableSelection):
 
     metadata = {}
 
-    prefix = make_shard_meta_common_prefix(table_prefix=self.prefix)    
+    prefix = make_shard_meta_common_prefix(table_prefix=self.prefix)
 
     partial_rows = self.table.read_rows(
-      start_key=make_shard_meta_first_key(self.prefix),
-      end_key=make_shard_meta_last_key(self.prefix, num_shards))
+        start_key=make_shard_meta_first_key(self.prefix),
+        end_key=make_shard_meta_last_key(self.prefix, num_shards))
 
     if partial_rows is None:
       return metadata
@@ -569,9 +583,8 @@ class RawVideoSelection(BigTableSelection):
       cell = row.cells["meta"]["meta".encode()][0]
       shard_meta = json.loads(cell.value.decode())
 
-      key = make_shard_meta_key(
-        table_prefix=self.prefix,
-        shard_id=shard_meta["shard_id"])
+      key = make_shard_meta_key(table_prefix=self.prefix,
+                                shard_id=shard_meta["shard_id"])
 
       if ignore_unfinished and shard_meta["status"] == "started":
         continue
@@ -596,7 +609,7 @@ class RawVideoSelection(BigTableSelection):
                                                 ignore_unfinished=True)
 
     all_video_meta = []
-    
+
     # HACK: Currently the regex filter approach isn't yielding the correct list of videos.
     # But specifying the start and end key does. The only problem is that row keys are
     # sorted lexicographically. So for now a num_videos beyond what would be present is
@@ -612,9 +625,8 @@ class RawVideoSelection(BigTableSelection):
       start_key = make_video_meta_first_key(self.prefix, shard_id)
       end_key = make_video_meta_last_key(self.prefix, shard_id, num_videos)
 
-      partial_rows = self.table.read_rows(
-        start_key=start_key, end_key=end_key)
-      
+      partial_rows = self.table.read_rows(start_key=start_key, end_key=end_key)
+
       for row in partial_rows:
 
         value = row.cells["meta"]["meta".encode()][0].value.decode()
@@ -625,20 +637,19 @@ class RawVideoSelection(BigTableSelection):
                        video_id=video_meta["video_id"],
                        shard_id=video_meta["shard_id"],
                        audio_block_size=video_meta["audio_block_size"])
-        
+
         all_video_meta.append(vm)
 
     return all_video_meta
 
   def _lookup_video_metadata(self, prefix, shard_id, video_id):
 
-    key = make_video_meta_key(
-      table_prefix=prefix, shard_id=shard_id, video_id=video_id
-    )
+    key = make_video_meta_key(table_prefix=prefix,
+                              shard_id=shard_id,
+                              video_id=video_id)
 
     msg = "looking up metadata for video with key {}, shard {}, video {}".format(
-      key, shard_id, video_id
-    )
+        key, shard_id, video_id)
 
     row = self.table.read_row(key)
     value = row.cells["meta"]["meta".encode()][0].value.decode()
@@ -653,11 +664,8 @@ class RawVideoSelection(BigTableSelection):
   def _get_random_video_meta(self, shard_meta):
 
     if not isinstance(shard_meta, dict):
-      msg = "Expected meta dictionary, saw type {}.".format(
-        type(shard_meta)
-      )
+      msg = "Expected meta dictionary, saw type {}.".format(type(shard_meta))
       raise ValueError(msg)
-
     """
     
     Hack: This is to deal with the fact that cloud function extraction does not
@@ -667,7 +675,7 @@ class RawVideoSelection(BigTableSelection):
     
     """
     while True:
-      
+
       try:
 
         num_keys = len(list(shard_meta.keys()))
@@ -683,24 +691,22 @@ class RawVideoSelection(BigTableSelection):
         tf.logging.debug("sampled video index: {}".format(sampled_video_index))
 
         # Look up the length of the video
-        meta = self._lookup_video_metadata(
-            prefix=self.prefix,
-            shard_id=sampled_shard_index,
-            video_id=sampled_video_index)
-        
+        meta = self._lookup_video_metadata(prefix=self.prefix,
+                                           shard_id=sampled_shard_index,
+                                           video_id=sampled_video_index)
+
         return meta
 
       except:
-        tf.logging.info("Failed fetching meta for video and shard, will retry: {},  {}".format(
-          sampled_video_index, sampled_shard_index
-        ))
+        tf.logging.info(
+            "Failed fetching meta for video and shard, will retry: {},  {}".
+            format(sampled_video_index, sampled_shard_index))
 
   def write_av(self, frames, audio, shard_id, video_id, audio_block_size=1000):
 
     if not isinstance(frames, video_utils.Video):
       msg = "expected frames of type {}, saw {}.".format(
-        video_utils.Video, type(frames)
-      )
+          video_utils.Video, type(frames))
       raise ValueError(msg)
 
     meta = VideoMeta(video_length=frames.length,
@@ -709,24 +715,23 @@ class RawVideoSelection(BigTableSelection):
                      video_id=video_id,
                      audio_block_size=audio_block_size)
 
-    video_meta_key = make_video_meta_key(
-      table_prefix=self.prefix,
-      shard_id=shard_id,
-      video_id=video_id)
+    video_meta_key = make_video_meta_key(table_prefix=self.prefix,
+                                         shard_id=shard_id,
+                                         video_id=video_id)
 
     rows = []
 
-    rows.append(_compose_av_write(table=self.table,
-                                  key=video_meta_key,
-                                  value=meta.as_dict(),
-                                  column_family="meta"))
+    rows.append(
+        _compose_av_write(table=self.table,
+                          key=video_meta_key,
+                          value=meta.as_dict(),
+                          column_family="meta"))
 
     num_audio_blocks = math.ceil(meta.audio_length / audio_block_size)
 
- 
     for i in range(num_audio_blocks):
 
-      subset_start = i*audio_block_size
+      subset_start = i * audio_block_size
       subset_end = subset_start + audio_block_size
 
       audio_subset = audio[subset_start:subset_end]
@@ -736,11 +741,11 @@ class RawVideoSelection(BigTableSelection):
                            video_id=video_id,
                            audio_block_id=i)
 
-      rows.append(_compose_av_write(table=self.table,
-                                    key=key,
-                                    value=audio_subset,
-                                    column_family="audio"))
-
+      rows.append(
+          _compose_av_write(table=self.table,
+                            key=key,
+                            value=audio_subset,
+                            column_family="audio"))
 
     _ = self.table.mutate_rows(rows)
     rows = []
@@ -753,16 +758,16 @@ class RawVideoSelection(BigTableSelection):
 
       video_frame = np.asarray(video_frame)
 
-      frame_key = make_frame_key(
-        table_prefix=self.prefix,
-        shard_id=shard_id,
-        video_id=video_id,
-        frame_id=i)
+      frame_key = make_frame_key(table_prefix=self.prefix,
+                                 shard_id=shard_id,
+                                 video_id=video_id,
+                                 frame_id=i)
 
-      rows.append(_compose_av_write(table=self.table,
-                                    key=frame_key,
-                                    value=video_frame,
-                                    column_family="video_frames"))
+      rows.append(
+          _compose_av_write(table=self.table,
+                            key=frame_key,
+                            value=video_frame,
+                            column_family="video_frames"))
       buffer_counter += 1
 
       if buffer_counter >= frame_write_buffer_size:
@@ -784,11 +789,10 @@ class RawVideoSelection(BigTableSelection):
 
       index = indices[i]
 
-      frame_key = make_frame_key(
-        table_prefix=self.prefix,
-        shard_id=meta.shard_id,
-        video_id=meta.video_id,
-        frame_id=index)
+      frame_key = make_frame_key(table_prefix=self.prefix,
+                                 shard_id=meta.shard_id,
+                                 video_id=meta.video_id,
+                                 frame_id=index)
 
       frame_keys.append(frame_key)
 
@@ -804,10 +808,10 @@ class RawVideoSelection(BigTableSelection):
     for i in range(audio_block_meta["num_query_blocks"]):
 
       audio_key = make_audio_key(
-        table_prefix=self.prefix,
-        shard_id=meta.shard_id,
-        video_id=meta.video_id,
-        audio_block_id=audio_block_meta["min_query_block"] + i)
+          table_prefix=self.prefix,
+          shard_id=meta.shard_id,
+          video_id=meta.video_id,
+          audio_block_id=audio_block_meta["min_query_block"] + i)
 
       keys.append(audio_key)
 
@@ -822,12 +826,10 @@ class RawVideoSelection(BigTableSelection):
       row = self.table.read_row(frame_key)
 
       if row is None:
-        msg = "Frame data query for key {} got None.".format(
-          frame_key
-        )
+        msg = "Frame data query for key {} got None.".format(frame_key)
         raise ValueError(msg)
 
-      frame_data = row.cells["video_frames"]["video_frames".encode()][0].value      
+      frame_data = row.cells["video_frames"]["video_frames".encode()][0].value
       frames[i] = np.asarray(list(frame_data), dtype=np.uint8)
 
     return np.asarray([np.asarray(thing) for thing in frames])
@@ -857,12 +859,11 @@ class RawVideoSelection(BigTableSelection):
     length = len(ret)
 
     if not isinstance(ret, np.ndarray) or length == 0:
-      
+
       msg = "Wrong type or length: {}, {}; response len: {}; other: {}".format(
-        type(ret), length, len(all_audio_data), _logging_data()
-      )
+          type(ret), length, len(all_audio_data), _logging_data())
       raise ValueError(msg)
-      
+
     return ret
 
   def sample_av_correspondence_examples(self,
@@ -875,10 +876,10 @@ class RawVideoSelection(BigTableSelection):
     #make_video_meta_common_prefix(table_prefix, shard_id)
 
     #all_shard_meta = self.lookup_shard_metadata(ignore_unfinished=True)
-    
+
     # TODO: Provide more clear logging in the event there aren't any completed
     # shards.
-    
+
     all_video_meta = self._lookup_all_video_metadata()
     num_videos = len(all_video_meta)
 
@@ -892,12 +893,10 @@ class RawVideoSelection(BigTableSelection):
       v1 = all_video_meta[v1i]
 
       def _sample(vlen, alen):
-        avs = video_utils.AVSamplable(video_length=vlen,
-                                      audio_length=alen)
-        return avs.sample_av_pair(
-          num_frames=frames_per_video,
-          max_frame_shift=max_frame_shift,
-          max_frame_skip=max_frame_skip)
+        avs = video_utils.AVSamplable(video_length=vlen, audio_length=alen)
+        return avs.sample_av_pair(num_frames=frames_per_video,
+                                  max_frame_shift=max_frame_shift,
+                                  max_frame_skip=max_frame_skip)
 
       # Get indices for two samples from the first video
       # The first one frames and audio
@@ -915,39 +914,60 @@ class RawVideoSelection(BigTableSelection):
       ka10, abm10 = self._audio_keys(meta=v1, indices=a10_)
 
       positive_same = AVCorrespondenceSample(
-        video=np.array([]), audio=np.array([]),
-        labels={"same_video": 1, "overlap": 1},
-        meta={"video_source": v0, "audio_source": v0,
+          video=np.array([]),
+          audio=np.array([]),
+          labels={
+              "same_video": 1,
+              "overlap": 1
+          },
+          meta={
+              "video_source": v0,
+              "audio_source": v0,
               "video_sample_meta": sampling_meta00,
               "audio_sample_meta": sampling_meta00,
               "audio_keys": ka00,
               "frame_keys": kf00,
-              "audio_block_meta": abm00})
+              "audio_block_meta": abm00
+          })
 
       negative_same = AVCorrespondenceSample(
-        video=np.array([]), audio=np.array([]),
-        labels={"same_video": 1, "overlap": 0},
-        meta={"video_source": v0, "audio_source": v0,
+          video=np.array([]),
+          audio=np.array([]),
+          labels={
+              "same_video": 1,
+              "overlap": 0
+          },
+          meta={
+              "video_source": v0,
+              "audio_source": v0,
               "video_sample_meta": sampling_meta00,
               "audio_sample_meta": sampling_meta01,
               "audio_keys": ka01,
               "frame_keys": kf00,
-              "audio_block_meta": abm01})
+              "audio_block_meta": abm01
+          })
 
       negative_different = AVCorrespondenceSample(
-        video=np.array([]), audio=np.array([]),
-        labels={"same_video": 0, "overlap": 0},
-        meta={"video_source": v0, "audio_source": v1,
+          video=np.array([]),
+          audio=np.array([]),
+          labels={
+              "same_video": 0,
+              "overlap": 0
+          },
+          meta={
+              "video_source": v0,
+              "audio_source": v1,
               "video_sample_meta": sampling_meta00,
               "audio_sample_meta": sampling_meta10,
               "audio_keys": ka10,
               "frame_keys": kf00,
-              "audio_block_meta": abm10})
+              "audio_block_meta": abm10
+          })
 
       example_set = {
-        "positive_same": positive_same,
-        "negative_same": negative_same,
-        #"negative_different": negative_different
+          "positive_same": positive_same,
+          "negative_same": negative_same,
+          #"negative_different": negative_different
       }
 
       if keys_only:
@@ -983,7 +1003,8 @@ class RawVideoSelection(BigTableSelection):
 
 
 class TFExampleSelection(BigTableSelection):
-  def __init__(self, *args, **kwargs):  
+
+  def __init__(self, *args, **kwargs):
     super(TFExampleSelection, self).__init__(
         # Defining these here instead of each time
         # the object is created makes this less
@@ -991,7 +1012,8 @@ class TFExampleSelection(BigTableSelection):
         column_families=["tfexample"],
         column_qualifier="example",
         column_family="tfexample",
-        *args, **kwargs)
+        *args,
+        **kwargs)
 
   def random_load_from_generator(self,
                                  generator,
@@ -1007,25 +1029,23 @@ class TFExampleSelection(BigTableSelection):
 
       if not isinstance(example_dict, dict):
         msg = "Expected generator to yield dict's, saw {}.".format(
-          type(example_dict)
-        )
+            type(example_dict))
         raise ValueError(msg)
 
       example = to_example(example_dict)
       example = example.SerializeToString()
 
       # Random target key
-      target_key = random_key(prefix=prefix,
-                              length=prefix_tag_length).encode()
+      target_key = random_key(prefix=prefix, length=prefix_tag_length).encode()
 
       row = table.row(target_key)
       row.set_cell(column_family_id="tfexample",
                    column="example",
                    value=example,
-                   timestamp=datetime.datetime(1970,1,1))
-                   # Don't set a timestamp so we set instead of
-                   # append cell values.
-                   #timestamp=datetime.datetime.utcnow())
+                   timestamp=datetime.datetime(1970, 1, 1))
+      # Don't set a timestamp so we set instead of
+      # append cell values.
+      #timestamp=datetime.datetime.utcnow())
 
       table.mutate_rows([row])
 

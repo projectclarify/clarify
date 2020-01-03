@@ -43,28 +43,38 @@ def run_and_output(command, cwd=None, env=None):
 
 def get_image_id(registry="gcr.io",
                  project="clarify",
-                 name="workspace"):
-  #output = run_and_output(
-  #  ["curl", "--silent",
-  #   "https://api.github.com/repos/{}/releases/latest".format(
-  #   "projectclarify/pcml"
-  #   )])
-  tag = "v0.1.0"
+                 name="workspace",
+                 version="v0.1.0",
+                 generate_tag=True):
+
+  tag = version
+
+  if generate_tag:
+    # TODO: Get unique ID of code tree from Bazel
+    import uuid
+    tag = "{}-{}".format(version, str(uuid.uuid4())[0:4])
 
   image_id = "{}/{}/{}:{}".format(registry, project, name, tag)
 
   return image_id
 
 
-def prepare_build_context():
+def prepare_build_context(container_type):
 
   ctx_dir = os.path.dirname(os.path.abspath(__file__))
 
   tmpdir = tempfile.mkdtemp()
 
+  if container_type == "workspace":
+    suffix = "workspace"
+  elif container_type == "runtime":
+    suffix = "runtime"
+  else:
+    raise ValueError("Unrecognized Dockerfile suffix.")
+
   # Copy Dockerfile to build context
   dockerfile_path = os.path.join(
-    ctx_dir, "Dockerfile")
+    ctx_dir, "Dockerfile.{}".format(suffix))
 
   dockerfile_dest_path = os.path.join(
     tmpdir, "Dockerfile")
@@ -74,25 +84,34 @@ def prepare_build_context():
     dockerfile_dest_path)
 
   # Copy tools to build context
-  src = os.path.join(ctx_dir, "../../tools")
+  src = os.path.join(ctx_dir, "../../")
 
   run_and_output(["cp", "-r", src, tmpdir])
 
   return tmpdir
 
 
-def build_and_push(mode):
+def build(mode, and_push=False, container_type="workspace",
+          static_image_id=None):
 
   if mode not in ["local", "gcb"]:
     raise ValueError("Unrecognized mode: {}".format(mode))
 
-  image_id = get_image_id()
+  image_id = get_image_id(
+    registry="gcr.io",
+    project="clarify",
+    name="test-container",
+    version="v0.1.0",
+    generate_tag=True
+  )
+  if static_image_id:
+    image_id = static_image_id
 
   print("Building with image id: {}".format(image_id))
 
-  tmpdir = prepare_build_context()
+  tmpdir = prepare_build_context(container_type)
   os.chdir(tmpdir)
-
+    
   # Log build context
   run_and_output(["find", "."])
 
@@ -104,15 +123,18 @@ def build_and_push(mode):
     run_and_output(
       ["docker", "build", "-t", image_id, "."])
 
-    run_and_output(
-      ["gcloud", "docker", "--", "push", image_id]
-    )
+    if and_push:
+      run_and_output(
+        ["gcloud", "docker", "--", "push", image_id]
+      )
 
   elif mode == "gcb":
     
     run_and_output(
       ["gcloud", "builds", "submit", "-t", image_id, "."]
     )
+
+  return image_id
 
 
 if __name__ == '__main__':
@@ -121,9 +143,22 @@ if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(description='Build PCML containers.')
 
-  parser.add_argument('--mode', type=str, default="gcb",
+  parser.add_argument('--build_mode', type=str, default="gcb",
                       help='Build using GCB or local Docker.')
+
+  parser.add_argument('--container_type', type=str,
+                      default="workspace",
+                      help='Build type, `workspace` or `runtime` container.')
+
+  parser.add_argument('--and_push', type=bool, default=False,
+                      help='If building with docker, whether to push result.')
+
+  parser.add_argument('--static_image_id', type=str,
+                      default=None, required=False,
+                      help='A static image id to use such as when building on circle.')
 
   args = parser.parse_args()
 
-  build_and_push(mode=args.mode)
+  build(mode=args.build_mode, and_push=args.and_push,
+        container_type=args.container_type,
+        static_image_id=args.static_image_id)

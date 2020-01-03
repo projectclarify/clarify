@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """FEC model tests."""
 
 from __future__ import absolute_import
@@ -24,7 +23,7 @@ from tensor2tensor.utils import registry
 
 
 class TestPercepSimilarityModel(tf.test.TestCase):
-  
+
   def setUp(self):
     self.model_name = "percep_similarity_triplet_emb"
     self.problem_name = "fec_tiny"
@@ -33,19 +32,16 @@ class TestPercepSimilarityModel(tf.test.TestCase):
   def test_registry_lookups(self):
 
     model_names = [
-      "percep_similarity_triplet_emb",
-      "percep_similarity_triplet_classify"
+        "percep_similarity_triplet_emb", "percep_similarity_triplet_classify"
     ]
 
     for model_name in model_names:
       _ = registry.model(model_name)
 
-      
     hparams_sets = [
-      "percep_similarity_triplet_emb",
-      "percep_similarity_triplet_emb_tiny"
+        "percep_similarity_triplet_emb", "percep_similarity_triplet_emb_tiny"
     ]
-    
+
     for hparams_set in hparams_sets:
       _ = registry.hparams(hparams_set)
 

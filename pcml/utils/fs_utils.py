@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """File-system utilities."""
 
 import os
@@ -47,7 +46,7 @@ def upsearch(directory, query, max_levels=3):
     max_levels(int): The maximum depth of recursion.
 
   """
-  
+
   tf.logging.info("Upsearched to {}".format(directory))
 
   if max_levels < 0:
@@ -61,7 +60,7 @@ def upsearch(directory, query, max_levels=3):
 
   parent_dir = "/".join(directory.split("/")[:-1])
 
-  return upsearch(parent_dir, query, max_levels=(max_levels-1))
+  return upsearch(parent_dir, query, max_levels=(max_levels - 1))
 
 
 def get_pcml_root():
@@ -74,7 +73,7 @@ def get_pcml_root():
 
 
 def expect_path(path):
-    """Check that a path exists (and is a valid).
+  """Check that a path exists (and is a valid).
     
     Args:
         path (str): An absolute, user-space path (e.g. /mnt/nfs/foo).
@@ -85,12 +84,11 @@ def expect_path(path):
 
     """
 
-    if not isinstance(path, str):
-        raise ValueError("Paths must be of type string, saw: %s" % path)
+  if not isinstance(path, str):
+    raise ValueError("Paths must be of type string, saw: %s" % path)
 
-    if not path.startswith("/"):
-        raise ValueError(
-            "Expected an absolute, user-space path, saw: %s" % path)
+  if not path.startswith("/"):
+    raise ValueError("Expected an absolute, user-space path, saw: %s" % path)
 
-    if not tf.gfile.Exists(path):
-        raise ValueEror("Path does not exist: %s" % path)
+  if not tf.gfile.Exists(path):
+    raise ValueEror("Path does not exist: %s" % path)

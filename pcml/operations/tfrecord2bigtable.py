@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """A kubernetes Job to load TFRecords into a Cloud BigTable."""
 
 from __future__ import absolute_import
@@ -34,8 +33,7 @@ from google.cloud.bigtable import row_filters
 from google.cloud.bigtable import column_family as cbt_lib_column_family
 
 from google.cloud.bigtable_admin_v2.proto import (
-    bigtable_table_admin_pb2 as table_admin_messages_v2_pb2,
-)
+    bigtable_table_admin_pb2 as table_admin_messages_v2_pb2,)
 from google.cloud.bigtable.column_family import ColumnFamily
 from google.cloud._helpers import _to_bytes
 
@@ -62,10 +60,10 @@ def create_cbt_cluster(instance_id="clarify-cbt-instance",
                              labels=labels)
 
   cluster = instance.cluster(
-    cluster_id,
-    location_id=zone,
-    serve_nodes=serve_nodes,
-    default_storage_type=storage_type,
+      cluster_id,
+      location_id=zone,
+      serve_nodes=serve_nodes,
+      default_storage_type=storage_type,
   )
 
   operation = instance.create(clusters=[cluster])
@@ -79,14 +77,20 @@ def create_cbt_cluster(instance_id="clarify-cbt-instance",
 # unclear why.
 class TFRecordsToCBT(PCMLJob):
 
-  def __init__(self, source_glob, row_prefix,
+  def __init__(self,
+               source_glob,
+               row_prefix,
                job_name_prefix="cbt-load",
                bigtable_instance="clarify-cbt-instance",
-               bigtable_table="clarify-cbt-devtable", 
-               column="example", column_family="tfexample",
-               num_parallel_reads=30, project="clarify",
+               bigtable_table="clarify-cbt-devtable",
+               column="example",
+               column_family="tfexample",
+               num_parallel_reads=30,
+               project="clarify",
                image="gcr.io/clarify/basic-runtime:0.0.4",
-               max_records=1234, *args, **kwargs):
+               max_records=1234,
+               *args,
+               **kwargs):
     """Load TFRecords from GCS to a Cloud BigTable table."""
 
     cmd = "python -m pcml.operations.tfrecord2bigtable "
@@ -104,38 +108,39 @@ class TFRecordsToCBT(PCMLJob):
     command_args = [cmd]
 
     job_name = "%s-%s" % (job_name_prefix, gen_timestamped_uid())
-    
+
     super(TFRecordsToCBT, self).__init__(
-      job_name=job_name,
-      command=command,
-      command_args=command_args,
-      namespace="kubeflow",
-      image=image,
-      resources=Resources(limits={"cpu": num_parallel_reads}),
-      *args, **kwargs)
+        job_name=job_name,
+        command=command,
+        command_args=command_args,
+        namespace="kubeflow",
+        image=image,
+        resources=Resources(limits={"cpu": num_parallel_reads}),
+        *args,
+        **kwargs)
 
 
 def iterable_dataset_from_file(filename):
-    dataset = tf.data.TFRecordDataset(filename)
+  dataset = tf.data.TFRecordDataset(filename)
 
-    iterator = dataset.make_initializable_iterator()
+  iterator = dataset.make_initializable_iterator()
 
-    next_element = iterator.get_next()
+  next_element = iterator.get_next()
 
-    with tf.Session() as sess:
+  with tf.Session() as sess:
 
-      sess.run(iterator.initializer)
+    sess.run(iterator.initializer)
 
-      i = 0
-      while True:
-        try:
-          if i % 1000 == 0:
-            print("Processed %s examples..." % i)
-          yield sess.run(next_element)
-          i += 1
-        except tf.errors.OutOfRangeError:
-          print("Ran out of examples (processed %s), exiting..." % i)
-          break
+    i = 0
+    while True:
+      try:
+        if i % 1000 == 0:
+          print("Processed %s examples..." % i)
+        yield sess.run(next_element)
+        i += 1
+      except tf.errors.OutOfRangeError:
+        print("Ran out of examples (processed %s), exiting..." % i)
+        break
 
 
 BigTableSelection = namedtuple('BigTableSelection', [
@@ -151,8 +156,7 @@ BigTableSelection = namedtuple('BigTableSelection', [
 def materialize_bigtable_selection(selection, sa_key_path=None):
 
   if isinstance(sa_key_path, str):
-    client = bigtable.Client.from_service_account_json(
-        sa_key_path, admin=True)
+    client = bigtable.Client.from_service_account_json(sa_key_path, admin=True)
   else:
     client = bigtable.Client(admin=True)
 
@@ -162,7 +166,7 @@ def materialize_bigtable_selection(selection, sa_key_path=None):
   table = instance.table(table_name)
 
   while True:
-    
+
     if table.exists():
       return (client, table, instance)
 
@@ -183,13 +187,16 @@ def materialize_bigtable_selection(selection, sa_key_path=None):
 def make_prefixed_idx(i, row_prefix, max_records):
   max_width = len('%d' % (max_records - 1))
   current_width = len(str(i))
-  pad = "".join(str(thing) for thing in [0]*(max_width - current_width))
+  pad = "".join(str(thing) for thing in [0] * (max_width - current_width))
   idx = "_".join([row_prefix, "".join([str(i), pad])]).encode('utf-8')
-  
+
   return idx
 
 
-def tfrecord_files_to_cbt_table(glob, table, selection, max_records=100000000,
+def tfrecord_files_to_cbt_table(glob,
+                                table,
+                                selection,
+                                max_records=100000000,
                                 mutation_batch_size=32):
   """
   
@@ -206,13 +213,13 @@ def tfrecord_files_to_cbt_table(glob, table, selection, max_records=100000000,
   files = tf.gfile.Glob(glob)
 
   for file_path in files:
- 
+
     row_mutation_batch = new_mutation_batch()
 
     for i, example in enumerate(iterable_dataset_from_file(file_path)):
 
       idx = hashlib.md5(example).hexdigest()
-    
+
       # DEV: To check "shuffle" effect add the id suffix
       idx = "_".join([selection.prefix, idx, str(i)])
 
@@ -231,7 +238,7 @@ def tfrecord_files_to_cbt_table(glob, table, selection, max_records=100000000,
       else:
         mutation_index += 1
 
-    final_mutation = row_mutation_batch[:(mutation_index-1)]
+    final_mutation = row_mutation_batch[:(mutation_index - 1)]
     if final_mutation:
       table.mutate_rows(final_mutation)
 
@@ -244,14 +251,12 @@ def iterate_cbt_examples(project="clarify",
                          column_qualifier="example",
                          column_family_id='tfexample'):
 
-  selection = BigTableSelection(
-    project=project,
-    instance=instance,
-    table=table,
-    prefix=prefix,
-    column_family=column_family,
-    column_qualifier=column_qualifier
-  )
+  selection = BigTableSelection(project=project,
+                                instance=instance,
+                                table=table,
+                                prefix=prefix,
+                                column_family=column_family,
+                                column_qualifier=column_qualifier)
 
   (client, table, instance) = materialize_bigtable_selection(selection)
 
@@ -272,7 +277,8 @@ def main(_):
     raise ValueError("Please provide a source glob with --source_glob.")
 
   if FLAGS.bigtable_instance is None:
-    raise ValueError("Please provide a BigTable instance with --bigtable_instance.")
+    raise ValueError(
+        "Please provide a BigTable instance with --bigtable_instance.")
 
   if FLAGS.bigtable_table is None:
     raise ValueError("Please provide a BigTable table with --bigtable_table.")
@@ -283,17 +289,15 @@ def main(_):
   if FLAGS.row_prefix is None:
     raise ValueError("Please provide a row prefix with --row_prefix.")
 
-  selection = BigTableSelection(
-    project=FLAGS.project,
-    instance=FLAGS.bigtable_instance,
-    table=FLAGS.bigtable_table,
-    prefix=FLAGS.row_prefix,
-    column_family=FLAGS.column_family,
-    column_qualifier=FLAGS.column
-  )
-  
+  selection = BigTableSelection(project=FLAGS.project,
+                                instance=FLAGS.bigtable_instance,
+                                table=FLAGS.bigtable_table,
+                                prefix=FLAGS.row_prefix,
+                                column_family=FLAGS.column_family,
+                                column_qualifier=FLAGS.column)
+
   (client, table, instance) = materialize_bigtable_selection(selection)
-  
+
   tfrecord_files_to_cbt_table(glob=FLAGS.source_glob,
                               table=table,
                               selection=selection,
@@ -306,20 +310,25 @@ if __name__ == "__main__":
   FLAGS = flags.FLAGS
 
   flags.DEFINE_string('op', "LoadTFRecords", 'The PCML operation to perform.')
-  flags.DEFINE_string('source_glob', None, 'The source TFRecord files to read '
-                      'from and push into Cloud Bigtable.')
+  flags.DEFINE_string(
+      'source_glob', None, 'The source TFRecord files to read '
+      'from and push into Cloud Bigtable.')
   flags.DEFINE_string('bigtable_instance', None, 'The Cloud Bigtable instance.')
-  flags.DEFINE_string('bigtable_table', None, 'The table within the instance to '
+  flags.DEFINE_string('bigtable_table', None,
+                      'The table within the instance to '
                       'write to.')
-  flags.DEFINE_string('project', None, 'The Project to use. (Optional if running '
-                      'on a Compute Engine VM, as it can be auto-determined from '
-                      'the metadata service.)')
+  flags.DEFINE_string(
+      'project', None, 'The Project to use. (Optional if running '
+      'on a Compute Engine VM, as it can be auto-determined from '
+      'the metadata service.)')
   flags.DEFINE_integer(
-      'max_records', 100000000, 'The approximate dataset size (used for padding '
+      'max_records', 100000000,
+      'The approximate dataset size (used for padding '
       'the appropriate number of zeros when constructing row keys). It should '
       'not be smaller than the actual number of records.')
-  flags.DEFINE_integer('num_parallel_reads', 1, 'The number of parallel reads '
-                       'from the source file system.')
+  flags.DEFINE_integer(
+      'num_parallel_reads', 1, 'The number of parallel reads '
+      'from the source file system.')
   flags.DEFINE_string('column_family', 'tfexample',
                       'The column family to write the data into.')
   flags.DEFINE_string('column', 'example',

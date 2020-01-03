@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["main.go"],
+    importpath = "github.com/projectclarify/pcml/sampler/sampler/cmd/main",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@com_google_cloud_go//bigtable:go_default_library",
+        "@com_google_cloud_go//profiler:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "main",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)

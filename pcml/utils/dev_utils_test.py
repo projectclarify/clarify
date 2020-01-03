@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of the development helper utilities."""
 
 from __future__ import absolute_import
@@ -24,6 +23,10 @@ from tensor2tensor.utils import registry
 from tensor2tensor.data_generators import algorithmic
 
 from pcml.utils.dev_utils import T2TDevHelper
+
+from pcml.utils.cfg_utils import Config
+
+TEST_CONFIG = Config()
 
 
 @registry.register_problem
@@ -57,33 +60,29 @@ class TinyAlgoProblem(algorithmic.AlgorithmicIdentityBinary40):
 
 @registry.register_model
 class TrivialModelT2tdh(t2t_model.T2TModel):
+
   def body(self, features):
     return features["inputs"]
 
 
 class TestDevHelper(tf.test.TestCase):
 
-  def test_finds_tfms_path(self):
-    """Test of the maybe_lookup_tfms_path method."""
-
-    helper = T2TDevHelper("trivial_model_t2tdh",
-                          "tiny_algo_problem",
-                          "transformer_tiny",
-                          [["1 0 0 1"]])
-
-    helper.maybe_lookup_tfms_path()
-
-    self.assertTrue(helper.tf_model_server_path is not None)
-
   def test_e2e(self):
     """End-to-end test of the dev helper utility."""
 
+    tfms_path = TEST_CONFIG.get("tfms_path")
+
+    import tensor2tensor.models
     helper2 = T2TDevHelper("trivial_model_t2tdh",
                            "tiny_algo_problem",
-                           "transformer_tiny",
-                           [["1 0 0 1"]])
+                           "transformer_tiny", [["1 0 0 1"]],
+                           tfms_path=tfms_path)
 
-    helper2.run_e2e()
+    helper2.datagen()
+    helper2.train()
+    # TODO: Re-include e2e if retaining T2TDevHelper, note this
+    # currently has removed the model export, serve, and query
+    # steps.
 
 
 if __name__ == "__main__":

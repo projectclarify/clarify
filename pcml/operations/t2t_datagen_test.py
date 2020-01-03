@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License
-
 """Tests of dedicated datagen Job wrapper."""
 
 import uuid
@@ -21,7 +20,7 @@ from pcml.operations.t2t_datagen import T2TDatagenJob
 
 
 class TestT2TDatagenJob(tf.test.TestCase):
- 
+
   def test_instantiate_and_mock(self):
 
     job = T2TDatagenJob(problem_name="vox_celeb_distributed_datagen",
@@ -30,7 +29,7 @@ class TestT2TDatagenJob(tf.test.TestCase):
                         image="gcr.io/clarify/basic-runtime:0.0.4",
                         staging_path="gs://clarify-dev/tmp/datagendev",
                         node_selector={"type": "tpu-host"})
-                        # HACK: Cause job to be allocated onto host that
+    # HACK: Cause job to be allocated onto host that
 
     job.launch_shard_parallel_jobs(mock=True)
 
@@ -46,7 +45,7 @@ class TestT2TDatagenJob(tf.test.TestCase):
                         node_selector={"type": "tpu-host"})
 
     job.launch_shard_parallel_jobs(dev_max_num_jobs=10)
-    
+
     # TODO: Return job ids.
 
     # TODO: Add a poll and check function that verifies whether the

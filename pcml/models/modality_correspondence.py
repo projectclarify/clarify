@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Modality correspondence learning models."""
 
 from __future__ import absolute_import
@@ -47,7 +46,7 @@ from pcml.models import modality_correspondence_utils as mcl_utils
 
 def extend_hparams_with_hparams(hp1, hp2):
   """Given one set of hparams add to that another."""
-  for k,v in hp2.__dict__.items():
+  for k, v in hp2.__dict__.items():
     setattr(hp1, k, v)
   return hp1
 
@@ -84,7 +83,7 @@ def extend_with_resnet_hparams(hparams):
   hparams.add_hparam("keep_prob", None)
 
   hparams.use_nchw = False
-    
+
   return hparams
 
 
@@ -96,7 +95,8 @@ def mcl_res_ut():
   hparams.filter_size = 4096
   hparams.num_heads = 16
   hparams.layer_prepostprocess_dropout = 0.3
-  hparams = universal_transformer.update_hparams_for_universal_transformer(hparams)
+  hparams = universal_transformer.update_hparams_for_universal_transformer(
+      hparams)
   transformer.update_hparams_for_tpu(hparams)
   hparams.add_step_timing_signal = False
 
@@ -118,11 +118,10 @@ def mcl_res_ut():
   hparams.add_hparam("num_zeropad_frames", 250)
 
   # =====
-  
-  
+
   # =====
   # Resnet hparams
-  
+
   hparams.add_hparam("layer_sizes", [3, 4, 6, 3])
   hparams.add_hparam("bottleneck_ratios", [4, 4, 4, 4])
   hparams.add_hparam("filter_sizes", [64, 64, 128, 256, 512])
@@ -136,16 +135,16 @@ def mcl_res_ut():
   hparams.add_hparam("keep_prob", None)
 
   hparams.use_nchw = False
-  
+
   # =====
-  
+
   hparams.add_hparam("multiproblem_task_id", 0)
 
   hparams.batch_size = 24
-  
+
   delattr(hparams, "batch_shuffle_size")
   hparams._hparam_types.pop("batch_shuffle_size", None)
-  
+
   #hparams.activation_dtype = "bfloat16"
   #hparams.weight_dtype = "bfloat16"
 
@@ -169,12 +168,12 @@ def mcl_res200():
   hparams = mcl_res_ut()
   hparams.layer_sizes = [3, 24, 36, 3]
   return hparams
- 
+
 
 @registry.register_hparams
 def mcl_res_ut_tiny():
   hparams = mcl_res_ut()
-  hparams.layer_sizes = [1,1,1,1]
+  hparams.layer_sizes = [1, 1, 1, 1]
   hparams.batch_size = 4
   hparams.hidden_size = 128
   hparams.filter_size = 1024
@@ -190,7 +189,9 @@ def _hack_make_non_dynamic(tensor):
 
 def log_shape(var):
   callers_local_vars = inspect.currentframe().f_back.f_locals.items()
-  variable_name = [var_name for var_name, var_val in callers_local_vars if var_val is var][0]
+  variable_name = [
+      var_name for var_name, var_val in callers_local_vars if var_val is var
+  ][0]
   tf.logging.debug("%s shape: %s" % (variable_name, tf.shape(var)))
 
 
@@ -219,27 +220,26 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
       # Perform audio preprocessing and apply resnet to produce feature vecs.
       audio = features["audio"]
       log_shape(audio)
-      audio = mcl_utils.resnet_waveforms_v2(hparams, audio, scope_name="audio", use_bfloat16=use_bfloat16)
+      audio = mcl_utils.resnet_waveforms_v2(hparams,
+                                            audio,
+                                            scope_name="audio",
+                                            use_bfloat16=use_bfloat16)
       log_shape(audio)
 
       audio_shape = common_layers.shape_list(audio)
-      audio_features = tf.reshape(audio, [audio_shape[0],
-                                          audio_shape[1],
-                                          1,
-                                          audio_shape[-1]])
+      audio_features = tf.reshape(
+          audio, [audio_shape[0], audio_shape[1], 1, audio_shape[-1]])
       audio_features = _hack_make_non_dynamic(audio_features)
       log_shape(audio_features)
 
       audio_features = tf.layers.dense(audio_features, hparams.hidden_size)
       log_shape(audio_features)
 
-      (encoder_output,
-       encoder_decoder_attention_bias,
-       enc_extra_output) = self.encode(
-         inputs=audio_features,
-         target_space=target_space,
-         hparams=hparams,
-         losses=None)
+      (encoder_output, encoder_decoder_attention_bias,
+       enc_extra_output) = self.encode(inputs=audio_features,
+                                       target_space=target_space,
+                                       hparams=hparams,
+                                       losses=None)
 
       log_shape(encoder_output)
 
@@ -249,12 +249,10 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
 
     if len(encoder_output_shape) == 3:
 
-      last_dim = encoder_output_shape[1]*encoder_output_shape[-1]
+      last_dim = encoder_output_shape[1] * encoder_output_shape[-1]
       encoder_output = tf.reshape(encoder_output,
-                                  (encoder_output_shape[0],
-                                   last_dim))
-      encoder_output = tf.layers.dense(encoder_output,
-                                       hparams.hidden_size)
+                                  (encoder_output_shape[0], last_dim))
+      encoder_output = tf.layers.dense(encoder_output, hparams.hidden_size)
 
     return encoder_output, encoder_decoder_attention_bias
 
@@ -269,7 +267,7 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
     b, t, x, y, c = common_layers.shape_list(features["video"])
 
     if hparams.encode_video_use_conv3d:
-      features["video"] = mcl_utils.conv_pool_3d_block(features["video"])    
+      features["video"] = mcl_utils.conv_pool_3d_block(features["video"])
 
     batched_frames = tf.unstack(features["video"], axis=1)
 
@@ -283,8 +281,8 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
       frame = batched_frames[i]
       frame = tf.expand_dims(frame, 1)
       video_features = mcl_utils.resnet_frame_stack_v2(
-        hparams, frame, scope="visual", use_bfloat16=use_bfloat16)
-      
+          hparams, frame, scope="visual", use_bfloat16=use_bfloat16)
+
       video_features = tf.layers.dense(video_features, hparams.hidden_size)
       video_fvs.append(video_features)
 
@@ -295,26 +293,23 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
 
     with tf.variable_scope("video_encoder"):
 
-      (video_features,
-       encoder_decoder_attention_bias,
-       enc_extra_output) = self.encode(
-           inputs=video_features,
-           target_space=target_space,
-           hparams=hparams,
-           losses=None)
+      (video_features, encoder_decoder_attention_bias,
+       enc_extra_output) = self.encode(inputs=video_features,
+                                       target_space=target_space,
+                                       hparams=hparams,
+                                       losses=None)
 
       log_shape(video_features)
 
       # Map the encoder_output into a flat embedding vector
       b, t, h = common_layers.shape_list(video_features)
-      video_features = tf.reshape(video_features, (b, t*h))
+      video_features = tf.reshape(video_features, (b, t * h))
       video_features = tf.layers.dense(video_features, hparams.hidden_size)
       log_shape(video_features)
 
     return video_features, encoder_decoder_attention_bias
 
-  def compute_similarity_loss(self, embedding_a, embedding_b, hparams,
-                              targets):
+  def compute_similarity_loss(self, embedding_a, embedding_b, hparams, targets):
     """Compute a loss that directly compares embedding vectors.
 
     Notes:
@@ -345,20 +340,20 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
       c = (embedding_a - embedding_b)
       c = tf.math.multiply(c, c)
       c = tf.reduce_sum(c, axis=1)
-      c = 0.5*tf.math.sqrt(c)
+      c = 0.5 * tf.math.sqrt(c)
 
       # A sum of the distances we would want to be close to zero
       # (i.e. embedding pairs that do correspond).
       should_be_zero = tf.reduce_sum(tf.math.multiply(c, targets))
-      should_be_zero = should_be_zero/tf.reduce_sum(targets)
+      should_be_zero = should_be_zero / tf.reduce_sum(targets)
 
       # A sum of the distances we would want to be far apart
       # (i.e. embedding pairs that do not correspond).
       should_be_one = tf.reduce_sum(tf.math.multiply(c, 1 - targets))
-      should_be_one = should_be_one/tf.reduce_sum(1-targets)
+      should_be_one = should_be_one / tf.reduce_sum(1 - targets)
 
-      loss = (should_be_zero + (1 - should_be_one))/2
-      
+      loss = (should_be_zero + (1 - should_be_one)) / 2
+
       return loss, tf.expand_dims(c, -1)
 
     else:
@@ -369,7 +364,7 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
 
     # Compute diagonal component of loss
     diag = tf.linalg.tensor_diag_part(similarity)
-    
+
     if hparams.loss_type.endswith("sigmoid_ce"):
       diag_loss = tf.losses.sigmoid_cross_entropy(targets, diag)
     elif hparams.loss_type.endswith("mse"):
@@ -383,16 +378,15 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
     non_diag_target = tf.zeros_like(diag_masked)
 
     if hparams.loss_type.endswith("sigmoid_ce"):
-      non_diag_loss = tf.losses.sigmoid_cross_entropy(
-        non_diag_target, diag_masked)
+      non_diag_loss = tf.losses.sigmoid_cross_entropy(non_diag_target,
+                                                      diag_masked)
     elif hparams.loss_type.endswith("mse"):
-      non_diag_loss = tf.losses.mean_squared_error(
-        non_diag_target, diag_masked)
+      non_diag_loss = tf.losses.mean_squared_error(non_diag_target, diag_masked)
     else:
       _raise_for_unrecognized_loss(hparams.loss_type)
 
     loss = (diag_loss + non_diag_loss) / 2
-    
+
     return loss, tf.expand_dims(diag, -1)
 
   def decoder_dense(self, embeddings, hparams):
@@ -400,7 +394,7 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
 
     fv = tf.layers.dense(embeddings, hparams.hidden_size)
     fv = _hack_make_non_dynamic(fv)
-    
+
     sizes = mcl_utils.compute_dense_reduction(input_size=hparams.hidden_size,
                                               target_size=64)
 
@@ -412,31 +406,29 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
     prediction = tf.layers.dense(fv, target_length)
     prediction = _hack_make_non_dynamic(prediction)
     log_shape(prediction)
-    
+
     return prediction
-  
+
   def decoder_transformer(self, embeddings, hparams):
     """Map from concatenated features to target via transformer."""
 
     target_space = 1
-    
+
     fv = tf.expand_dims(tf.expand_dims(embeddings, 1), 1)
 
     fv = _hack_make_non_dynamic(fv)
     log_shape(fv)
 
     # HACK
-    hparams.hidden_size = 2*hparams.hidden_size
-    
+    hparams.hidden_size = 2 * hparams.hidden_size
+
     with tf.variable_scope("decode"):
 
-      (encoder_output,
-       encoder_decoder_attention_bias,
-       enc_extra_output) = self.encode(
-         inputs=fv,
-         target_space=target_space,
-         hparams=hparams,
-         losses=None)
+      (encoder_output, encoder_decoder_attention_bias,
+       enc_extra_output) = self.encode(inputs=fv,
+                                       target_space=target_space,
+                                       hparams=hparams,
+                                       losses=None)
 
       log_shape(encoder_output)
 
@@ -446,7 +438,7 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
     log_shape(prediction)
 
     return prediction
-  
+
   def body(self, features):
 
     hparams = self._hparams
@@ -456,22 +448,22 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
 
     audio_embedding, a_attn = self.encode_audio(features, hparams)
 
-    embeddings = tf.concat([tf.squeeze(video_embedding),
-                            tf.squeeze(audio_embedding)],
-                          axis=1)
+    embeddings = tf.concat(
+        [tf.squeeze(video_embedding),
+         tf.squeeze(audio_embedding)], axis=1)
     log_shape(embeddings)
 
     # Whether to compute a similarity loss, e.g.
     # similarity_cosine or similarity_euclidean
     if hparams.loss_type.startswith("similarity"):
-      loss, prediction = self.compute_similarity_loss(
-        video_embedding, audio_embedding, hparams,
-        features["targets"])
+      loss, prediction = self.compute_similarity_loss(video_embedding,
+                                                      audio_embedding, hparams,
+                                                      features["targets"])
       res = tf.concat([embeddings, prediction], axis=1)
       return res, {"training": loss}
-  
+
     # DEBUG: In attempts to run on ctpu directly changing the decoder
-    # type via the --extra_hparams flag we may not have been seeing 
+    # type via the --extra_hparams flag we may not have been seeing
     # any different hparams configuration - it might have wanted to see
     # --hparams instead of --extra_hparams or --hparams.
     if hparams.decoder_type == "dense":
@@ -487,18 +479,18 @@ class ModalityCorrespondenceLearner(universal_transformer.UniversalTransformer):
     # DEBUG: This is the loss that was used in the previous version
     # that ran without exceeding the gRPC deadline.
     if hparams.loss_type == "sigmoid_ce":
-      loss = tf.losses.sigmoid_cross_entropy(
-        tf.squeeze(features["targets"]), tf.squeeze(prediction))
+      loss = tf.losses.sigmoid_cross_entropy(tf.squeeze(features["targets"]),
+                                             tf.squeeze(prediction))
 
     elif hparams.loss_type == "softmax_ce":
-      loss = tf.losses.softmax_cross_entropy(
-        tf.squeeze(features["targets"]), tf.squeeze(prediction))
+      loss = tf.losses.softmax_cross_entropy(tf.squeeze(features["targets"]),
+                                             tf.squeeze(prediction))
     elif hparams.loss_type == "mse":
-      loss = tf.losses.mean_squared_error(
-        tf.squeeze(features["targets"]), tf.squeeze(prediction))
+      loss = tf.losses.mean_squared_error(tf.squeeze(features["targets"]),
+                                          tf.squeeze(prediction))
     elif hparams.loss_type == "huber":
-      loss = tf.losses.huber_loss(
-        tf.squeeze(features["targets"]), tf.squeeze(prediction))
+      loss = tf.losses.huber_loss(tf.squeeze(features["targets"]),
+                                  tf.squeeze(prediction))
     else:
       _raise_for_unrecognized_loss(hparams.loss_type)
 

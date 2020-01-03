@@ -31,28 +31,28 @@ import dateutil
 import tensorflow as tf
 
 from google.cloud import pubsub_v1
-    
+
 from google.oauth2 import service_account
 import googleapiclient.discovery
 from googleapiclient import _auth
 
 credentials = _auth.default_credentials()
 
-service = googleapiclient.discovery.build(
-    'iam', 'v1', credentials=credentials)
+service = googleapiclient.discovery.build('iam', 'v1', credentials=credentials)
 
-crm_service = googleapiclient.discovery.build(
-    'cloudresourcemanager', 'v1', credentials=credentials)
+crm_service = googleapiclient.discovery.build('cloudresourcemanager',
+                                              'v1',
+                                              credentials=credentials)
 
-cloudbuild = googleapiclient.discovery.build(
-    'cloudbuild', 'v1', credentials=credentials)
+cloudbuild = googleapiclient.discovery.build('cloudbuild',
+                                             'v1',
+                                             credentials=credentials)
 
 
 def latest_successful_build(image_uri, project_id):
   """Given an image URI get the most recent green cloudbuild."""
 
-  builds = cloudbuild.projects().builds().list(
-      projectId=project_id).execute()
+  builds = cloudbuild.projects().builds().list(projectId=project_id).execute()
 
   uri_prefix = image_uri.split(":")[0]
 
@@ -72,16 +72,14 @@ def latest_successful_build(image_uri, project_id):
             latest_time = finish_time
 
   if latest:
-    tf.logging.info("Found a latest successful build: {}".format(
-      latest
-    ))
+    tf.logging.info("Found a latest successful build: {}".format(latest))
 
   return latest
 
 
-def _build_cloud_run_image(
-    function_name, project_id,
-    default_cache_from="tensorflow/tensorflow:1.14.0"):
+def _build_cloud_run_image(function_name,
+                           project_id,
+                           default_cache_from="tensorflow/tensorflow:1.14.0"):
 
   function_code_path = "functions/{}".format(function_name)
 
@@ -108,26 +106,28 @@ def _build_cloud_run_image(
   return image_uri
 
 
-def update_service(function_name, image_uri, region, memory="2Gi",
-                   concurrency=40, timeout="10m"):
+def update_service(function_name,
+                   image_uri,
+                   region,
+                   memory="2Gi",
+                   concurrency=40,
+                   timeout="10m"):
   """Update a cloud run service given a container image."""
 
-  run_and_output(["gcloud", "beta", "run", "deploy",
-                  "--platform", "managed", 
-                  "--region", region,
-                  function_name,
-                  "--image", image_uri,
-                  "--memory", memory,
-                  "--timeout", timeout,
-                  "--concurrency", str(concurrency)])
+  run_and_output([
+      "gcloud", "beta", "run", "deploy", "--platform", "managed", "--region",
+      region, function_name, "--image", image_uri, "--memory", memory,
+      "--timeout", timeout, "--concurrency",
+      str(concurrency)
+  ])
 
 
 def get_domain_for_cloudrun_service(service_name, region):
 
   out = run_and_output([
-      "gcloud", "beta", "run", "services", "describe",
-      service_name, "--platform", "managed",
-      "--region", region])
+      "gcloud", "beta", "run", "services", "describe", service_name,
+      "--platform", "managed", "--region", region
+  ])
 
   domain = None
   for line in out.split("\n"):
@@ -138,12 +138,12 @@ def get_domain_for_cloudrun_service(service_name, region):
 
 
 def list_service_accounts(project_id):
-    """Lists all service accounts for the current project."""
+  """Lists all service accounts for the current project."""
 
-    service_accounts = service.projects().serviceAccounts().list(
-        name='projects/' + project_id).execute()
+  service_accounts = service.projects().serviceAccounts().list(
+      name='projects/' + project_id).execute()
 
-    return service_accounts
+  return service_accounts
 
 
 def service_account_exists(service_account_email, project):
@@ -160,12 +160,10 @@ def service_account_exists(service_account_email, project):
 def maybe_create_service_account(service_account_name, project):
 
   service_account_email = "{}@{}.iam.gserviceaccount.com".format(
-    service_account_name, project
-  )
+      service_account_name, project)
 
-  if not service_account_exists(
-      service_account_email=service_account_email,
-      project=project):
+  if not service_account_exists(service_account_email=service_account_email,
+                                project=project):
 
     service_account = service.projects().serviceAccounts().create(
         name='projects/' + project,
@@ -185,21 +183,18 @@ def configure_invoker_sa(service_name, project, region):
 
   service_account_name = "{}-invoker".format(service_name)
 
-  service_account_email = maybe_create_service_account(
-      service_account_name, project)
+  service_account_email = maybe_create_service_account(service_account_name,
+                                                       project)
 
-  member_arg = "--member=serviceAccount:{}".format(
-    service_account_email
-  )
+  member_arg = "--member=serviceAccount:{}".format(service_account_email)
 
   role_arg = "--role=roles/run.invoker"
 
-  run_and_output(["gcloud", "beta", "run", "services",
-                  "add-iam-policy-binding",
-                  "--platform", "managed", 
-                  "--region", region,
-                  service_name,
-                  member_arg, role_arg])
+  run_and_output([
+      "gcloud", "beta", "run", "services", "add-iam-policy-binding",
+      "--platform", "managed", "--region", region, service_name, member_arg,
+      role_arg
+  ])
 
   return service_account_email
 
@@ -227,10 +222,12 @@ def maybe_add_pubsub_token_creator_policy(project_id):
 
   role_arg = "--role=roles/iam.serviceAccountTokenCreator"
 
-  run_and_output(["gcloud", "projects", "add-iam-policy-binding",
-                  project_number, member_arg, role_arg])
+  run_and_output([
+      "gcloud", "projects", "add-iam-policy-binding", project_number,
+      member_arg, role_arg
+  ])
 
-    
+
 def list_subscriptions_in_project(project_id):
   """Lists all subscriptions in the current project."""
 
@@ -243,8 +240,7 @@ def list_subscriptions_in_project(project_id):
 
 
 def maybe_create_topic(project, topic_name):
-  msg = "Creating topic {} in project {}".format(topic_name,
-                                                 project)
+  msg = "Creating topic {} in project {}".format(topic_name, project)
   tf.logging.info(msg)
   publisher = pubsub_v1.PublisherClient()
   topic_path = publisher.topic_path(project, topic_name)
@@ -257,40 +253,36 @@ def maybe_create_topic(project, topic_name):
     topic = publisher.create_topic(topic_path)
 
 
-def maybe_create_subscription_for_service(service_name,
-                                          service_account_email,
-                                          service_url,
-                                          project,
-                                          region,
+def maybe_create_subscription_for_service(service_name, service_account_email,
+                                          service_url, project, region,
                                           topic_name):
 
   subscriptions = list_subscriptions_in_project(project)
 
   # Create a unique subscription ID
-  subscription_name = "{}-{}".format(
-    service_name, topic_name
-  )
+  subscription_name = "{}-{}".format(service_name, topic_name)
 
   subscriber = pubsub_v1.SubscriberClient()
-  subscription_path = subscriber.subscription_path(
-    project, subscription_name)
+  subscription_path = subscriber.subscription_path(project, subscription_name)
 
   publisher = pubsub_v1.PublisherClient()
   topic_path = publisher.topic_path(project, topic_name)
 
   if subscription_path not in subscriptions:
 
-    run_and_output(["gcloud", "beta", "pubsub", "subscriptions",
-                    "create", subscription_path,
-                    "--topic", topic_path,
-                    "--push-endpoint={}".format(service_url),
-                    "--push-auth-service-account={}".format(
-                      service_account_email
-                    )])
+    run_and_output([
+        "gcloud", "beta", "pubsub", "subscriptions", "create",
+        subscription_path, "--topic", topic_path,
+        "--push-endpoint={}".format(service_url),
+        "--push-auth-service-account={}".format(service_account_email)
+    ])
 
 
-def deploy_cloud_run_topic_responder(project, region, function_name,
-                                     memory="2Gi", concurrency=80,
+def deploy_cloud_run_topic_responder(project,
+                                     region,
+                                     function_name,
+                                     memory="2Gi",
+                                     concurrency=80,
                                      timeout="14m"):
 
   image_uri = _build_cloud_run_image(function_name, project)
@@ -299,26 +291,28 @@ def deploy_cloud_run_topic_responder(project, region, function_name,
 
   topic_name = "{}-trigger".format(function_name)
 
-  update_service(function_name, image_uri, region=region,
-                 memory=memory, concurrency=concurrency, timeout=timeout)
+  update_service(function_name,
+                 image_uri,
+                 region=region,
+                 memory=memory,
+                 concurrency=concurrency,
+                 timeout=timeout)
 
-  domain = get_domain_for_cloudrun_service(
-    service_name=function_name, region=region)
+  domain = get_domain_for_cloudrun_service(service_name=function_name,
+                                           region=region)
 
-  service_account_email = configure_invoker_sa(
-    service_name=function_name,
-    project=project,
-    region=region)
+  service_account_email = configure_invoker_sa(service_name=function_name,
+                                               project=project,
+                                               region=region)
 
   maybe_add_pubsub_token_creator_policy(project)
 
   maybe_create_topic(project=project, topic_name=topic_name)
 
   maybe_create_subscription_for_service(
-    service_name=function_name,
-    service_account_email=service_account_email,
-    service_url=domain,
-    project=project,
-    region=region,
-    topic_name=topic_name
-  )
+      service_name=function_name,
+      service_account_email=service_account_email,
+      service_url=domain,
+      project=project,
+      region=region,
+      topic_name=topic_name)

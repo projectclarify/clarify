@@ -40,14 +40,11 @@ hparams.data_dir = "foo"
 p_hparams = problem_obj.get_hparams(hparams)
 mode = "predict"
 
-
 ckpt_path = "gs://clarify-models-us-central1/experiments/mnist01/mcl-dev-j0830-1542-167c/output"
-
 
 # Checkpoints obtained and model restored in global scope i.e. once per
 # cold start (i.e. not per each function execution).
-with tfe.restore_variables_on_create(
-    tf.train.latest_checkpoint(ckpt_path)):
+with tfe.restore_variables_on_create(tf.train.latest_checkpoint(ckpt_path)):
   model = MCLDev(hparams, mode, p_hparams)
 
 client = firestore.Client()
@@ -89,7 +86,10 @@ class LabeledEmbeddingSpace(object):
       self.generate_random(given_data)
     self.emb_data = self.load_emb_data(given_data)
 
-  def generate_random(self, emb_data_path, embedding_length=2048, num_embeddings=100):
+  def generate_random(self,
+                      emb_data_path,
+                      embedding_length=2048,
+                      num_embeddings=100):
 
     ref = []
 
@@ -105,8 +105,8 @@ class LabeledEmbeddingSpace(object):
               "focus": float(np.random.random()),
               "posture": float(np.random.random()),
               "flow": float(np.random.random())
-            }
-          })
+          }
+      })
 
     serialized_data = json.dumps(ref)
 
@@ -117,7 +117,7 @@ class LabeledEmbeddingSpace(object):
 
   def load_emb_data(self, emb_data_path):
     with open(emb_data_path, "r") as f:
-      self.data = json.loads(f.read())    
+      self.data = json.loads(f.read())
 
   def build_kdtree(self):
 
@@ -126,7 +126,7 @@ class LabeledEmbeddingSpace(object):
     self.kdt = KDTree(X, leaf_size=30, metric='euclidean')
 
   def consensus_labels(self, result_indices):
-    
+
     consensus = None
     num_results = len(result_indices)
 
@@ -185,9 +185,8 @@ def label_state(data, context):
     tmpdir = tempfile.gettempdir()
 
     # NOTE: For dev purposes initially this is using random embedding vectors.
-    space = LabeledEmbeddingSpace(
-      given_data="{}/emb.json".format(tmpdir),
-      generate_random=True)
+    space = LabeledEmbeddingSpace(given_data="{}/emb.json".format(tmpdir),
+                                  generate_random=True)
 
     space.build_kdtree()
 
@@ -215,29 +214,29 @@ def label_state(data, context):
   consensus_labels = space.consensus_query(query)
 
   update = {
-    u'state': {
-      u'data': [],
-      u'meta': {
-        u'timestamp': datetime.datetime.utcfromtimestamp(0)
+      u'state': {
+          u'data': [],
+          u'meta': {
+              u'timestamp': datetime.datetime.utcfromtimestamp(0)
+          }
       }
-    }
   }
 
   targets = {
-    "happiness": 0.5,
-    "calm": 0.5,
-    "confidence": 0.5,
-    "kindness": 0.5,
-    "focus": 0.5,
-    "posture": 0.5,
-    "flow": 0.5
+      "happiness": 0.5,
+      "calm": 0.5,
+      "confidence": 0.5,
+      "kindness": 0.5,
+      "focus": 0.5,
+      "posture": 0.5,
+      "flow": 0.5
   }
 
   for key, value in consensus_labels.items():
     update[u'state'][u'data'].append({
-      "label": key,
-      "current": value,
-      "target": targets[key]
+        "label": key,
+        "current": value,
+        "target": targets[key]
     })
 
   target_doc = client.collection(collection_path).document(uid)

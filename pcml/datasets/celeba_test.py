@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of CelebA problem definition."""
 
 from __future__ import absolute_import
@@ -27,16 +26,12 @@ from pcml.datasets import celeba
 class TestCelebaProblemTiny(tf.test.TestCase):
 
   def test_e2e(self):
-    
-    helper = T2TDevHelper(
-      "trivial_model",
-      "image_celeba_tiny",
-      "transformer_tiny",
-      None
-    )
+
+    helper = T2TDevHelper("trivial_model", "image_celeba_tiny",
+                          "transformer_tiny", None)
 
     helper.datagen()
-    
+
     example = helper.eager_get_example()["targets"]
 
     #vsize = helper.problem.vocab_size

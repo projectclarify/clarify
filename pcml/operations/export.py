@@ -29,21 +29,25 @@ class ExportJob(PCMLJob):
                num_cpu=1,
                memory="6Gi",
                image="gcr.io/clarify/basic-runtime:0.0.4",
-               *args, **kwargs):
+               *args,
+               **kwargs):
 
     cmd = "python -m pcml.operations.export "
     cmd += "--output_dir={}".format(output_dir)
 
-    super(ExportJob, self).__init__(
-      job_name="export-{}".format(gen_timestamped_uid()),
-      command=["/bin/sh", "-c"],
-      command_args=self.build_cmd(),
-      namespace="kubeflow",
-      image=image,
-      staging_path=pcml_tgz_path,
-      resources=Resources(
-        limits={"cpu": num_cpu, "memory": memory}),
-      *args, **kwargs)
+    super(ExportJob,
+          self).__init__(job_name="export-{}".format(gen_timestamped_uid()),
+                         command=["/bin/sh", "-c"],
+                         command_args=self.build_cmd(),
+                         namespace="kubeflow",
+                         image=image,
+                         staging_path=pcml_tgz_path,
+                         resources=Resources(limits={
+                             "cpu": num_cpu,
+                             "memory": memory
+                         }),
+                         *args,
+                         **kwargs)
 
 
 def main(_):
@@ -64,7 +68,7 @@ def main(_):
 
   version_path = setup_pcml_version(FLAGS.staging_path)
 
-  FLAGS.t2t_usr_dir = version_path #??
+  FLAGS.t2t_usr_dir = version_path  #??
 
   # Make pmcl registered models available
   import pcml
@@ -75,11 +79,9 @@ if __name__ == "__main__":
 
   from tensor2tensor.serving.export import FLAGS
 
-  tf.flags.DEFINE_boolean('batch', False,
-                          'Whether to run in batch or locally.')
+  tf.flags.DEFINE_boolean('batch', False, 'Whether to run in batch or locally.')
 
-  tf.flags.DEFINE_string('staging_path', False,
-                         'Path to which to stage.')
+  tf.flags.DEFINE_string('staging_path', False, 'Path to which to stage.')
 
   tf.flags.DEFINE_string('pcml_tgz_bundle', False,
                          'Path to PCML bundle to use when running.')

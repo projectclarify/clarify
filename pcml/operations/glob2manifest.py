@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """A kubernetes Job to write file paths matching glob pattern to path manifest
 
 E.g.
@@ -35,7 +34,8 @@ flags = tf.flags
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string('source_glob', None, 'The GCS glob pattern to search.')
-flags.DEFINE_string('target_path', None, 'The full output path for the manifest.')
+flags.DEFINE_string('target_path', None,
+                    'The full output path for the manifest.')
 
 from pcml.launcher.kube import PCMLJob
 from pcml.launcher.kube import gen_timestamped_uid
@@ -59,13 +59,14 @@ class Glob2Manifest(PCMLJob):
     job_name_prefix = "glob2manifest"
     job_name = "%s-%s" % (job_name_prefix, gen_timestamped_uid())
 
-    super(Glob2Manifest, self).__init__(
-      job_name=job_name,
-      command=command,
-      command_args=command_args,
-      namespace="kubeflow",
-      image="gcr.io/clarify/basic-runtime:0.0.3",
-      *args, **kwargs)
+    super(Glob2Manifest,
+          self).__init__(job_name=job_name,
+                         command=command,
+                         command_args=command_args,
+                         namespace="kubeflow",
+                         image="gcr.io/clarify/basic-runtime:0.0.3",
+                         *args,
+                         **kwargs)
 
 
 def run(source_glob, target_path):
@@ -79,7 +80,7 @@ def run(source_glob, target_path):
 
 
 def main(_):
-    
+
   tf.logging.set_verbosity(tf.logging.INFO)
 
   if FLAGS.source_glob is None:

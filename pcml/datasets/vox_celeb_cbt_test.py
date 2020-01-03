@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of CBT-centric vox celeb problem."""
 
 from __future__ import absolute_import
@@ -45,9 +44,7 @@ class TestProblem(tf.test.TestCase):
     self.project = TEST_CONFIG.get("project")
     self.instance = TEST_CONFIG.get("test_cbt_instance")
     self.tmpdir = tempfile.mkdtemp()
-    self.test_run_tag = "clarify-test-{}-vox-cbt".format(
-      str(uuid.uuid4())[0:8]
-    )
+    self.test_run_tag = "clarify-test-{}-vox-cbt".format(str(uuid.uuid4())[0:8])
     self.prefix = "train"
     self.problem_name = "vox_celeb_cbt"
     self.staging = os.path.join(TEST_CONFIG.test_artifacts_root,
@@ -57,14 +54,14 @@ class TestProblem(tf.test.TestCase):
 
     # Populate a table with some raw data to sample
     self.source_selection = cbt_utils.RawVideoSelection(
-      project=self.project,
-      instance=self.instance,
-      table=self.source_table_name,
-      prefix=self.prefix
-    )
+        project=self.project,
+        instance=self.instance,
+        table=self.source_table_name,
+        prefix=self.prefix)
 
     extract.extract_to_cbt(manifest_path=self.manifest_path,
-                           shard_id=0, num_shards=1,
+                           shard_id=0,
+                           num_shards=1,
                            project=self.project,
                            instance=self.instance,
                            table=self.source_table_name,
@@ -72,7 +69,7 @@ class TestProblem(tf.test.TestCase):
                            tmp_dir=tempfile.mkdtemp())
 
   def test_lookup(self):
-    
+
     problem = registry.problem(self.problem_name)
 
   def test_example_generator(self):
@@ -80,18 +77,17 @@ class TestProblem(tf.test.TestCase):
     problem = registry.problem(self.problem_name)
 
     sample_generator = self.source_selection.sample_av_correspondence_examples(
-      frames_per_video=problem.video_shape[0],
-      max_num_samples=10)
+        frames_per_video=problem.video_shape[0], max_num_samples=10)
 
     example_generator = vox_celeb_cbt.example_generator(
-      raw_sampler=sample_generator,
-      video_shape=problem.video_shape,
-      audio_shape=problem.audio_shape,
-      max_examples=100,
-      augmentation_hparams=problem.augmentation_hparams)
+        raw_sampler=sample_generator,
+        video_shape=problem.video_shape,
+        audio_shape=problem.audio_shape,
+        max_examples=100,
+        augmentation_hparams=problem.augmentation_hparams)
 
     example = example_generator.__next__()
-    
+
     for key in ["audio", "video", "targets"]:
       self.assertTrue(key in example)
 
@@ -105,29 +101,26 @@ class TestProblem(tf.test.TestCase):
     target_table_name = self.test_run_tag + "bt"
 
     job = cbt_datagen.CBTDatagenJob(
-      problem_name=self.problem_name,
-      project=self.project,
-      bigtable_instance=self.instance,
-      bigtable_source_table_name=self.source_table_name,
-      bigtable_target_table_name=target_table_name,
-      prefix=self.prefix,
-      staging_path=self.staging,
-      node_selector={"type": "datagen-small"})
+        problem_name=self.problem_name,
+        project=self.project,
+        bigtable_instance=self.instance,
+        bigtable_source_table_name=self.source_table_name,
+        bigtable_target_table_name=target_table_name,
+        prefix=self.prefix,
+        staging_path=self.staging,
+        node_selector={"type": "datagen-small"})
 
     create_responses = job.launch_shard_parallel_jobs(num_shards=1)
 
     for create_response in create_responses:
-      _testing_run_poll_and_check_job(
-        test_object=self,
-        create_response=create_response,
-        expect_in_logs="Completed datagen.")
+      _testing_run_poll_and_check_job(test_object=self,
+                                      create_response=create_response,
+                                      expect_in_logs="Completed datagen.")
 
-    tfexample_selection = cbt_utils.TFExampleSelection(
-      project=self.project,
-      instance=self.instance,
-      table=target_table_name,
-      prefix=self.prefix
-    )
+    tfexample_selection = cbt_utils.TFExampleSelection(project=self.project,
+                                                       instance=self.instance,
+                                                       table=target_table_name,
+                                                       prefix=self.prefix)
 
     example_iterator = tfexample_selection.iterate_tfexamples()
 
@@ -159,6 +152,7 @@ class TestProblem(tf.test.TestCase):
       examples_table_name=None)
 
   """
+
 
 if __name__ == "__main__":
   tf.test.main()

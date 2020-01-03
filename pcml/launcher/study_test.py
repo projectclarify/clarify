@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of utilities for constructing Katib StudyJob's."""
 
 import tensorflow as tf
@@ -60,10 +59,9 @@ class TestStudyJob(tf.test.TestCase):
         selector_labels={"type": "tpu-host"},
         use_katib=True)
 
-    _ = T2TKubeStudy(
-        study_name="foo",
-        study_ranged_hparams="study_job_test_rhp",
-        experiment=experiment)
+    _ = T2TKubeStudy(study_name="foo",
+                     study_ranged_hparams="study_job_test_rhp",
+                     experiment=experiment)
 
 
 if __name__ == "__main__":

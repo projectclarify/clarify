@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """VGGFace2 problem.
 
 TODO: What exactly is the learning problem?
@@ -65,9 +64,7 @@ def _load_vgg_meta(download_root, shuffle=True, mode="train"):
   download_root = os.path.join(download_root, mode)
   meta_path = os.path.join(download_root, "meta.txt")
 
-  tf.logging.info("Loaded metadata for {} from {}".format(
-    mode, meta_path
-  ))
+  tf.logging.info("Loaded metadata for {} from {}".format(mode, meta_path))
 
   identity_to_paths = {}
 
@@ -90,15 +87,15 @@ def _vgg_sampling_iterator(meta):
 
   while True:
 
-    id1 = keys[np.random.randint(0,keys_len)]
-    id2 = keys[np.random.randint(0,keys_len)]
+    id1 = keys[np.random.randint(0, keys_len)]
+    id2 = keys[np.random.randint(0, keys_len)]
 
     id1_images = meta[id1]
     id2_images = meta[id2]
 
-    img1 = id1_images[np.random.randint(0,len(id1_images))]
-    img2 = id1_images[np.random.randint(0,len(id1_images))]
-    img3 = id2_images[np.random.randint(0,len(id2_images))]
+    img1 = id1_images[np.random.randint(0, len(id1_images))]
+    img2 = id1_images[np.random.randint(0, len(id1_images))]
+    img3 = id2_images[np.random.randint(0, len(id2_images))]
 
     yield (img1, img2, img3)
 
@@ -106,16 +103,20 @@ def _vgg_sampling_iterator(meta):
 def _read_image(image_path, image_shape, tmp_dir):
 
   fname = "-".join(image_path.split("/")[-2:])
-  local_path = generator_utils.maybe_download(
-    tmp_dir, fname, image_path)
+  local_path = generator_utils.maybe_download(tmp_dir, fname, image_path)
   d = cv2.imread(local_path)
   d = cv2.cvtColor(d, cv2.COLOR_BGR2RGB)
   d = _normalize_dimensions(d, image_shape)
   return d.flatten().tolist()
 
 
-def _generator(data_root, tmp_dir, mode, how_many, image_shape,
-               num_shards=-1, shard_id=-1):
+def _generator(data_root,
+               tmp_dir,
+               mode,
+               how_many,
+               image_shape,
+               num_shards=-1,
+               shard_id=-1):
 
   # Num shards and shard_id are not used because the dataset can be
   # sampled ad infinitum. The number of examples produced is simply
@@ -124,8 +125,7 @@ def _generator(data_root, tmp_dir, mode, how_many, image_shape,
   meta, download_root = _load_vgg_meta(data_root, mode=mode)
 
   tf.logging.info("Geneating {} examples, shard_id {}, numshards {}".format(
-    how_many, shard_id, num_shards
-  ))
+      how_many, shard_id, num_shards))
 
   for i, sample in enumerate(_vgg_sampling_iterator(meta)):
 
@@ -138,26 +138,24 @@ def _generator(data_root, tmp_dir, mode, how_many, image_shape,
     paths = [_mkpath(subpath) for subpath in sample]
 
     ex = {
+        "image/a": _read_image(paths[0], image_shape, tmp_dir),
+        "image/b": _read_image(paths[1], image_shape, tmp_dir),
+        "image/c": _read_image(paths[2], image_shape, tmp_dir),
 
-      "image/a": _read_image(paths[0], image_shape, tmp_dir),
-      "image/b": _read_image(paths[1], image_shape, tmp_dir),
-      "image/c": _read_image(paths[2], image_shape, tmp_dir),
+        # For compatibility with FEC setup, maybe include a label
+        # for rating/mode that is always 3 which according to the
+        # scheme used in the FEC dataset corresponds to the first
+        # two images in a pair belonging closer in embedding space
+        # than those compared to the third.
+        "triplet_code": [3],
 
-      # For compatibility with FEC setup, maybe include a label
-      # for rating/mode that is always 3 which according to the
-      # scheme used in the FEC dataset corresponds to the first
-      # two images in a pair belonging closer in embedding space
-      # than those compared to the third.
-      "triplet_code": [3],
-
-      # These have identity and origin information in case this is needed
-      # for debugging later.
-      "path/a": paths[0],
-      "path/b": paths[1],
-      "path/c": paths[2]
-
+        # These have identity and origin information in case this is needed
+        # for debugging later.
+        "path/a": paths[0],
+        "path/b": paths[1],
+        "path/c": paths[2]
     }
-    
+
     yield ex
 
 
@@ -167,7 +165,7 @@ class VggFace2(TripletImageProblem):
   @property
   def image_statistics(self):
     # Mean and standard deviation per color channel
-    return {"mean": [0.508,0.578,0.233], "sd": [0.236,0.204,0.284]}
+    return {"mean": [0.508, 0.578, 0.233], "sd": [0.236, 0.204, 0.284]}
 
   @property
   def data_root(self):
@@ -177,10 +175,10 @@ class VggFace2(TripletImageProblem):
   def image_shape(self):
     return (64, 64, 3)
 
-  def _generator(self, data_root, tmp_dir, mode, how_many,
-                 image_shape, num_shards, shard_id):
-    return _generator(data_root, tmp_dir, mode, how_many,
-                      image_shape, num_shards, shard_id)
+  def _generator(self, data_root, tmp_dir, mode, how_many, image_shape,
+                 num_shards, shard_id):
+    return _generator(data_root, tmp_dir, mode, how_many, image_shape,
+                      num_shards, shard_id)
 
   @property
   def train_size(self):
@@ -238,11 +236,11 @@ class VggFace2UdaFar(VggFace2):
 
     def _preproc(image):
 
-      image = image_aug.preprocess_image(
-        image, mode,
-        resize_size=self.image_shape,
-        normalize=self.normalize_image,
-        image_statistics=self.image_statistics)
+      image = image_aug.preprocess_image(image,
+                                         mode,
+                                         resize_size=self.image_shape,
+                                         normalize=self.normalize_image,
+                                         image_statistics=self.image_statistics)
 
       image.set_shape(self.image_shape)
 
@@ -276,7 +274,7 @@ class VggFace2UdaNear(VggFace2UdaFar):
   def uda_near_far(self):
     return "near"
 
-  
+
 """
 class MultiProblemV3(multi_problem_v2.MultiProblemV2):
 

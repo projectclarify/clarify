@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Download FEC dataset.
 
 The FEC dataset is at the top level a pair of CSV's that specify the URL of ~500k
@@ -72,19 +71,27 @@ from pcml.launcher.kube import PCMLJob
 from pcml.launcher.kube import gen_timestamped_uid
 from pcml.launcher.kube import Resources
 
-
-_FEC_ARCHIVE="https://storage.googleapis.com/public_release/FEC_dataset.zip"
-_FEC_TEST_META_FILENAME="faceexp-comparison-data-test-public.csv"
-_FEC_TRAIN_META_FILENAME="faceexp-comparison-data-train-public.csv"
+_FEC_ARCHIVE = "https://storage.googleapis.com/public_release/FEC_dataset.zip"
+_FEC_TEST_META_FILENAME = "faceexp-comparison-data-test-public.csv"
+_FEC_TRAIN_META_FILENAME = "faceexp-comparison-data-train-public.csv"
 _FEC_IMAGE_SIZE = 64
 _SUCCESS_MESSAGE = "Successfully completed download and filtering of FEC dataset."
 
 
 def _load_meta_line(line):
+
   def _load_meta_entry(entry_array):
-    return {"url": entry_array[0][1:-1],
-            "bounds": [float(entry_array[1]), float(entry_array[2]),
-                       float(entry_array[3]), float(entry_array[4])]}
+    return {
+        "url":
+            entry_array[0][1:-1],
+        "bounds": [
+            float(entry_array[1]),
+            float(entry_array[2]),
+            float(entry_array[3]),
+            float(entry_array[4])
+        ]
+    }
+
   a = _load_meta_entry(line[0:5])
   b = _load_meta_entry(line[5:10])
   c = _load_meta_entry(line[10:15])
@@ -93,25 +100,27 @@ def _load_meta_line(line):
 
   remainder = line[16:]
   ratings = {}
-  num_ratings = int(len(remainder)/2)
+  num_ratings = int(len(remainder) / 2)
   mean_rating = 0
 
   for i in range(num_ratings):
-    rater_id = remainder[2*i]
-    rating = remainder[2*i + 1]
+    rater_id = remainder[2 * i]
+    rating = remainder[2 * i + 1]
     ratings[rater_id] = int(rating)
     mean_rating += int(rating)
- 
+
   mean_rating = mean_rating / num_ratings
 
   mode = scipy.stats.mode(list(ratings.values()))[0][0]
 
   return {
-    "a": a, "b": b, "c": c,
-    "triplet_type": triplet_type,
-    "mean_rating": mean_rating,
-    "mode_rating": int(mode),
-    "ratings": ratings
+      "a": a,
+      "b": b,
+      "c": c,
+      "triplet_type": triplet_type,
+      "mean_rating": mean_rating,
+      "mode_rating": int(mode),
+      "ratings": ratings
   }
 
 
@@ -165,11 +174,11 @@ def _crop_to_fractional_xy_bbox(image, bbox, expand_rate=0.15):
 
   w, h, c = np.shape(image)
 
-  x_start = int(bbox[2]*w)
-  x_end = int(bbox[3]*w)
+  x_start = int(bbox[2] * w)
+  x_end = int(bbox[3] * w)
 
-  y_start = int(bbox[0]*h)
-  y_end = int(bbox[1]*h)
+  y_start = int(bbox[0] * h)
+  y_end = int(bbox[1] * h)
 
   # Expand as a function of cropped area not total image area
   x_expand = (x_end - x_start) * expand_rate / 2
@@ -190,10 +199,10 @@ def _crop_to_fractional_xy_bbox(image, bbox, expand_rate=0.15):
     y_extra = x_size - y_size
   elif x_size < y_size:
     x_extra = y_size - x_size
-    
-  x_extra_before = int(x_extra/2.0)
+
+  x_extra_before = int(x_extra / 2.0)
   x_extra_after = x_extra - x_extra_before
-  y_extra_before = int(y_extra/2.0)
+  y_extra_before = int(y_extra / 2.0)
   y_extra_after = y_extra - y_extra_before
 
   x_start = max(int(x_start - x_extra_before), 0)
@@ -207,7 +216,7 @@ def _crop_to_fractional_xy_bbox(image, bbox, expand_rate=0.15):
 
 def _read_image(image_path):
   img = cv2.imread(image_path)
-  rgb_img = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2RGB)  
+  rgb_img = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2RGB)
   return rgb_img
 
 
@@ -292,7 +301,9 @@ def sharded_download_fec_data(tmp_dir, is_training, shard_id, num_shards):
 
   target_shape = (128, 128, 3)
 
-  meta = [thing for thing in _get_fec_meta(is_training=is_training, tmp_dir=tmp_dir)]
+  meta = [
+      thing for thing in _get_fec_meta(is_training=is_training, tmp_dir=tmp_dir)
+  ]
 
   meta_len = len(meta)
 
@@ -303,8 +314,7 @@ def sharded_download_fec_data(tmp_dir, is_training, shard_id, num_shards):
   meta = meta[shard_start:min(shard_end, meta_len)]
 
   tf.logging.info("Processing shard with {} records of {} total".format(
-    len(meta), meta_len
-  ))
+      len(meta), meta_len))
 
   return _download_fec_data(tmp_dir, meta, target_shape=target_shape)
 
@@ -327,14 +337,17 @@ class DownloadFec(PCMLJob):
     self.job_name_prefix = "download-fec"
     job_name = "%s-%s" % (self.job_name_prefix, gen_timestamped_uid())
 
-    super(DownloadFec, self).__init__(
-      job_name=job_name,
-      command=command,
-      command_args=command_args,
-      namespace="kubeflow",
-      num_local_ssd=1,
-      resources=Resources(limits={"cpu": "750m", "memory": "4Gi"}),
-      *args, **kwargs)
+    super(DownloadFec, self).__init__(job_name=job_name,
+                                      command=command,
+                                      command_args=command_args,
+                                      namespace="kubeflow",
+                                      num_local_ssd=1,
+                                      resources=Resources(limits={
+                                          "cpu": "750m",
+                                          "memory": "4Gi"
+                                      }),
+                                      *args,
+                                      **kwargs)
 
 
 def main(_):
@@ -351,8 +364,8 @@ def main(_):
 
   # TODO: need to check maybe transfer code above for downloading direct to GCS then
   # use it in fec.py
-  output_dir = os.path.join(str(FLAGS.output_bucket),
-                            condition, str(FLAGS.shard_id))
+  output_dir = os.path.join(str(FLAGS.output_bucket), condition,
+                            str(FLAGS.shard_id))
 
   #tmp_dir = tempfile.mktemp()
   tmp_dir = "/mnt/ssd0"
@@ -365,7 +378,7 @@ def main(_):
                             num_shards=FLAGS.num_shards)
 
   for filename in tf.gfile.ListDirectory(tmp_dir):
-    
+
     # Might as well save all the data to avoid having to download it in the
     # future if something needs to change.
     #regex = r'cropped@[0-9a-z\.\-]*#http[0-9a-z\.\-]*:--'
@@ -388,13 +401,15 @@ if __name__ == "__main__":
   flags = tf.flags
   FLAGS = flags.FLAGS
 
-  flags.DEFINE_string("output_bucket", None, "Bucket path to which to write data.")
+  flags.DEFINE_string("output_bucket", None,
+                      "Bucket path to which to write data.")
 
   flags.DEFINE_integer("num_shards", 1, "Total num shards.")
 
   flags.DEFINE_integer("shard_id", 0, "Which shard.")
 
-  flags.DEFINE_integer("is_training", None, "Integer specification of is_training.")
-  
+  flags.DEFINE_integer("is_training", None,
+                       "Integer specification of is_training.")
+
   tf.logging.set_verbosity(tf.logging.INFO)
   tf.app.run()

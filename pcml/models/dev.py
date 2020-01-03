@@ -1,4 +1,3 @@
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -34,10 +33,10 @@ from tensor2tensor.data_generators import problem
 
 tf.logging.set_verbosity(tf.logging.DEBUG)
 
-
 from tensor2tensor.data_generators.mnist import ImageMnist, mnist_generator
 
 _MNIST_IMAGE_SIZE = 28
+
 
 def layers():
   return common_layers.layers()
@@ -61,10 +60,11 @@ class DevProblem(ImageMnist):
 
   def hparams(self, defaults, unused_model_hparams):
     p = defaults
-    p.modality = {"inputs": modalities.ModalityType.IMAGE,
-                  "targets": modalities.ModalityType.IDENTITY}
-    p.vocab_size = {"inputs": 256,
-                    "targets": self.num_classes}
+    p.modality = {
+        "inputs": modalities.ModalityType.IMAGE,
+        "targets": modalities.ModalityType.IDENTITY
+    }
+    p.vocab_size = {"inputs": 256, "targets": self.num_classes}
     p.batch_size_multiplier = 4 if self.is_small else 256
     p.loss_multiplier = 3.0 if self.is_small else 1.0
     if self._was_reversed:
@@ -76,7 +76,7 @@ class DevProblem(ImageMnist):
 @registry.register_hparams
 def mcl_res_ut_vtiny():
   hparams = mcl.mcl_res_ut()
-  hparams.layer_sizes = [4,4,4,4]
+  hparams.layer_sizes = [4, 4, 4, 4]
   hparams.batch_size = 4
   hparams.hidden_size = 64
   hparams.filter_size = 32
@@ -86,56 +86,53 @@ def mcl_res_ut_vtiny():
 
 def resnet_wrapper(hp, inputs, use_bfloat16=False):
 
-    block_fns = {
-        "residual": resnet.residual_block,
-        "bottleneck": resnet.bottleneck_block,
-    }
-    assert hp.block_fn in block_fns
+  block_fns = {
+      "residual": resnet.residual_block,
+      "bottleneck": resnet.bottleneck_block,
+  }
+  assert hp.block_fn in block_fns
 
-    is_training = hp.mode == tf.estimator.ModeKeys.TRAIN
+  is_training = hp.mode == tf.estimator.ModeKeys.TRAIN
 
-    data_format = "channels_last"
-    if hp.use_nchw:
-      # Convert from channels_last (NHWC) to channels_first (NCHW). This
-      # provides a large performance boost on GPU.
-      inputs = tf.transpose(inputs, [0, 3, 1, 2])
-      data_format = "channels_first"
+  data_format = "channels_last"
+  if hp.use_nchw:
+    # Convert from channels_last (NHWC) to channels_first (NCHW). This
+    # provides a large performance boost on GPU.
+    inputs = tf.transpose(inputs, [0, 3, 1, 2])
+    data_format = "channels_first"
 
-    inputs = resnet.conv2d_fixed_padding(
-        inputs=inputs,
-        filters=hp.filter_sizes[0],
-        kernel_size=7,
-        strides=1 if hp.is_cifar else 2,
-        data_format=data_format)
-    inputs = tf.identity(inputs, "initial_conv")
-    inputs = resnet.batch_norm_relu(inputs, is_training, data_format=data_format)
+  inputs = resnet.conv2d_fixed_padding(inputs=inputs,
+                                       filters=hp.filter_sizes[0],
+                                       kernel_size=7,
+                                       strides=1 if hp.is_cifar else 2,
+                                       data_format=data_format)
+  inputs = tf.identity(inputs, "initial_conv")
+  inputs = resnet.batch_norm_relu(inputs, is_training, data_format=data_format)
 
-    if not hp.is_cifar:
-      inputs = tf.layers.max_pooling2d(
-          inputs=inputs,
-          pool_size=3,
-          strides=2,
-          padding="SAME",
-          data_format=data_format)
-      inputs = tf.identity(inputs, "initial_max_pool")
+  if not hp.is_cifar:
+    inputs = tf.layers.max_pooling2d(inputs=inputs,
+                                     pool_size=3,
+                                     strides=2,
+                                     padding="SAME",
+                                     data_format=data_format)
+    inputs = tf.identity(inputs, "initial_max_pool")
 
-    out = resnet.resnet_v2(
-        inputs,
-        block_fns[hp.block_fn],
-        hp.layer_sizes,
-        hp.filter_sizes,
-        data_format,
-        is_training=is_training,
-        is_cifar=hp.is_cifar,
-        use_td=hp.use_td,
-        targeting_rate=hp.targeting_rate,
-        keep_prob=hp.keep_prob,
-        bottleneck_ratios=hp.bottleneck_ratios)
+  out = resnet.resnet_v2(inputs,
+                         block_fns[hp.block_fn],
+                         hp.layer_sizes,
+                         hp.filter_sizes,
+                         data_format,
+                         is_training=is_training,
+                         is_cifar=hp.is_cifar,
+                         use_td=hp.use_td,
+                         targeting_rate=hp.targeting_rate,
+                         keep_prob=hp.keep_prob,
+                         bottleneck_ratios=hp.bottleneck_ratios)
 
-    if hp.use_nchw:
-      out = tf.transpose(out, [0, 2, 3, 1])
+  if hp.use_nchw:
+    out = tf.transpose(out, [0, 2, 3, 1])
 
-    return out
+  return out
 
 
 @registry.register_model
@@ -160,7 +157,7 @@ class MCLDev(mcl.ModalityCorrespondenceLearner):
     embedding = resnet_wrapper(hparams, features["inputs"])
     return embedding
 
-  def body(self, features):        
+  def body(self, features):
 
     hparams = self._hparams
 
@@ -170,7 +167,7 @@ class MCLDev(mcl.ModalityCorrespondenceLearner):
     mcl.log_shape(emb)
 
     b, j, k, h = common_layers.shape_list(emb)
-    shape = (b, j*k*h)
+    shape = (b, j * k * h)
     emb = tf.reshape(emb, shape)
     mcl.log_shape(emb)
     out = tf.layers.dense(emb, 1)
@@ -181,10 +178,8 @@ class MCLDev(mcl.ModalityCorrespondenceLearner):
                                           tf.squeeze(out))
     else:
       loss = 0.0
-    
-    return out, {"training": loss}
 
-  
+    return out, {"training": loss}
     """
     From original t2t resnet code
     
@@ -207,7 +202,8 @@ class MCLDev(mcl.ModalityCorrespondenceLearner):
     return logits, losses
     
     """
-    
+
+
 from pcml.datasets import vox_celeb_cbt
 from tensor2tensor.layers import modalities
 from tensor2tensor.data_generators import problem
@@ -226,11 +222,9 @@ class VoxCelebImageAudio(vox_celeb_cbt.VoxCelebCbt):
     example["audio"] = tf.slice(example["audio"], (0,), (self.audio_shape[0],))
 
     # Just a single frame
-    example["video"] = tf.slice(example["video"],
-                                (0, 0, 0, 0),
-                                (1, -1, -1, -1))
+    example["video"] = tf.slice(example["video"], (0, 0, 0, 0), (1, -1, -1, -1))
     example["video"] = tf.squeeze(example["video"])
-    
+
     example["targets"] = tf.random.uniform((1,),
                                            minval=0,
                                            maxval=5,
@@ -240,13 +234,13 @@ class VoxCelebImageAudio(vox_celeb_cbt.VoxCelebCbt):
 
   def hparams(self, defaults, unused_model_hparams):
     p = defaults
-    p.modality = {"video": modalities.ModalityType.IDENTITY,
-                  "audio": modalities.ModalityType.IDENTITY,
-                  "targets": modalities.ModalityType.IDENTITY}
+    p.modality = {
+        "video": modalities.ModalityType.IDENTITY,
+        "audio": modalities.ModalityType.IDENTITY,
+        "targets": modalities.ModalityType.IDENTITY
+    }
 
-    p.vocab_size = {"video": 256,
-                    "audio": 256,
-                    "targets": self.num_classes}
+    p.vocab_size = {"video": 256, "audio": 256, "targets": self.num_classes}
 
     p.batch_size_multiplier = 4
     p.loss_multiplier = 3.0
@@ -278,7 +272,7 @@ class MCLDev2(mcl.ModalityCorrespondenceLearner):
     embedding = resnet_wrapper(hparams, batched_image_tensor)
     return embedding
 
-  def body(self, features):        
+  def body(self, features):
 
     hparams = self._hparams
 
@@ -286,7 +280,7 @@ class MCLDev2(mcl.ModalityCorrespondenceLearner):
 
       emb = self.embed_image(features["video"])
       b, j, k, h = common_layers.shape_list(emb)
-      shape = (b, j*k*h)
+      shape = (b, j * k * h)
       emb = tf.reshape(emb, shape)
       out = tf.layers.dense(emb, 1)
 
@@ -297,7 +291,7 @@ class MCLDev2(mcl.ModalityCorrespondenceLearner):
                                           tf.squeeze(out))
     else:
       loss = 0.0
-    
+
     return out, {"training": loss}
 
 
@@ -310,7 +304,7 @@ def dense_reduction(x, target_size, reducing_factor=2, flatten=True):
 
   if flatten:
     b, j, k, h = common_layers.shape_list(x)
-    shape = (b, j*k*h)
+    shape = (b, j * k * h)
     x = tf.reshape(x, shape)
 
   input_size = tf.cast(common_layers.shape_list(x)[-1], tf.int32)
@@ -320,7 +314,7 @@ def dense_reduction(x, target_size, reducing_factor=2, flatten=True):
 
   while current_size % reducing_factor == 0:
 
-    current_size *= 1/reducing_factor
+    current_size *= 1 / reducing_factor
 
     if current_size < target_size:
       break
@@ -349,49 +343,47 @@ def dense_reduction(x, target_size, reducing_factor=2, flatten=True):
 
 def t2t_preprocess_waveforms(inputs, hparams):
 
-    p = hparams
+  p = hparams
 
-    num_mel_bins = p.audio_num_mel_bins
-    num_channels = 3 if p.audio_add_delta_deltas else 1
+  num_mel_bins = p.audio_num_mel_bins
+  num_channels = 3 if p.audio_add_delta_deltas else 1
 
-    waveforms = inputs
-    mel_fbanks = common_audio.compute_mel_filterbank_features(
-            waveforms,
-            sample_rate=p.audio_sample_rate,
-            dither=p.audio_dither,
-            preemphasis=p.audio_preemphasis,
-            frame_length=p.audio_frame_length,
-            frame_step=p.audio_frame_step,
-            lower_edge_hertz=p.audio_lower_edge_hertz,
-            upper_edge_hertz=p.audio_upper_edge_hertz,
-            num_mel_bins=p.audio_num_mel_bins,
-            apply_mask=True)
+  waveforms = inputs
+  mel_fbanks = common_audio.compute_mel_filterbank_features(
+      waveforms,
+      sample_rate=p.audio_sample_rate,
+      dither=p.audio_dither,
+      preemphasis=p.audio_preemphasis,
+      frame_length=p.audio_frame_length,
+      frame_step=p.audio_frame_step,
+      lower_edge_hertz=p.audio_lower_edge_hertz,
+      upper_edge_hertz=p.audio_upper_edge_hertz,
+      num_mel_bins=p.audio_num_mel_bins,
+      apply_mask=True)
 
-    if p.audio_add_delta_deltas:
-      mel_fbanks = common_audio.add_delta_deltas(mel_fbanks)
+  if p.audio_add_delta_deltas:
+    mel_fbanks = common_audio.add_delta_deltas(mel_fbanks)
 
-    x = tf.reshape(mel_fbanks,
-                   common_layers.shape_list(mel_fbanks)[:2] +
-                   [num_mel_bins, num_channels])
+  x = tf.reshape(
+      mel_fbanks,
+      common_layers.shape_list(mel_fbanks)[:2] + [num_mel_bins, num_channels])
 
-    nonpadding_mask = 1. - common_attention.embedding_to_padding(x)
-    num_of_nonpadding_elements = tf.reduce_sum(
-        nonpadding_mask) * num_mel_bins * num_channels
+  nonpadding_mask = 1. - common_attention.embedding_to_padding(x)
+  num_of_nonpadding_elements = tf.reduce_sum(
+      nonpadding_mask) * num_mel_bins * num_channels
 
-    # This replaces CMVN estimation on data
-    var_epsilon = 1e-09
-    mean = tf.reduce_sum(
-        x, axis=[1], keepdims=True) / num_of_nonpadding_elements
+  # This replaces CMVN estimation on data
+  var_epsilon = 1e-09
+  mean = tf.reduce_sum(x, axis=[1], keepdims=True) / num_of_nonpadding_elements
 
-    variance = (num_of_nonpadding_elements * mean**2. -
-                2. * mean * tf.reduce_sum(x, axis=[1], keepdims=True) +
-                tf.reduce_sum(x**2, axis=[1], keepdims=True)
-               ) / num_of_nonpadding_elements
+  variance = (num_of_nonpadding_elements * mean**2. - 2. * mean *
+              tf.reduce_sum(x, axis=[1], keepdims=True) + tf.reduce_sum(
+                  x**2, axis=[1], keepdims=True)) / num_of_nonpadding_elements
 
-    x = (x - mean) * tf.rsqrt(variance + var_epsilon) * tf.expand_dims(
-        nonpadding_mask, -1)
+  x = (x - mean) * tf.rsqrt(variance + var_epsilon) * tf.expand_dims(
+      nonpadding_mask, -1)
 
-    return x
+  return x
 
 
 @registry.register_model
@@ -422,58 +414,53 @@ class MCLDev3(mcl.ModalityCorrespondenceLearner):
   def modality_embedding_size(self):
     return 512
 
-  def _embed(self, tensor, embedding_size, dense_reduction_factor,
-             hparams):
+  def _embed(self, tensor, embedding_size, dense_reduction_factor, hparams):
 
-    embedding = resnet_wrapper(hp=hparams,
-                               inputs=tensor)
+    embedding = resnet_wrapper(hp=hparams, inputs=tensor)
 
-    embedding = dense_reduction(
-      embedding, target_size=embedding_size,
-      reducing_factor=dense_reduction_factor)
+    embedding = dense_reduction(embedding,
+                                target_size=embedding_size,
+                                reducing_factor=dense_reduction_factor)
 
     embedding = tf.reshape(embedding, [-1, embedding_size])
 
     return embedding
 
-  def embed_audio(self, batched_feature_tensor, embedding_size=64,
+  def embed_audio(self,
+                  batched_feature_tensor,
+                  embedding_size=64,
                   dense_reduction_factor=2):
 
     with tf.variable_scope("audio", reuse=tf.AUTO_REUSE):
 
-      processed_waveforms = t2t_preprocess_waveforms(
-          batched_feature_tensor,
-          hparams=self.hparams)
+      processed_waveforms = t2t_preprocess_waveforms(batched_feature_tensor,
+                                                     hparams=self.hparams)
 
-      embedding = self._embed(
-        processed_waveforms,
-        embedding_size=embedding_size,
-        dense_reduction_factor=dense_reduction_factor,
-        hparams=self.hparams
-      )
+      embedding = self._embed(processed_waveforms,
+                              embedding_size=embedding_size,
+                              dense_reduction_factor=dense_reduction_factor,
+                              hparams=self.hparams)
 
       return embedding
 
-  def embed_image(self, batched_image_tensor,
+  def embed_image(self,
+                  batched_image_tensor,
                   embedding_size=64,
                   dense_reduction_factor=2):
 
     with tf.variable_scope("video", reuse=tf.AUTO_REUSE):
 
-      embedding = self._embed(
-        batched_image_tensor,
-        embedding_size=embedding_size,
-        dense_reduction_factor=dense_reduction_factor,
-        hparams=self.hparams
-      )
+      embedding = self._embed(batched_image_tensor,
+                              embedding_size=embedding_size,
+                              dense_reduction_factor=dense_reduction_factor,
+                              hparams=self.hparams)
 
       return embedding
 
-  def body(self, features):        
+  def body(self, features):
 
     hparams = self._hparams
     num_classes = 1
-
     """
 
     The current use of self.modality_embedding_size may not be ideal.
@@ -485,24 +472,21 @@ class MCLDev3(mcl.ModalityCorrespondenceLearner):
       #with tf.variable_scope("dummy", reuse=tf.AUTO_REUSE):
 
       video_embedding = self.embed_image(
-        features["video"],
-        embedding_size=self.modality_embedding_size)
+          features["video"], embedding_size=self.modality_embedding_size)
 
       audio_embedding = self.embed_audio(
-        features["audio"],
-        embedding_size=self.modality_embedding_size)
+          features["audio"], embedding_size=self.modality_embedding_size)
 
-      concatenated = tf.concat([tf.squeeze(video_embedding),
-                                tf.squeeze(audio_embedding)],
-                               axis=1)
-      concatenated = tf.reshape(
-        concatenated, [-1, 2*self.modality_embedding_size])
+      concatenated = tf.concat(
+          [tf.squeeze(video_embedding),
+           tf.squeeze(audio_embedding)], axis=1)
+      concatenated = tf.reshape(concatenated,
+                                [-1, 2 * self.modality_embedding_size])
 
-      prediction = dense_reduction(
-          concatenated,
-          target_size=num_classes,
-          reducing_factor=2,
-          flatten=False)
+      prediction = dense_reduction(concatenated,
+                                   target_size=num_classes,
+                                   reducing_factor=2,
+                                   flatten=False)
 
     prediction = tf.cast(prediction, dtype=tf.float32)
 
@@ -511,5 +495,5 @@ class MCLDev3(mcl.ModalityCorrespondenceLearner):
                                           tf.squeeze(prediction))
     else:
       loss = 0.0
-    
+
     return prediction, {"training": loss}

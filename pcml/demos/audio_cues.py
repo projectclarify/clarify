@@ -48,8 +48,7 @@ import pcml
 
 from pcml.datasets import image_aug
 
-from IPython.display import (
-    Audio, display, clear_output)
+from IPython.display import (Audio, display, clear_output)
 from functools import partial
 from matplotlib import pyplot as plt
 from matplotlib import pylab
@@ -80,8 +79,7 @@ model_obj = registry.model(model_name)
 
 rate = 16000.
 duration = .25
-t = np.linspace(
-    0., duration, int(rate * duration))
+t = np.linspace(0., duration, int(rate * duration))
 
 
 def load_image(img_string):
@@ -92,14 +90,15 @@ def load_image(img_string):
   img = Image.open(filename)
   return np.array(img)
 
+
 def synth(f):
-    x = np.sin(f * 2. * np.pi * t)
-    display(Audio(x, rate=rate, autoplay=True))
+  x = np.sin(f * 2. * np.pi * t)
+  display(Audio(x, rate=rate, autoplay=True))
 
 
 def _random_crop_square(image):
 
-  x,y,c = image.shape
+  x, y, c = image.shape
 
   x_crop_before = 0
   x_crop_after = 0
@@ -128,37 +127,37 @@ def _normalize_dimensions(image, target_shape):
   image = _random_crop_square(image)
 
   mn, mx = np.amin(image), np.amax(image)
-  if mn >=0 and mx <= 255:
+  if mn >= 0 and mx <= 255:
     image = image / 255.0
 
   source_shape = image.shape
-  scale_x_factor = target_shape[0]/source_shape[0]
-  scale_y_factor = target_shape[1]/source_shape[1]
+  scale_x_factor = target_shape[0] / source_shape[0]
+  scale_y_factor = target_shape[1] / source_shape[1]
   scale_x_first = (scale_x_factor <= scale_y_factor)
 
   if scale_x_first:
 
     new_x = target_shape[0]
-    new_y = int(source_shape[1]*scale_x_factor)
+    new_y = int(source_shape[1] * scale_x_factor)
     resize_dim = (new_x, new_y)
     newimg = cv2.resize(image, resize_dim)
     pad_width = target_shape[1] - new_y
     if pad_width > 0:
       # Pad in Y direction
-      newimg = np.pad(newimg, [(0,pad_width),(0,0),(0,0)], mode="mean")
+      newimg = np.pad(newimg, [(0, pad_width), (0, 0), (0, 0)], mode="mean")
 
   else:
 
     new_y = target_shape[1]
-    new_x = int(source_shape[0]*scale_y_factor)
+    new_x = int(source_shape[0] * scale_y_factor)
     resize_dim = (new_x, new_y)
     newimg = cv2.resize(image, resize_dim)
     pad_width = target_shape[0] - new_x
     if pad_width > 0:
       # Pad in X direction
-      newimg = np.pad(newimg, [(0,0),(0,pad_width),(0,0)], mode="mean")
+      newimg = np.pad(newimg, [(0, 0), (0, pad_width), (0, 0)], mode="mean")
 
-  newimg = (newimg*255.0).astype(np.int64)
+  newimg = (newimg * 255.0).astype(np.int64)
 
   return newimg
 
@@ -171,20 +170,20 @@ def detect_and_preprocess(image):
 
   xcenter = predictions[0][0]
   ycenter = predictions[0][1]
-  width = predictions[0][2]*1.80
-  height = predictions[0][3]*1.80
+  width = predictions[0][2] * 1.80
+  height = predictions[0][3] * 1.80
 
   xmax = image.shape[1]
   ymax = image.shape[0]
 
-  ystart = max(0,int(ycenter-height/2))
-  yend = min(ymax,int(ycenter+height/2))
-  xstart = max(0,int(xcenter-width/2))
-  xend = min(xmax,int(xcenter+width/2))
+  ystart = max(0, int(ycenter - height / 2))
+  yend = min(ymax, int(ycenter + height / 2))
+  xstart = max(0, int(xcenter - width / 2))
+  xend = min(xmax, int(xcenter + width / 2))
 
-  img_with_face = image[ystart:yend,xstart:xend,:]
+  img_with_face = image[ystart:yend, xstart:xend, :]
 
-  image_shape = (64,64,3)
+  image_shape = (64, 64, 3)
   img_post = _normalize_dimensions(img_with_face, target_shape=image_shape)
 
   return img_post
@@ -194,53 +193,55 @@ def get_example():
 
   # Add a new document
   db = firestore.Client()
-  doc_ref = db.collection(u'users/2LbhP63ADQfo5XkmKeVVEtPWvAD2/modalities').document(u'av')
+  doc_ref = db.collection(
+      u'users/2LbhP63ADQfo5XkmKeVVEtPWvAD2/modalities').document(u'av')
 
   image_stats = {"mean": [0.330, 0.537, -0.242], "sd": [0.220, 0.169, 1.156]}
-  shape = (64,64,3)
+  shape = (64, 64, 3)
   mode = "eval"
 
   data = doc_ref.get().to_dict()["videoData"]
 
   img = np.asarray(load_image(data))
-  
+
   img = detect_and_preprocess(img)
 
   # Convert to int32
 
   example = {
-    "image/a": img,
-    "image/b": img,
-    "image/c": img,
-    "image/a/noaug": img,
-    "image/b/noaug": img,
-    "image/c/noaug": img,
-    "triplet_code": [0],
-    "type": [1],
-    "targets": img
+      "image/a": img,
+      "image/b": img,
+      "image/c": img,
+      "image/a/noaug": img,
+      "image/b/noaug": img,
+      "image/c/noaug": img,
+      "triplet_code": [0],
+      "type": [1],
+      "targets": img
   }
 
   def _preproc(image):
 
-    image = image_aug.preprocess_image(
-      image, mode,
-      resize_size=shape,
-      normalize=True,
-      image_statistics=image_stats,
-      crop_area_min=1,
-      contrast_lower=0.45,
-      contrast_upper=0.55,
-      brightness_delta_min=-0.01,
-      brightness_delta_max=0.01)
+    image = image_aug.preprocess_image(image,
+                                       mode,
+                                       resize_size=shape,
+                                       normalize=True,
+                                       image_statistics=image_stats,
+                                       crop_area_min=1,
+                                       contrast_lower=0.45,
+                                       contrast_upper=0.55,
+                                       brightness_delta_min=-0.01,
+                                       brightness_delta_max=0.01)
 
     image.set_shape(shape)
 
     return image
 
-  example["image/a"] = tf.expand_dims(_preproc(example["image/a"]),0)
-  example["image/b"] = tf.expand_dims(_preproc(example["image/b"]),0)
-  example["image/c"] = tf.expand_dims(_preproc(example["image/c"]),0)
-  example["triplet_code"] = tf.expand_dims(tf.cast(example["triplet_code"], tf.int64),0)
+  example["image/a"] = tf.expand_dims(_preproc(example["image/a"]), 0)
+  example["image/b"] = tf.expand_dims(_preproc(example["image/b"]), 0)
+  example["image/c"] = tf.expand_dims(_preproc(example["image/c"]), 0)
+  example["triplet_code"] = tf.expand_dims(
+      tf.cast(example["triplet_code"], tf.int64), 0)
 
   return example
 
@@ -271,7 +272,9 @@ def play_beginning_session():
 
 
 def play_establishing_baseline():
-  _tts("Establishing baseline. Please demonstrate a variety of expressions and poses.")
+  _tts(
+      "Establishing baseline. Please demonstrate a variety of expressions and poses."
+  )
   time.sleep(3)
 
 
@@ -353,7 +356,7 @@ def optimize():
           if num_sampled == 4:
             play_establishing_baseline()
 
-          synth_level = synth_min + synth_range*((dist-mn)/(mx-mn))
+          synth_level = synth_min + synth_range * ((dist - mn) / (mx - mn))
 
           #if distances:
           #  distance_threshold = np.mean(distances)

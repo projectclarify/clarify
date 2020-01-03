@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Example utils."""
 
 from __future__ import absolute_import
@@ -32,7 +31,7 @@ class ExampleFieldTemplate(object):
     self.shape = shape
     self.field_type = field_type
     self.dtype = dtype
-  
+
   @property
   def dtype(self):
     """A tf.dtype.
@@ -42,16 +41,16 @@ class ExampleFieldTemplate(object):
 
     """
     return self.__dtype
-  
+
   @dtype.setter
   def dtype(self, x):
     self.__dtype = x
-            
+
   @property
   def modality(self):
     """E.g. a modalities.ModalityType."""
     return self.__modality
-  
+
   @modality.setter
   def modality(self, x):
     self.__modality = x
@@ -59,12 +58,12 @@ class ExampleFieldTemplate(object):
   @property
   def vocab_size(self):
     return self.__vocab_size
-  
+
   @vocab_size.setter
   def vocab_size(self, x):
     assert isinstance(x, int)
     self.__vocab_size = x
-  
+
   @property
   def space_id(self):
     return self.__space_id
@@ -74,17 +73,17 @@ class ExampleFieldTemplate(object):
     """An integer."""
     assert isinstance(x, int)
     self.__space_id = x
- 
+
   @property
   def shape(self):
     return self.__shape
-  
+
   @shape.setter
   def shape(self, x):
     if not isinstance(x, tuple):
       raise ValueError("shape must be a tuple, saw %s" % x)
     self.__shape = x
-    
+
   def as_dict(self):
     return {
         "dtype": self.dtype,
@@ -115,23 +114,24 @@ class ExampleFieldTemplate(object):
     if zeros:
       return tf.cast(tf.zeros(shape=self.shape), dtype=self.dtype)
 
-    return tf.random.uniform(
-        shape=self.shape,
-        minval=0,
-        maxval=self.vocab_size,
-        dtype=self.dtype)
+    return tf.random.uniform(shape=self.shape,
+                             minval=0,
+                             maxval=self.vocab_size,
+                             dtype=self.dtype)
 
   def mock(self, zeros=False, batch_size=1):
     if batch_size is None:
       return self.mock_one(zeros)
 
     if not isinstance(batch_size, int):
-      raise ValueError("batch_size passed to .mock must be of type int, saw %s" % batch_size)
-    return tf.convert_to_tensor([self.mock_one(zeros) for _ in range(batch_size)], self.dtype)
+      raise ValueError(
+          "batch_size passed to .mock must be of type int, saw %s" % batch_size)
+    return tf.convert_to_tensor(
+        [self.mock_one(zeros) for _ in range(batch_size)], self.dtype)
 
   def matches(self, field):
-    shape_matches = tf.reduce_all(tf.math.equal(tf.shape(field),
-                                                tf.convert_to_tensor(self.shape)))
+    shape_matches = tf.reduce_all(
+        tf.math.equal(tf.shape(field), tf.convert_to_tensor(self.shape)))
     return shape_matches
     #dtype_matches = tf.convert_to_tensor(field.dtype == self.dtype)
     #return tf.reduce_all(tf.concat(shape_matches, dtype_matches))
@@ -166,8 +166,8 @@ class ExampleTemplate(object):
 
   @property
   def fields(self):
-    return self.__fields  
-  
+    return self.__fields
+
   @fields.setter
   def fields(self, fields):
     assert isinstance(fields, dict)
@@ -212,7 +212,7 @@ class ExampleTemplate(object):
       matches = matches and key in self.fields.keys()
       matches = matches and self.fields[key].matches(value)
     return matches
-  
+
   def as_dict(self):
     """Return the template as a dictionary of lists."""
     pass
@@ -220,6 +220,7 @@ class ExampleTemplate(object):
     for key in self.fields:
       d[key] = self.fields[key].as_dict()
     return d
+
 
 def update_hparams_given_example_spec(hparams, example_spec):
   """Updates 'modality' and 'vocab_size' attrs. of `hparams` given `example_spec`."""

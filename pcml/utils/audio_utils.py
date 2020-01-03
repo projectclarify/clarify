@@ -28,7 +28,7 @@ from scipy.io import wavfile
 def standardize_audio_array(audio, audio_shape):
 
   # Incoming audio is in [-0.5, 0.5] and is of type float32
-  
+
   pad_size = audio_shape[0] - len(audio)
 
   if pad_size > 0:
@@ -37,7 +37,7 @@ def standardize_audio_array(audio, audio_shape):
     audio = audio[0:audio_shape[0]]
 
   audio = audio.tolist()
- 
+
   return audio
 
 
@@ -46,7 +46,8 @@ def mp4_to_1d_array(mp4_path, audio_bitrate=44100):
   with tempfile.TemporaryDirectory() as tmpd:
     tmp_wav_path = os.path.join(tmpd, "mywav.wav")
     subprocess.check_output([
-      "ffmpeg", "-loglevel", "quiet", "-i", mp4_path, "-f", "wav", "-ar", str(audio_bitrate), "-vn", tmp_wav_path
+        "ffmpeg", "-loglevel", "quiet", "-i", mp4_path, "-f", "wav", "-ar",
+        str(audio_bitrate), "-vn", tmp_wav_path
     ])
     audio_data = wavfile.read(tmp_wav_path)[1]
   audio_data = audio_data / np.iinfo(np.int16).max

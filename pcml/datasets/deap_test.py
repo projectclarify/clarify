@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of DEAP problem definitions."""
 
 from __future__ import absolute_import
@@ -25,7 +24,7 @@ from pcml.datasets import deap
 from pcml.datasets.test_utils import TrivialModel
 from pcml.utils.dev_utils import T2TDevHelper
 
-TESTING_TMP = "/tmp/deap" #HACK
+TESTING_TMP = "/tmp/deap"  #HACK
 
 
 class TestDeapUtils(tf.test.TestCase):
@@ -34,28 +33,27 @@ class TestDeapUtils(tf.test.TestCase):
     deap._raw_data_verifier(deap.DEFAULT_DEAP_ROOT)
 
   def test_load_preprocessed(self):
-    input_path = deap.maybe_get_deap_data(
-        tmp_dir=TESTING_TMP,
-        deap_root=deap.DEFAULT_DEAP_ROOT,
-        is_training=True,
-        training_fraction=1).__next__()
+    input_path = deap.maybe_get_deap_data(tmp_dir=TESTING_TMP,
+                                          deap_root=deap.DEFAULT_DEAP_ROOT,
+                                          is_training=True,
+                                          training_fraction=1).__next__()
     rec, pos, raw, labels, chan = deap.load_preprocessed_deap_data(input_path)
     # TODO: Assert all data are floats in [0,1]
 
   def test_tiled_subsample_example(self):
 
     example = {
-        "eeg/raw": [[1,1,1,1,1,1,1],[1,1,1,1,1,1,1]],
-        "eeg/positions": [[1,1],[1,1]],
+        "eeg/raw": [[1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1]],
+        "eeg/positions": [[1, 1], [1, 1]],
         "eeg/channels": ["Ch1", "Ch2"],
-        "physio/hEOG": [1,1,1,1,1,1,1],
-        "physio/vEOG": [1,1,1,1,1,1,1],
-        "physio/zEMG": [1,1,1,1,1,1,1],
-        "physio/tEMG": [1,1,1,1,1,1,1],
-        "physio/GSR": [1,1,1,1,1,1,1],
-        "physio/rAMP": [1,1,1,1,1,1,1],
-        "physio/plethysmograph": [1,1,1,1,1,1,1],
-        "physio/temp": [1,1,1,1,1,1,1],
+        "physio/hEOG": [1, 1, 1, 1, 1, 1, 1],
+        "physio/vEOG": [1, 1, 1, 1, 1, 1, 1],
+        "physio/zEMG": [1, 1, 1, 1, 1, 1, 1],
+        "physio/tEMG": [1, 1, 1, 1, 1, 1, 1],
+        "physio/GSR": [1, 1, 1, 1, 1, 1, 1],
+        "physio/rAMP": [1, 1, 1, 1, 1, 1, 1],
+        "physio/plethysmograph": [1, 1, 1, 1, 1, 1, 1],
+        "physio/temp": [1, 1, 1, 1, 1, 1, 1],
         "affect/valence": [1],
         "affect/arousal": [1],
         "affect/dominance": [1],
@@ -63,8 +61,8 @@ class TestDeapUtils(tf.test.TestCase):
     }
 
     subsampled = deap._tiled_subsample_example(example,
-                                          subsample_width=2,
-                                          subsample_step=1)
+                                               subsample_width=2,
+                                               subsample_step=1)
     for example in subsampled:
       self.assertEqual(len(example["affect/liking"]), 1)
 
@@ -88,8 +86,8 @@ class TestDeapUtils(tf.test.TestCase):
     expected_channels = deap.DEAP_EXPECTED_MAPPED_EEG_CHANNELS
 
     expected_keys_shapes = [
-        ("eeg/raw", (len(expected_channels)*subsample_width, ), int),
-        ("eeg/positions", (len(expected_channels)*4, ), None),
+        ("eeg/raw", (len(expected_channels) * subsample_width,), int),
+        ("eeg/positions", (len(expected_channels) * 4,), None),
         ("eeg/channels", (len(expected_channels),), None),
         ("physio/hEOG", (subsample_width,), None),
         ("physio/vEOG", (subsample_width,), None),
@@ -99,7 +97,8 @@ class TestDeapUtils(tf.test.TestCase):
         ("physio/rAMP", (subsample_width,), None),
         ("physio/plethysmograph", (subsample_width,), None),
         ("physio/temp", (subsample_width,), None),
-        ("affect/trial_selfreport", (4,), None)]
+        ("affect/trial_selfreport", (4,), None)
+    ]
 
     for expected_key, expected_shape, expected_type in expected_keys_shapes:
       assert expected_key in generated_examples[0]
@@ -109,28 +108,35 @@ class TestDeapUtils(tf.test.TestCase):
       if expected_type is not None:
         self.assertEqual(field.dtype, expected_type)
 
-    self.assertTrue(np.array_equal(sorted(example["eeg/channels"]),
-                                   sorted(np.asarray(expected_channels))))
+    self.assertTrue(
+        np.array_equal(sorted(example["eeg/channels"]),
+                       sorted(np.asarray(expected_channels))))
 
   def test_clip_and_standardize(self):
 
-    cases = [{"min_val": 0, "max_val": 10, "voc": 256, "dt": np.int32},
-             {"min_val": -20, "max_val": 20, "voc": 256, "dt": np.int32}]
+    cases = [{
+        "min_val": 0,
+        "max_val": 10,
+        "voc": 256,
+        "dt": np.int32
+    }, {
+        "min_val": -20,
+        "max_val": 20,
+        "voc": 256,
+        "dt": np.int32
+    }]
 
     for case in cases:
       min_val, max_val = case["min_val"], case["max_val"]
-      a = np.random.randint(min_val,max_val,(100,))
-      std = deap.clip_and_standardize(a, min_val, max_val,
-                                      case["voc"], case["dt"])
-      assert std.min() >= -1*case["voc"]/2
-      assert std.max() <= case["voc"]/2
+      a = np.random.randint(min_val, max_val, (100,))
+      std = deap.clip_and_standardize(a, min_val, max_val, case["voc"],
+                                      case["dt"])
+      assert std.min() >= -1 * case["voc"] / 2
+      assert std.max() <= case["voc"] / 2
 
   def test_deap_problem_generates(self):
-    helper = T2TDevHelper(
-        "multi_modal_dev_model",
-        "deap_problem_base",
-        "multi_modal_dev_model_tiny",
-        None)
+    helper = T2TDevHelper("multi_modal_dev_model", "deap_problem_base",
+                          "multi_modal_dev_model_tiny", None)
     helper.datagen()
     dataset = helper.problem.dataset("train", data_dir=helper.data_dir)
     example = dataset.make_one_shot_iterator().next()
@@ -143,18 +149,15 @@ class TestDeapUtils(tf.test.TestCase):
     #    tf.reduce_all(tf.greater_equal(example, tf.zeros_like(example)))]).numpy())
 
   def test_deap_problem_train(self):
-    
+
     # TODO: Current error comes from using stock infer method of trivial
     # model which assumes the features has "inputs", easy to update, looks
     # like it trains up to the point of export in that case, worth giving
     # multi-task training a shot instead of modifying mmdm, perhaps in
     # notebook
-    
-    helper = T2TDevHelper(
-        "trivial_model",
-        "deap_problem_base",
-        "multi_modal_dev_model_tiny",
-        None)
+
+    helper = T2TDevHelper("trivial_model", "deap_problem_base",
+                          "multi_modal_dev_model_tiny", None)
     helper.run_e2e()
 
 

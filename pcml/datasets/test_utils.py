@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Common test utils related to data generators."""
 
 from __future__ import absolute_import
@@ -67,9 +66,7 @@ def get_dataset_data_root(name):
   return dataset_root
 
 
-def _verify_local_given_manifest(local_path,
-                                 remote_stem,
-                                 remote_manifest):
+def _verify_local_given_manifest(local_path, remote_stem, remote_manifest):
   """Verify files in manifest are present in `local_path`.
 
   Trim remote_stem from prefix of remote_manifest to determine paths
@@ -114,14 +111,16 @@ def _verify_local_given_manifest(local_path,
 
 def get_test_data_path():
   """Gets the path to a folder named 'test_data' in same dir as curr. file."""
-  return os.path.abspath(os.path.join(
-      inspect.getfile(inspect.currentframe()), "../test_data"))
+  return os.path.abspath(
+      os.path.join(inspect.getfile(inspect.currentframe()), "../test_data"))
 
 
 @registry.register_model
 class TrivialModel(t2t_model.T2TModel):
+
   def body(self, features):
     return features["targets"]
+
   def infer(self, features=None, **kwargs):
     del kwargs
     predictions, _ = self(features)

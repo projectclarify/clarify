@@ -1,66 +1,20 @@
 version: 2
 jobs:
-  client-build:
-    docker:
-      - image: tensorflow/tensorflow:1.14.0-py3
-    steps:
-      - checkout
-      - run:
-          name: Update
-          command: 'apt-get update'
-      - run:
-          name: Install NPM
-          command: 'apt-get install nodejs npm -y'
-      - run:
-          name: Update npm
-          command: 'npm install -g npm@latest'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "client/package-lock.json" }}
-      - run:
-          name: Install
-          command: 'cd $HOME/project/client && npm install'
-      - save_cache:
-          key: dependency-cache-{{ checksum "client/package-lock.json" }}
-          paths:
-            - client/node_modules
-  client-tests:
-    docker:
-      - image: tensorflow/tensorflow:1.14.0-py3
-    steps:
-      - checkout
-      - run:
-          name: Test
-          command: 'cd ~/pcml/client && npm test'
-      - store_artifacts:
-          path: test-results.xml
-          prefix: tests
   pcml-tests:
-    docker:
-      - image: tensorflow/tensorflow:1.14.0-py3
+    machine: true
     steps:
       - checkout
+      #- setup_remote_docker
+      #   docker_layer_caching: true 
       - run:
-         name: Base dependencies
-         command: 'sh tools/environments/install_base.sh'
+         name: Build the test container locally
+         command: 'python tools/environments/build.py --build_mode=local --static_image_id=test-container --container_type=workspace'
       - run:
-         name: Install Bazel
-         command: 'sh tools/environments/alt_install_bazel.sh'
-      - run:
-         name: Install tfms
-         command: 'sh tools/environments/install_tf_serving.sh'
-      #- run:
-      #   name: Test PCML
-      #   command: 'cd $HOME/project && $HOME/bin/bazel build //...'
+         name: Non-authenticated tests
+         command: 'docker run -it test-container /bin/bash -c "source ~/.bashrc; cd /build; sh tools/testing/test_local.sh"'
 workflows:
   version: 2
   build_and_test:
     jobs:
       - pcml-tests
-      #- client-build
-      #- client-tests:
-      #    requires:
-      #      - client-build
-      #    filters:
-      #      branches:
-      #        only: master
 

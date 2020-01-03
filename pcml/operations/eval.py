@@ -46,13 +46,16 @@ Modes = tf.estimator.ModeKeys  # pylint: disable=invalid-name
 
 class EvalJob(CronJob, PCMLJob):
 
-  def __init__(self, ckpt_dir, staging_path=None,
+  def __init__(self,
+               ckpt_dir,
+               staging_path=None,
                schedule="* * * * *",
                job_name_prefix="eval-job",
                num_cpu=1,
                memory="7Gi",
                image="gcr.io/clarify/basic-runtime:0.0.4",
-               *args, **kwargs):
+               *args,
+               **kwargs):
     """Periodically run eval for ckpt dir."""
 
     cmd = "python -m pcml.operations.eval "
@@ -62,18 +65,20 @@ class EvalJob(CronJob, PCMLJob):
     command_args = [cmd]
 
     job_name = "%s-%s" % (job_name_prefix, gen_timestamped_uid())
-    
-    super(EvalJob, self).__init__(
-      job_name=job_name,
-      command=command,
-      command_args=command_args,
-      namespace="kubeflow",
-      image=image,
-      staging_path=staging_path,
-      schedule=schedule,
-      resources=Resources(limits={"cpu": num_cpu,
-                                  "memory": memory}),
-      *args, **kwargs)
+
+    super(EvalJob, self).__init__(job_name=job_name,
+                                  command=command,
+                                  command_args=command_args,
+                                  namespace="kubeflow",
+                                  image=image,
+                                  staging_path=staging_path,
+                                  schedule=schedule,
+                                  resources=Resources(limits={
+                                      "cpu": num_cpu,
+                                      "memory": memory
+                                  }),
+                                  *args,
+                                  **kwargs)
 
 
 def _metrics_given_threshold(predictions, targets, threshold):
@@ -109,7 +114,7 @@ def _metrics_given_threshold(predictions, targets, threshold):
   def _safe_fraction(numerator, denominator):
     if denominator == 0:
       return 0
-    return numerator/denominator
+    return numerator / denominator
 
   # Thanks, Wikipedia!
 
@@ -118,25 +123,25 @@ def _metrics_given_threshold(predictions, targets, threshold):
   ppv = _safe_fraction(TP, TP + FP)
   npv = _safe_fraction(TN, TN + FN)
   accuracy = _safe_fraction(TP + TN, TP + TN + FP + FN)
-  f1 = _safe_fraction(2*TP, 2*TP + FP + FN)
+  f1 = _safe_fraction(2 * TP, 2 * TP + FP + FN)
   informativeness = (tpr + tnr - 1)
   markedness = (ppv + npv - 1)
-  balanced_accuracy = (tpr + tnr)/2
+  balanced_accuracy = (tpr + tnr) / 2
 
   return {
-    "tpr": tpr,
-    "tnr": tnr,
-    "ppv": ppv,
-    "npv": npv,
-    "accuracy": accuracy,
-    "f1": f1,
-    "informativeness": informativeness,
-    "markedness": markedness,
-    "tp": TP,
-    "tn": TN,
-    "fp": FP,
-    "fn": FN,
-    "balanced_accuracy": balanced_accuracy
+      "tpr": tpr,
+      "tnr": tnr,
+      "ppv": ppv,
+      "npv": npv,
+      "accuracy": accuracy,
+      "f1": f1,
+      "informativeness": informativeness,
+      "markedness": markedness,
+      "tp": TP,
+      "tn": TN,
+      "fp": FP,
+      "fn": FN,
+      "balanced_accuracy": balanced_accuracy
   }
 
 
@@ -155,20 +160,27 @@ def _auc_for_metrics_set(metrics_set):
     precision = float(m["tpr"])
     recall = float(m["ppv"])
     if last_precision and last_recall:
-      total_area += (recall - last_recall)*precision
+      total_area += (recall - last_recall) * precision
     last_precision = precision
     last_recall = recall
 
   return total_area
 
 
-def compute_metrics(problem_name, model_name, hparams_name, 
-                    ckpt_dir, data_dir="/tmp", eval_batch_size=32,
-                    eval_steps=100, extra_hparams=[], mode=Modes.EVAL,
+def compute_metrics(problem_name,
+                    model_name,
+                    hparams_name,
+                    ckpt_dir,
+                    data_dir="/tmp",
+                    eval_batch_size=32,
+                    eval_steps=100,
+                    extra_hparams=[],
+                    mode=Modes.EVAL,
                     num_threshold_bins=100):
 
   if not isinstance(num_threshold_bins, int) and num_threshold_bins > 0:
-    msg = "Num threshold bins should be int > 0, saw {}".format(num_threshold_bins)
+    msg = "Num threshold bins should be int > 0, saw {}".format(
+        num_threshold_bins)
     raise ValueError(msg)
 
   registered_model = registry.model(model_name)
@@ -186,18 +198,15 @@ def compute_metrics(problem_name, model_name, hparams_name,
   problem_hparams = problem_instance.get_hparams(hparams)
 
   # Build the eval dataset and get the examples
-  eval_dataset = problem_instance.dataset(mode=Modes.EVAL,
-                                          data_dir=data_dir)
+  eval_dataset = problem_instance.dataset(mode=Modes.EVAL, data_dir=data_dir)
 
   eval_dataset = eval_dataset.repeat(None).batch(eval_batch_size)
   eval_dataset_iterator = tfe.Iterator(eval_dataset)
 
   with tfe.restore_variables_on_create(ckpt_dir):
 
-    model_instance = registered_model(
-      hparams, mode, problem_hparams
-    )
-  
+    model_instance = registered_model(hparams, mode, problem_hparams)
+
     predictions = np.array([], dtype=np.float32)
     targets = np.array([], dtype=np.float32)
 
@@ -212,13 +221,14 @@ def compute_metrics(problem_name, model_name, hparams_name,
         # We've concatenated the two embedding vectors followed
         # by the label so we can obtain the label just by looking
         # at the last value
-        prediction = np.array([thing[-1] for thing in prediction], dtype=np.float32)
+        prediction = np.array([thing[-1] for thing in prediction],
+                              dtype=np.float32)
 
         target = tf.squeeze(eval_examples["targets"]).numpy().astype(np.float32)
 
         predictions = np.concatenate([predictions, prediction])
         targets = np.concatenate([targets, target])
-        
+
         if i % 10 == 0:
           msg = "Finished collecting predictions for eval step {}.".format(i)
           tf.logging.info(msg)
@@ -236,23 +246,31 @@ def compute_metrics(problem_name, model_name, hparams_name,
   metrics_set = []
 
   for i in range(num_threshold_bins):
-    threshold = i/num_threshold_bins
-    metrics = _metrics_given_threshold(predictions, targets,
+    threshold = i / num_threshold_bins
+    metrics = _metrics_given_threshold(predictions,
+                                       targets,
                                        threshold=threshold)
     metrics["at_threshold"] = threshold
     metrics["num_threshold_bins"] = num_threshold_bins
     metrics_set.append(metrics)
 
-  midpoint_metrics = _metrics_given_threshold(predictions, targets,
+  midpoint_metrics = _metrics_given_threshold(predictions,
+                                              targets,
                                               threshold=0.5)
   midpoint_metrics["auc"] = _auc_for_metrics_set(metrics_set)
 
   return midpoint_metrics, metrics_set, predictions, targets
 
 
-def compute_metrics_v2(problem_name, model_name, hparams_name, 
-                       ckpt_dir, data_dir="/tmp", eval_batch_size=32,
-                       eval_steps=100, extra_hparams=[], mode=Modes.EVAL,
+def compute_metrics_v2(problem_name,
+                       model_name,
+                       hparams_name,
+                       ckpt_dir,
+                       data_dir="/tmp",
+                       eval_batch_size=32,
+                       eval_steps=100,
+                       extra_hparams=[],
+                       mode=Modes.EVAL,
                        num_threshold_bins=100):
 
   registered_model = registry.model(model_name)
@@ -270,8 +288,7 @@ def compute_metrics_v2(problem_name, model_name, hparams_name,
   problem_hparams = problem_instance.get_hparams(hparams)
 
   # Build the eval dataset and get the examples
-  eval_dataset = problem_instance.dataset(mode=Modes.EVAL,
-                                          data_dir=data_dir)
+  eval_dataset = problem_instance.dataset(mode=Modes.EVAL, data_dir=data_dir)
 
   eval_dataset = eval_dataset.repeat(None).batch(eval_batch_size)
   eval_dataset_iterator = tfe.Iterator(eval_dataset)
@@ -288,9 +305,7 @@ def compute_metrics_v2(problem_name, model_name, hparams_name,
 
   with tfe.restore_variables_on_create(ckpt_dir):
 
-    model_instance = registered_model(
-      hparams, mode, problem_hparams
-    )
+    model_instance = registered_model(hparams, mode, problem_hparams)
 
     for i in range(eval_steps):
 
@@ -316,7 +331,7 @@ def compute_metrics_v2(problem_name, model_name, hparams_name,
         tf.logging.info(msg)
 
   for key, value in metrics.items():
-    metrics[key] = value/eval_steps
+    metrics[key] = value / eval_steps
 
   return metrics
 
@@ -363,16 +378,16 @@ def parse_extra_hparams(hparams_string):
 
 
 def report_metrics_summaries(metrics, global_step, ckpt_dir, mode):
-  
-  tf.logging.info("Reporting metrics: {},{}".format(metrics,
-                                                    global_step))
+
+  tf.logging.info("Reporting metrics: {},{}".format(metrics, global_step))
 
   global_step = tf.convert_to_tensor(global_step, dtype=tf.int64)
 
   summary_writer = tf.contrib.summary.create_file_writer(
-    os.path.join(ckpt_dir, mode))
+      os.path.join(ckpt_dir, mode))
 
-  with summary_writer.as_default(), tf.contrib.summary.always_record_summaries():
+  with summary_writer.as_default(), tf.contrib.summary.always_record_summaries(
+  ):
     for key, value in metrics.items():
       tf.contrib.summary.scalar(key, value, step=global_step)
 
@@ -387,19 +402,16 @@ def latest_step_for_ckpt_dir(ckpt_dir):
       ckpt_tag = filename.split(".")[1]
 
       if not ckpt_tag.startswith("ckpt"):
-        err = "Unrecognized ckpt file name format, {}".format(
-          filename
-        )
+        err = "Unrecognized ckpt file name format, {}".format(filename)
         raise ValueError(err)
-    
+
       global_step = int(ckpt_tag.split("-")[1])
 
       if not max_global_step or global_step > max_global_step:
         max_global_step = global_step
 
   if not max_global_step:
-    err = ("A max global step could not be determined, " +
-           "returning zero.")
+    err = ("A max global step could not be determined, " + "returning zero.")
     tf.logging.info(err)
     max_global_step = 0
 
@@ -408,13 +420,13 @@ def latest_step_for_ckpt_dir(ckpt_dir):
   return max_global_step
 
 
-def log_all_metric_data(predictions, targets, metrics_set, ckpt_dir, global_step, mode):
+def log_all_metric_data(predictions, targets, metrics_set, ckpt_dir,
+                        global_step, mode):
   plen = len(predictions)
   tlen = len(targets)
   if plen != tlen:
     msg = "Should have same number of predictions and targets, saw {}, {}.".format(
-      plen, tlen
-    )
+        plen, tlen)
     raise ValueError(msg)
   uid = str(uuid.uuid4())[0:8]
   fname = "predictions-{}-{}".format(str(global_step), uid)
@@ -424,8 +436,8 @@ def log_all_metric_data(predictions, targets, metrics_set, ckpt_dir, global_step
     metrics_set[i] = m
 
   data = {
-    "metrics_set": metrics_set,
-    "predictions": predictions.flatten().tolist()
+      "metrics_set": metrics_set,
+      "predictions": predictions.flatten().tolist()
   }
 
   fpath = os.path.join(ckpt_dir, mode, "metric_data", fname)
@@ -433,8 +445,12 @@ def log_all_metric_data(predictions, targets, metrics_set, ckpt_dir, global_step
     f.write(json.dumps(data))
 
 
-def eval_for_ckpt_dir(ckpt_dir, delay_seconds=5, mock_acc=False,
-                      mock_step=False, continuous=True, eval_steps=10,
+def eval_for_ckpt_dir(ckpt_dir,
+                      delay_seconds=5,
+                      mock_acc=False,
+                      mock_step=False,
+                      continuous=True,
+                      eval_steps=10,
                       data_dir=None):
   """Run Eager-mode eval with the option to repeat periodically."""
 
@@ -470,8 +486,7 @@ def eval_for_ckpt_dir(ckpt_dir, delay_seconds=5, mock_acc=False,
 
       continue
 
-    for mode in [Modes.EVAL]: #, Modes.TRAIN]:
-
+    for mode in [Modes.EVAL]:  #, Modes.TRAIN]:
       """
       #Previous version
 
@@ -494,24 +509,21 @@ def eval_for_ckpt_dir(ckpt_dir, delay_seconds=5, mock_acc=False,
 
       """
 
-      metrics = compute_metrics_v2(
-        problem_name=config["problem"],
-        model_name=config["model"],
-        hparams_name=config["hparams_set"],
-        ckpt_dir=ckpt_dir,
-        extra_hparams=extra_hparams,
-        mode=mode,
-        eval_steps=eval_steps,
-        data_dir=data_dir)
+      metrics = compute_metrics_v2(problem_name=config["problem"],
+                                   model_name=config["model"],
+                                   hparams_name=config["hparams_set"],
+                                   ckpt_dir=ckpt_dir,
+                                   extra_hparams=extra_hparams,
+                                   mode=mode,
+                                   eval_steps=eval_steps,
+                                   data_dir=data_dir)
 
       report_metrics_summaries(metrics=metrics,
                                ckpt_dir=ckpt_dir,
                                global_step=global_step,
                                mode=mode)
 
-    tf.logging.info("Delaying {}s until next eval".format(
-      delay_seconds
-    ))
+    tf.logging.info("Delaying {}s until next eval".format(delay_seconds))
 
     last_global_step = global_step
 
@@ -529,7 +541,6 @@ def trigger_eval(ckpt_dir, data_dir=None, eval_steps=30):
     ckpt_dir = ckpt_dir[0]
     if not isinstance(ckpt_dir, str):
       raise ValueError("Problem receiving thread args.")
-
   """
   
   HACK: Having an issue with restoring two different checkpoints
@@ -547,8 +558,8 @@ def trigger_eval(ckpt_dir, data_dir=None, eval_steps=30):
   while True:
 
     cmd = ("python -m pcml.operations.eval " +
-           "--ckpt_dir={} --continuous=False " +
-           "--eval_steps={} ").format(ckpt_dir, eval_steps)
+           "--ckpt_dir={} --continuous=False " + "--eval_steps={} ").format(
+               ckpt_dir, eval_steps)
 
     if data_dir:
       cmd += "--data_dir={}".format(data_dir)
@@ -584,19 +595,15 @@ if __name__ == "__main__":
   flags = tf.flags
   FLAGS = flags.FLAGS
 
-  flags.DEFINE_string('ckpt_dir', None,
-                      'Path to ckpts to eval.')
+  flags.DEFINE_string('ckpt_dir', None, 'Path to ckpts to eval.')
 
-  flags.DEFINE_boolean('continuous', True,
-                       'Whether to run eval continuously.')
+  flags.DEFINE_boolean('continuous', True, 'Whether to run eval continuously.')
 
   # TODO: Make use of this flag instead of hard coding (currently 60).
-  flags.DEFINE_integer('delay_seconds', 300,
-                       'Delay in seconds between evals.')
+  flags.DEFINE_integer('delay_seconds', 300, 'Delay in seconds between evals.')
 
   # TODO: Make use of this flag instead of hard coding (currently 60).
-  flags.DEFINE_integer('eval_steps', 10,
-                       'Number of steps of eval to perform.')
+  flags.DEFINE_integer('eval_steps', 10, 'Number of steps of eval to perform.')
 
   flags.DEFINE_string('data_dir', None,
                       'Directory where examples are stored (incl. GCS).')

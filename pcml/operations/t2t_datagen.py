@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Dedicated wrapper for datagen including sharded datagen."""
 
 from __future__ import absolute_import
@@ -33,14 +32,18 @@ from pcml.launcher.util import _compress_and_stage
 
 class T2TDatagenJob(PCMLJob):
 
-  def __init__(self, problem_name, mode, data_dir,
+  def __init__(self,
+               problem_name,
+               mode,
+               data_dir,
                job_name_prefix="datagen",
                image="gcr.io/clarify/basic-runtime:0.0.4",
                num_cpu=7,
                memory="25Gi",
-               *args, **kwargs):
+               *args,
+               **kwargs):
     """Run T2T datagen optionally with one job per shard."""
-    
+
     self.problem = registry.problem(problem_name)
     # Having attributes train_shards, dev_shards, test_shards
 
@@ -60,15 +63,18 @@ class T2TDatagenJob(PCMLJob):
     # constructed using this same prefix.
     self.job_name_prefix = job_name_prefix
 
-    super(T2TDatagenJob, self).__init__(
-      job_name=job_name,
-      command=command,
-      command_args=command_args,
-      namespace="kubeflow",
-      image=image,
-      num_local_ssd=1,
-      resources=Resources(limits={"cpu": num_cpu, "memory": memory}),
-      *args, **kwargs)
+    super(T2TDatagenJob, self).__init__(job_name=job_name,
+                                        command=command,
+                                        command_args=command_args,
+                                        namespace="kubeflow",
+                                        image=image,
+                                        num_local_ssd=1,
+                                        resources=Resources(limits={
+                                            "cpu": num_cpu,
+                                            "memory": memory
+                                        }),
+                                        *args,
+                                        **kwargs)
 
 
 def _maybe_please_specify_a(flag):
@@ -78,15 +84,16 @@ def _maybe_please_specify_a(flag):
 
 def main(_):
 
-  for flag in ["data_dir", "num_shards", "shard_id", "problem", "tmp_dir",
-               "mode"]:
+  for flag in [
+      "data_dir", "num_shards", "shard_id", "problem", "tmp_dir", "mode"
+  ]:
     _maybe_please_specify_a(flag)
 
   problem = registry.problem(FLAGS.problem)
 
-  local_tfrecords_filepath = problem.generate_data(
-    data_dir=FLAGS.tmp_dir, tmp_dir=FLAGS.tmp_dir,
-    task_id=FLAGS.shard_id)
+  local_tfrecords_filepath = problem.generate_data(data_dir=FLAGS.tmp_dir,
+                                                   tmp_dir=FLAGS.tmp_dir,
+                                                   task_id=FLAGS.shard_id)
 
   # Stage out TFRecords to GCS
   filename = os.path.split(local_tfrecords_filepath)[-1]
@@ -104,9 +111,10 @@ if __name__ == "__main__":
   flags.DEFINE_string("problem", None,
                       "The name of the problem for which to generate data.")
   flags.DEFINE_integer("num_shards", None, "Number of shards.")
-  flags.DEFINE_integer("shard_id", None, "The shard for which to generate data.")
+  flags.DEFINE_integer("shard_id", None,
+                       "The shard for which to generate data.")
   flags.DEFINE_string("mode", None,
-                       "The shard type in ['train', 'dev', 'test']")
+                      "The shard type in ['train', 'dev', 'test']")
 
   tf.logging.set_verbosity(tf.logging.INFO)
   tf.app.run()

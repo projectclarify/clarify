@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Perceptual similarity embedding network and related from Vemulapalli and Agarwala (2019).
 
 Vemulapalli, Raviteja, and Aseem Agarwala. "A Compact Embedding for Facial Expression Similarity." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.
@@ -58,10 +57,10 @@ def _ordered_triplet_loss_partial(e1, e2, e3, delta=0.1):
   k = tf.constant(delta, dtype=tf.float32)
 
   loss = tf.clip_by_value(
-    _l2_distance(e1, e2) - _l2_distance(e1, e3) + k, 0.0, 2.0)
+      _l2_distance(e1, e2) - _l2_distance(e1, e3) + k, 0.0, 2.0)
 
   loss += tf.clip_by_value(
-    _l2_distance(e1, e2) - _l2_distance(e2, e3) + k, 0.0, 2.0)
+      _l2_distance(e1, e2) - _l2_distance(e2, e3) + k, 0.0, 2.0)
 
   return loss
 
@@ -73,19 +72,19 @@ def _triplet_loss_partial(e1, e2, e3, similarity_condition, delta=0.1):
   key1 = tf.ones_like(similarity_condition, dtype=tf.int64)
   mask1 = tf.cast(tf.equal(similarity_condition, key1), tf.float32)
 
-  key2 = tf.ones_like(similarity_condition, dtype=tf.int64)*2
+  key2 = tf.ones_like(similarity_condition, dtype=tf.int64) * 2
   mask2 = tf.cast(tf.equal(similarity_condition, key2), tf.float32)
 
-  key3 = tf.ones_like(similarity_condition, dtype=tf.int64)*3
+  key3 = tf.ones_like(similarity_condition, dtype=tf.int64) * 3
   mask3 = tf.cast(tf.equal(similarity_condition, key3), tf.float32)
 
-  otlp1 = _ordered_triplet_loss_partial(e2,e3,e1, delta=delta)
+  otlp1 = _ordered_triplet_loss_partial(e2, e3, e1, delta=delta)
   loss1 = tf.multiply(otlp1, mask1)
-  
-  otlp2 = _ordered_triplet_loss_partial(e1,e3,e2, delta=delta)
+
+  otlp2 = _ordered_triplet_loss_partial(e1, e3, e2, delta=delta)
   loss2 = tf.multiply(otlp2, mask2)
 
-  otlp3 = _ordered_triplet_loss_partial(e1,e2,e3, delta=delta)
+  otlp3 = _ordered_triplet_loss_partial(e1, e2, e3, delta=delta)
   loss3 = tf.multiply(otlp3, mask3)
 
   return loss1 + loss2 + loss3
@@ -110,9 +109,7 @@ def obtain_triplet_embeddings(num, data_dir, ckpt_dir, moode, hparams_set_name,
 
   with tfe.restore_variables_on_create(ckpt_dir):
 
-    model_instance = registered_model(
-      hparams, mode, problem_hparams
-    )
+    model_instance = registered_model(hparams, mode, problem_hparams)
 
     eval_examples = dataset_iterator.next()
 
@@ -149,21 +146,21 @@ def make_and_show_img_similarity_query(data, kdt, idx):
   dist, ind = kdt.query(query, k=k, return_distance=return_distance)
 
   plt.figure()
-  f, axarr = plt.subplots(k,2,figsize=(4,12), dpi=100)
+  f, axarr = plt.subplots(k, 2, figsize=(4, 12), dpi=100)
 
   img = data[ind[0][0]]["img"].astype(np.int32)
-  axarr[0,0].imshow(img)
-  axarr[0,0].set_title("query")
-  axarr[0,0].axis('off')
+  axarr[0, 0].imshow(img)
+  axarr[0, 0].set_title("query")
+  axarr[0, 0].axis('off')
 
   for i in range(k):
-    axarr[i,0].axis("off")
-    axarr[i,1].axis("off")
+    axarr[i, 0].axis("off")
+    axarr[i, 1].axis("off")
 
-  for i in range(k-1):
-    img = data[ind[0][i+1]]["img"].astype(np.int32)
+  for i in range(k - 1):
+    img = data[ind[0][i + 1]]["img"].astype(np.int32)
     axarr[i, 1].imshow(img)
-    d = int(dist[0][i+1]*1000)/1000.0
+    d = int(dist[0][i + 1] * 1000) / 1000.0
     axarr[i, 1].set_title("d={}".format(d))
     axarr[i, 1].axis("off")
 
@@ -172,19 +169,19 @@ def make_and_show_img_similarity_query(data, kdt, idx):
   key1 = tf.ones_like(similarity_condition, dtype=tf.int64)
   mask1 = tf.cast(tf.equal(similarity_condition, key1), tf.float32)
 
-  key2 = tf.ones_like(similarity_condition, dtype=tf.int64)*2
+  key2 = tf.ones_like(similarity_condition, dtype=tf.int64) * 2
   mask2 = tf.cast(tf.equal(similarity_condition, key2), tf.float32)
 
-  key3 = tf.ones_like(similarity_condition, dtype=tf.int64)*3
+  key3 = tf.ones_like(similarity_condition, dtype=tf.int64) * 3
   mask3 = tf.cast(tf.equal(similarity_condition, key3), tf.float32)
 
-  otlp1 = _ordered_triplet_loss_partial(e2,e3,e1, delta=delta)
+  otlp1 = _ordered_triplet_loss_partial(e2, e3, e1, delta=delta)
   loss1 = tf.multiply(otlp1, mask1)
-  
-  otlp2 = _ordered_triplet_loss_partial(e1,e3,e2, delta=delta)
+
+  otlp2 = _ordered_triplet_loss_partial(e1, e3, e2, delta=delta)
   loss2 = tf.multiply(otlp2, mask2)
 
-  otlp3 = _ordered_triplet_loss_partial(e1,e2,e3, delta=delta)
+  otlp3 = _ordered_triplet_loss_partial(e1, e2, e3, delta=delta)
   loss3 = tf.multiply(otlp3, mask3)
 
   return loss1 + loss2 + loss3
@@ -236,8 +233,11 @@ class PercepSimilarityTripletEmb(MCLDev3):
     e2 = tf.convert_to_tensor(predictions[1])
     e3 = tf.convert_to_tensor(predictions[2])
 
-    partial = _triplet_loss_partial(
-      e1, e2, e3, features["triplet_code"], delta=0.0)
+    partial = _triplet_loss_partial(e1,
+                                    e2,
+                                    e3,
+                                    features["triplet_code"],
+                                    delta=0.0)
 
     # A vector of either 1 or 0 depending on whether each example in the
     # batch is either accuracte or not accurate
@@ -246,7 +246,7 @@ class PercepSimilarityTripletEmb(MCLDev3):
     # The total number of accuracte predictions devided by the number
     # of predictions
     accuracy = tf.reduce_mean(tf.cast(unreduced_accuracy, tf.float32))
-    
+
     metrics = {"triplet_accuracy": accuracy.numpy()}
 
     return metrics
@@ -258,13 +258,16 @@ class PercepSimilarityTripletEmb(MCLDev3):
     e3 = self.embed_image(features["image/c"])
 
     if "image/b" in features:
-      partial = _triplet_loss_partial(
-        e1, e2, e3, features["triplet_code"], delta=0.1)
+      partial = _triplet_loss_partial(e1,
+                                      e2,
+                                      e3,
+                                      features["triplet_code"],
+                                      delta=0.1)
       loss = tf.reduce_mean(partial)
     else:
       loss = 0.0
 
-    return tf.stack([e1,e2,e3], 0), {"training": loss}
+    return tf.stack([e1, e2, e3], 0), {"training": loss}
 
 
 @registry.register_model
@@ -280,5 +283,5 @@ class PercepSimilarityTripletClassify(PercepSimilarityTripletEmb):
                                           tf.squeeze(features["image/b"]))
     else:
       loss = 0.0
-    
+
     return features["image/a"], {"training": loss}

@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License
-
 """Tests of dedicated datagen Job wrapper direct to CBT."""
 
 import uuid
@@ -21,9 +20,7 @@ from pcml.launcher.kube_test import _testing_run_poll_and_check_job
 
 from pcml.operations.t2t_datagen_v2 import T2TDatagenJobV2
 
-
 import os
-
 
 
 class TestT2TDatagenJobV2(tf.test.TestCase):
@@ -56,10 +53,9 @@ class TestT2TDatagenJobV2(tf.test.TestCase):
     create_responses = job.launch_shard_parallel_jobs(dev_max_num_jobs=1)
 
     for create_response in create_responses:
-      _testing_run_poll_and_check_job(
-        test_object=self, create_response=create_response,
-        expect_in_logs="Completed datagen.")
-    
+      _testing_run_poll_and_check_job(test_object=self,
+                                      create_response=create_response,
+                                      expect_in_logs="Completed datagen.")
     """
 
     These keep crashing because of memory usage. What's happening is each
@@ -74,6 +70,6 @@ class TestT2TDatagenJobV2(tf.test.TestCase):
 
     """
 
-    
+
 if __name__ == "__main__":
   tf.test.main()

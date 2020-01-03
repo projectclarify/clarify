@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of glob2manifest file path writing Job."""
 
 from __future__ import absolute_import
@@ -31,9 +30,8 @@ class TestGlob2Manifest(tf.test.TestCase):
 
   def test_glob2manifest_fn(self):
 
-    glob2manifest.run(
-        source_glob="gs://clarify-dev/tmp/03312019/pcml-new/*.py",
-        target_path="gs://clarify-dev/tmp/beam/devmanifest.txt")
+    glob2manifest.run(source_glob="gs://clarify-dev/tmp/03312019/pcml-new/*.py",
+                      target_path="gs://clarify-dev/tmp/beam/devmanifest.txt")
 
   def test_e2e(self):
 

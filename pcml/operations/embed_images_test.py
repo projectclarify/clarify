@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of batch image embedding job."""
 
 from __future__ import absolute_import
@@ -37,8 +36,7 @@ class TestEmbedImages(tf.test.TestCase):
 
   def setUp(self):
     self.test_run_tag = "clarify-test-{}-embed-images".format(
-      str(uuid.uuid4())[0:8]
-    )
+        str(uuid.uuid4())[0:8])
     self.staging = os.path.join(TEST_CONFIG.test_artifacts_root,
                                 self.test_run_tag)
     self.model_name = "mcl_dev"
@@ -50,20 +48,20 @@ class TestEmbedImages(tf.test.TestCase):
 
   def test_e2e(self):
 
-    job = embed_images.EmbedImages(
-      input_manifest="",
-      target_csv="",
-      ckpt_path="",
-      problem_name=self.problem_name,
-      model_name=self.model_name,
-      hparams_set_name=self.hparams_set_name,
-      staging_path=self.staging)
+    job = embed_images.EmbedImages(input_manifest="",
+                                   target_csv="",
+                                   ckpt_path="",
+                                   problem_name=self.problem_name,
+                                   model_name=self.model_name,
+                                   hparams_set_name=self.hparams_set_name,
+                                   staging_path=self.staging)
 
     create_response = job.stage_and_batch_run()
 
     _testing_run_poll_and_check_job(
-      test_object=self, create_response=create_response,
-      expect_in_logs=embed_images._SUCCESS_MESSAGE)
+        test_object=self,
+        create_response=create_response,
+        expect_in_logs=embed_images._SUCCESS_MESSAGE)
 
 
 if __name__ == "__main__":

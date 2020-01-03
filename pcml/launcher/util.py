@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """General utilities."""
 
 from __future__ import absolute_import
@@ -73,8 +72,8 @@ def expect_type(obj, ty):
 
   """
   if not isinstance(obj, ty):
-    raise ValueError("Expected type %s, saw object %s of type %s" % (
-        ty, obj, type(obj)))
+    raise ValueError("Expected type %s, saw object %s of type %s" %
+                     (ty, obj, type(obj)))
 
 
 def gen_timestamped_uid():
@@ -131,12 +130,10 @@ def _compress_and_stage(local_app_root, remote_app_root):
 
   """
 
-  _ = run_and_output(["python", "setup.py", "sdist"],
-                     cwd=local_app_root)
+  _ = run_and_output(["python", "setup.py", "sdist"], cwd=local_app_root)
   pcml_gz_file = "pcml-0.0.1.tar.gz"
   local_pcml_gz_file_path = os.path.join(local_app_root, "dist", pcml_gz_file)
 
-  tf.gfile.Copy(
-      local_pcml_gz_file_path,
-      os.path.join(remote_app_root, pcml_gz_file),
-      overwrite=True)
+  tf.gfile.Copy(local_pcml_gz_file_path,
+                os.path.join(remote_app_root, pcml_gz_file),
+                overwrite=True)

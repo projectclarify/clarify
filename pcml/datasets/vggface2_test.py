@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of VGGFace2 problem."""
 
 from __future__ import absolute_import
@@ -41,9 +40,7 @@ class TestVGGFace2Problem(tf.test.TestCase):
     self.instance = TEST_CONFIG.get("test_cbt_instance")
     self.tmpdir = tempfile.mkdtemp()
     self.salt = str(uuid.uuid4())[0:8]
-    self.test_run_tag = "clarify-test-{}-vggface-cbt".format(
-      self.salt
-    )
+    self.test_run_tag = "clarify-test-{}-vggface-cbt".format(self.salt)
     self.mode = "train"
     self.test_problem_name = "vgg_face2_tiny"
     self.staging = os.path.join(TEST_CONFIG.test_artifacts_root,
@@ -51,10 +48,7 @@ class TestVGGFace2Problem(tf.test.TestCase):
 
   def test_registry_lookups(self):
 
-    problem_names = [
-      "vgg_face2",
-      "vgg_face2_tiny"
-    ]
+    problem_names = ["vgg_face2", "vgg_face2_tiny"]
 
     for problem_name in problem_names:
       _ = registry.problem(problem_name)
@@ -75,15 +69,13 @@ class TestVGGFace2Problem(tf.test.TestCase):
 
     tmp = tempfile.mkdtemp()
 
-    helper = T2TDevHelper(
-      problem_name=self.test_problem_name,
-      model_name="percep_similarity_triplet_emb",
-      hparams_set="mcl_res_ut_vtiny",
-      data_dir=tmp,
-      tmp_dir=tmp,
-      queries=None,
-      mode="train"
-    )
+    helper = T2TDevHelper(problem_name=self.test_problem_name,
+                          model_name="percep_similarity_triplet_emb",
+                          hparams_set="mcl_res_ut_vtiny",
+                          data_dir=tmp,
+                          tmp_dir=tmp,
+                          queries=None,
+                          mode="train")
 
     helper.problem.dataset_version_tag = self.salt
     helper.problem.cbt_generate(self.project, self.instance, "train")
@@ -95,9 +87,8 @@ class TestVGGFace2Problem(tf.test.TestCase):
 
     # HACK
     def _mock_tfrecords_for_mode(mode):
-      path = os.path.join(tmp, "{}-{}-01-of-01".format(
-        self.test_problem_name, mode
-      ))
+      path = os.path.join(tmp, "{}-{}-01-of-01".format(self.test_problem_name,
+                                                       mode))
       with open(path, "w") as f:
         f.write("")
 

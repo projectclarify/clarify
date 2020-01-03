@@ -50,13 +50,13 @@ class FECNoAug(FEC):
     example["image/a/noaug"] = example["image/a"]
     example["image/b/noaug"] = example["image/b"]
     example["image/c/noaug"] = example["image/c"]
-    return super(FECNoAug, self).preprocess_example(example,
-                                                    mode,
+    return super(FECNoAug, self).preprocess_example(example, mode,
                                                     unused_hparams)
 
 
-def obtain_triplet_embeddings(batch_size, data_dir, ckpt_dir, mode, hparams_set_name,
-                              model_name, problem_name, num_batches):
+def obtain_triplet_embeddings(batch_size, data_dir, ckpt_dir, mode,
+                              hparams_set_name, model_name, problem_name,
+                              num_batches):
 
   registered_model = registry.model(model_name)
   hparams = registry.hparams(hparams_set_name)
@@ -76,39 +76,37 @@ def obtain_triplet_embeddings(batch_size, data_dir, ckpt_dir, mode, hparams_set_
 
   with tfe.restore_variables_on_create(ckpt_dir):
 
-    model_instance = registered_model(
-      hparams, mode, problem_hparams
-    )
+    model_instance = registered_model(hparams, mode, problem_hparams)
 
     for j in range(num_batches):
 
-      tf.logging.info("embedding for batch {} of {}".format(
-        j, num_batches
-      ))
+      tf.logging.info("embedding for batch {} of {}".format(j, num_batches))
 
       eval_examples = dataset_iterator.next()
       try:
-          predictions, _ = model_instance(eval_examples)
+        predictions, _ = model_instance(eval_examples)
 
-          examples_a = eval_examples["image/a/noaug"].numpy()
-          examples_b = eval_examples["image/b/noaug"].numpy()
-          examples_c = eval_examples["image/c/noaug"].numpy()
-          examples = np.append(examples_a, examples_b, axis=0)
-          examples = np.append(examples, examples_c, axis=0)
+        examples_a = eval_examples["image/a/noaug"].numpy()
+        examples_b = eval_examples["image/b/noaug"].numpy()
+        examples_c = eval_examples["image/c/noaug"].numpy()
+        examples = np.append(examples_a, examples_b, axis=0)
+        examples = np.append(examples, examples_c, axis=0)
 
-          predictions = predictions.numpy()
-          predictions_a = predictions[0]
-          predictions_b = predictions[1]
-          predictions_c = predictions[2]
-          predictions = np.append(predictions_a, predictions_b, axis=0)
-          predictions = np.append(predictions, predictions_c, axis=0)
+        predictions = predictions.numpy()
+        predictions_a = predictions[0]
+        predictions_b = predictions[1]
+        predictions_c = predictions[2]
+        predictions = np.append(predictions_a, predictions_b, axis=0)
+        predictions = np.append(predictions, predictions_c, axis=0)
 
-          for i, _ in enumerate(predictions):
-            idx = (j-num_failed)*batch_size*3 + i
-            if idx > max_idx:
-              max_idx = idx
-            data[str(idx)] = {
-              "emb": predictions[i].tolist(), "img": examples[i].tolist()}
+        for i, _ in enumerate(predictions):
+          idx = (j - num_failed) * batch_size * 3 + i
+          if idx > max_idx:
+            max_idx = idx
+          data[str(idx)] = {
+              "emb": predictions[i].tolist(),
+              "img": examples[i].tolist()
+          }
 
       except:
         # TODO: Specifically except CBT deadline exceeded.
@@ -139,7 +137,11 @@ def restore_embedding_data(path):
   return data, predictions, kdt
 
 
-def make_and_show_img_similarity_query(query_data, ref_data, kdt, query_idx, num_hits=4):
+def make_and_show_img_similarity_query(query_data,
+                                       ref_data,
+                                       kdt,
+                                       query_idx,
+                                       num_hits=4):
 
   from matplotlib import pyplot as plt
 
@@ -149,7 +151,10 @@ def make_and_show_img_similarity_query(query_data, ref_data, kdt, query_idx, num
   return_distance = True
 
   plt.figure()
-  f, axarr = plt.subplots(k, 2*num_column_major, figsize=(num_column_major*4,12), dpi=150)
+  f, axarr = plt.subplots(k,
+                          2 * num_column_major,
+                          figsize=(num_column_major * 4, 12),
+                          dpi=150)
 
   for j in range(num_column_major):
 
@@ -157,20 +162,20 @@ def make_and_show_img_similarity_query(query_data, ref_data, kdt, query_idx, num
     img = query_data[str(query_idx + j)]["img"].astype(np.int32)
     dist, ind = kdt.query(query, k=k, return_distance=return_distance)
 
-    axarr[0,2*j].imshow(img)
-    axarr[0,2*j].set_title("query")
-    axarr[0,2*j].axis('off')
+    axarr[0, 2 * j].imshow(img)
+    axarr[0, 2 * j].set_title("query")
+    axarr[0, 2 * j].axis('off')
 
     for i in range(k):
-      axarr[i,2*j].axis("off")
-      axarr[i,2*j+1].axis("off")
+      axarr[i, 2 * j].axis("off")
+      axarr[i, 2 * j + 1].axis("off")
 
-    for i in range(k-1):
-      img = ref_data[str(ind[0][i+1])]["img"].astype(np.int32)
-      axarr[i, 2*j+1].imshow(img)
-      d = int(dist[0][i+1]*1000)/1000.0
-      axarr[i, 2*j+1].set_title("d={}".format(d))
-      axarr[i, 2*j+1].axis("off")
+    for i in range(k - 1):
+      img = ref_data[str(ind[0][i + 1])]["img"].astype(np.int32)
+      axarr[i, 2 * j + 1].imshow(img)
+      d = int(dist[0][i + 1] * 1000) / 1000.0
+      axarr[i, 2 * j + 1].set_title("d={}".format(d))
+      axarr[i, 2 * j + 1].axis("off")
 
 
 def write_embeddings(data, predictions, path):

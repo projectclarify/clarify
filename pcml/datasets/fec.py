@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """FEC problem definition."""
 
 from __future__ import absolute_import
@@ -51,9 +50,7 @@ def _load_fec_meta_post_download(download_root, shuffle=True, mode="train"):
 
   modes = tf.gfile.ListDirectory(download_root)
   if (mode + "/") not in modes:
-    raise ValueError("Could not find expected mode in modes, {}".format(
-      mode
-    ))
+    raise ValueError("Could not find expected mode in modes, {}".format(mode))
 
   unsharded_meta = []
 
@@ -85,13 +82,13 @@ def _load_fec_meta_post_download(download_root, shuffle=True, mode="train"):
     for shard_meta_element in shard_meta:
 
       shard_meta_element["a"]["full_remote_path"] = os.path.join(
-        mode_shard_dir, shard_meta_element["a"]["cropped_filename"])
+          mode_shard_dir, shard_meta_element["a"]["cropped_filename"])
 
       shard_meta_element["b"]["full_remote_path"] = os.path.join(
-        mode_shard_dir, shard_meta_element["b"]["cropped_filename"])
+          mode_shard_dir, shard_meta_element["b"]["cropped_filename"])
 
       shard_meta_element["c"]["full_remote_path"] = os.path.join(
-        mode_shard_dir, shard_meta_element["c"]["cropped_filename"])
+          mode_shard_dir, shard_meta_element["c"]["cropped_filename"])
 
       unsharded_meta.append(shard_meta_element)
 
@@ -105,7 +102,7 @@ def _load_fec_meta_post_download(download_root, shuffle=True, mode="train"):
 
 def _random_crop_square(image):
 
-  x,y,c = image.shape
+  x, y, c = image.shape
 
   x_crop_before = 0
   x_crop_after = 0
@@ -134,37 +131,37 @@ def _normalize_dimensions(image, target_shape):
   image = _random_crop_square(image)
 
   mn, mx = np.amin(image), np.amax(image)
-  if mn >=0 and mx <= 255:
+  if mn >= 0 and mx <= 255:
     image = image / 255.0
 
   source_shape = image.shape
-  scale_x_factor = target_shape[0]/source_shape[0]
-  scale_y_factor = target_shape[1]/source_shape[1]
+  scale_x_factor = target_shape[0] / source_shape[0]
+  scale_y_factor = target_shape[1] / source_shape[1]
   scale_x_first = (scale_x_factor <= scale_y_factor)
 
   if scale_x_first:
 
     new_x = target_shape[0]
-    new_y = int(source_shape[1]*scale_x_factor)
+    new_y = int(source_shape[1] * scale_x_factor)
     resize_dim = (new_x, new_y)
     newimg = cv2.resize(image, resize_dim)
     pad_width = target_shape[1] - new_y
     if pad_width > 0:
       # Pad in Y direction
-      newimg = np.pad(newimg, [(0,pad_width),(0,0),(0,0)], mode="mean")
+      newimg = np.pad(newimg, [(0, pad_width), (0, 0), (0, 0)], mode="mean")
 
   else:
 
     new_y = target_shape[1]
-    new_x = int(source_shape[0]*scale_y_factor)
+    new_x = int(source_shape[0] * scale_y_factor)
     resize_dim = (new_x, new_y)
     newimg = cv2.resize(image, resize_dim)
     pad_width = target_shape[0] - new_x
     if pad_width > 0:
       # Pad in X direction
-      newimg = np.pad(newimg, [(0,0),(0,pad_width),(0,0)], mode="mean")
+      newimg = np.pad(newimg, [(0, 0), (0, pad_width), (0, 0)], mode="mean")
 
-  newimg = (newimg*255.0).astype(np.int64)
+  newimg = (newimg * 255.0).astype(np.int64)
 
   return newimg
 
@@ -174,16 +171,15 @@ def sharded_subset_list(l, num_shards, shard_id):
   if num_shards <= 0 or shard_id <= 0:
     return l
 
-  shard_size = int(len(l)/num_shards)
+  shard_size = int(len(l) / num_shards)
   shard_offset = shard_size * shard_id
-  return l[shard_offset:(shard_offset+shard_size)]
+  return l[shard_offset:(shard_offset + shard_size)]
 
 
 def _read_image(image_path, image_shape, tmp_dir):
 
   fname = image_path.split("/")[-1]
-  local_path = generator_utils.maybe_download(
-    tmp_dir, fname, image_path)
+  local_path = generator_utils.maybe_download(tmp_dir, fname, image_path)
   d = cv2.imread(local_path)
   d = _normalize_dimensions(d, image_shape)
   return d.flatten().tolist()
@@ -213,12 +209,11 @@ def fec_generator(fec_data_root,
 
     def _maybe_download_and_read(path):
       fname = path.split("/")[-1]
-      local_path_a = generator_utils.maybe_download(
-        tmp_dir, fname, path)
+      local_path_a = generator_utils.maybe_download(tmp_dir, fname, path)
       d = cv2.imread(local_path_a)
       d = _normalize_dimensions(d, image_shape)
       return d.flatten().tolist()
-    
+
     def _type_to_code(t):
       if t == "ONE_CLASS_TRIPLET":
         return 1
@@ -228,19 +223,19 @@ def fec_generator(fec_data_root,
         return 3
       else:
         raise ValueError()
- 
+
     try:
       # Then constructing an example dictionary for the triplet and yielding it
       ex = {
-        "image/a": _maybe_download_and_read(path_a),
-        "image/b": _maybe_download_and_read(path_b),
-        "image/c": _maybe_download_and_read(path_c),
-        "type": [_type_to_code(entry["triplet_type"])],
-        "rating/mean": [float(entry["mean_rating"])],
-        "rating/mode": [int(entry["mode_rating"])],
-        "rating/all": [json.dumps(entry["ratings"])],
-        }
-    
+          "image/a": _maybe_download_and_read(path_a),
+          "image/b": _maybe_download_and_read(path_b),
+          "image/c": _maybe_download_and_read(path_c),
+          "type": [_type_to_code(entry["triplet_type"])],
+          "rating/mean": [float(entry["mean_rating"])],
+          "rating/mode": [int(entry["mode_rating"])],
+          "rating/all": [json.dumps(entry["ratings"])],
+      }
+
       yield ex
 
     # HACK: Currently there is an error where occasionally it will look for a file on GCS that
@@ -266,10 +261,10 @@ class FacialExpressionCorrespondence(TripletImageProblem):
   def image_shape(self):
     return (64, 64, 3)
 
-  def _generator(self, data_root, tmp_dir, mode, how_many,
-                 image_shape, num_shards, shard_id):
-    return fec_generator(data_root, tmp_dir, mode, image_shape,
-                         how_many, num_shards, shard_id)
+  def _generator(self, data_root, tmp_dir, mode, how_many, image_shape,
+                 num_shards, shard_id):
+    return fec_generator(data_root, tmp_dir, mode, image_shape, how_many,
+                         num_shards, shard_id)
 
   def example_reading_spec(self):
 
@@ -277,20 +272,26 @@ class FacialExpressionCorrespondence(TripletImageProblem):
     image_shape = self.stored_image_shape
 
     data_fields = {
-      "image/a": tf.FixedLenFeature(image_shape, dtype=tf.int64),
-      "image/b": tf.FixedLenFeature(image_shape, dtype=tf.int64),
-      "image/c": tf.FixedLenFeature(image_shape, dtype=tf.int64),
-      "type": tf.FixedLenFeature((), dtype=tf.int64),
-      "rating/mode": tf.FixedLenFeature(targets_shape, dtype=tf.int64),
+        "image/a": tf.FixedLenFeature(image_shape, dtype=tf.int64),
+        "image/b": tf.FixedLenFeature(image_shape, dtype=tf.int64),
+        "image/c": tf.FixedLenFeature(image_shape, dtype=tf.int64),
+        "type": tf.FixedLenFeature((), dtype=tf.int64),
+        "rating/mode": tf.FixedLenFeature(targets_shape, dtype=tf.int64),
     }
 
     data_items_to_decoders = {
-      "image/a": tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="image/a"),
-      "image/b": tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="image/b"),
-      "image/c": tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="image/c"),
-      "type": tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="type"),
-      "triplet_code": tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="rating/mode"),
-      "targets": tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="rating/mode"),
+        "image/a":
+            tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="image/a"),
+        "image/b":
+            tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="image/b"),
+        "image/c":
+            tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="image/c"),
+        "type":
+            tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="type"),
+        "triplet_code":
+            tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="rating/mode"),
+        "targets":
+            tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="rating/mode"),
     }
 
     return data_fields, data_items_to_decoders
@@ -298,19 +299,23 @@ class FacialExpressionCorrespondence(TripletImageProblem):
   def hparams(self, defaults, unused_model_hparams):
 
     p = defaults
-    p.modality = {"image/a": modalities.ModalityType.IDENTITY,
-                  "image/b": modalities.ModalityType.IDENTITY,
-                  "image/c": modalities.ModalityType.IDENTITY,
-                  "type": modalities.ModalityType.IDENTITY,
-                  "triplet_code": modalities.ModalityType.IDENTITY,
-                  "targets": modalities.ModalityType.IDENTITY}
+    p.modality = {
+        "image/a": modalities.ModalityType.IDENTITY,
+        "image/b": modalities.ModalityType.IDENTITY,
+        "image/c": modalities.ModalityType.IDENTITY,
+        "type": modalities.ModalityType.IDENTITY,
+        "triplet_code": modalities.ModalityType.IDENTITY,
+        "targets": modalities.ModalityType.IDENTITY
+    }
 
-    p.vocab_size = {"image/a": 256,
-                    "image/b": 256,
-                    "image/c": 256,
-                    "type": 3,
-                    "triplet_code": self.num_classes,
-                    "targets": self.num_classes}
+    p.vocab_size = {
+        "image/a": 256,
+        "image/b": 256,
+        "image/c": 256,
+        "type": 3,
+        "triplet_code": self.num_classes,
+        "targets": self.num_classes
+    }
 
     p.batch_size_multiplier = 4
     p.loss_multiplier = 3.0

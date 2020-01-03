@@ -31,8 +31,8 @@ class TestVideoUtils(tf.test.TestCase):
 
     _ = avs._sample_frame_indices(sample_length=l)
 
-    frame_indices = avs._sample_frame_indices(sample_length=int(l/2))
-    self.assertEqual(len(frame_indices), int(l/2))
+    frame_indices = avs._sample_frame_indices(sample_length=int(l / 2))
+    self.assertEqual(len(frame_indices), int(l / 2))
 
     audio_indices = avs._audio_given_frame_sample(frame_indices)
     audio_sample_len = len(audio_indices)
@@ -47,8 +47,8 @@ class TestVideoUtils(tf.test.TestCase):
     # Actually decided not to enforce this.
     for scale_factor in [1]:
 
-      vl2 = int(l*scale_factor)
-      al2 = int(al*scale_factor)
+      vl2 = int(l * scale_factor)
+      al2 = int(al * scale_factor)
       avs2 = video_utils.AVSamplable(video_length=vl2, audio_length=al2)
 
       for k in range(1, l - 5):
@@ -61,7 +61,7 @@ class TestVideoUtils(tf.test.TestCase):
 
         for frame_shift in range(0, 3):
 
-          for frame_skip in range(0, min(k-1, 3)):
+          for frame_skip in range(0, min(k - 1, 3)):
 
             f_, a_, m_ = avs2.sample_av_pair(num_frames=k,
                                              max_frame_shift=frame_shift,

@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """CelebA problem definition."""
 
 from __future__ import absolute_import
@@ -32,9 +31,11 @@ class ImageCelebaPcml(ImageCeleba):
 
   @property
   def example_split_config(self):
-    return {"train": (162770, 0),
-            "dev": (19867, 162770),
-            "test": (19962, 162770+19867)}
+    return {
+        "train": (162770, 0),
+        "dev": (19867, 162770),
+        "test": (19962, 162770 + 19867)
+    }
 
   @property
   def image_dim(self):
@@ -43,8 +44,9 @@ class ImageCelebaPcml(ImageCeleba):
   def generate_data(self, data_dir, tmp_dir, task_id=-1):
     esc = self.example_split_config
     train_gen = self.generator(tmp_dir, esc["train"][0], esc["train"][1])
-    train_paths = self.training_filepaths(
-        data_dir, self.train_shards, shuffled=False)
+    train_paths = self.training_filepaths(data_dir,
+                                          self.train_shards,
+                                          shuffled=False)
     generator_utils.generate_files(train_gen, train_paths)
 
     dev_gen = self.generator(tmp_dir, esc["dev"][0], esc["dev"][1])
@@ -61,33 +63,37 @@ class ImageCelebaPcml(ImageCeleba):
     inputs = example["inputs"]
     example["image"] = image_utils.resize_by_area(inputs, self.image_dim)
     example.pop("inputs", None)
-   
+
     example.pop("landmarks", None)
     example.pop("attributes", None)
 
     # I think there might be 10 instead of 12 landmarks?
-    example["targets"] = tf.pad(example["targets"], tf.constant([[0,2]]))
+    example["targets"] = tf.pad(example["targets"], tf.constant([[0, 2]]))
 
     # HACK: RECENT ADDITION ===================
-    example["image"] = (tf.cast(example["image"], tf.float32) - tf.constant([128.0])) / tf.constant([256.0])
+    example["image"] = (tf.cast(example["image"], tf.float32) -
+                        tf.constant([128.0])) / tf.constant([256.0])
     #example["image"] = (tf.cast(example["image"], tf.float32)) / tf.constant([256.0])
-    example["targets"] = tf.cast(example["targets"], tf.float32) / tf.constant([256.0])
+    example["targets"] = tf.cast(example["targets"], tf.float32) / tf.constant(
+        [256.0])
     # =========================================
-    
+
     return example
 
   def example_reading_spec(self):
     data_fields, di2dec = super(ImageCelebaPcml, self).example_reading_spec()
     data_fields["landmarks"] = tf.FixedLenFeature((10,), dtype=tf.int64)
-    di2dec["targets"] = tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="landmarks")
+    di2dec["targets"] = tf.contrib.slim.tfexample_decoder.Tensor(
+        tensor_key="landmarks")
     return data_fields, di2dec
 
   def hparams(self, defaults, unused_model_hparams):
     p = defaults
-    p.modality = {"image": "IdentityModality", #modalities.ModalityType.IDENTITY,
-                  "targets": "IdentityModality"} #modalities.ModalityType.IDENTITY}
-    p.vocab_size = {"image": 256,
-                    "targets": 256}
+    p.modality = {
+        "image": "IdentityModality",  #modalities.ModalityType.IDENTITY,
+        "targets": "IdentityModality"
+    }  #modalities.ModalityType.IDENTITY}
+    p.vocab_size = {"image": 256, "targets": 256}
     p.batch_size_multiplier = 256
     p.input_space_id = 1
     p.target_space_id = 1
@@ -98,9 +104,7 @@ class ImageCelebaTinyV2(ImageCelebaPcml):
 
   @property
   def example_split_config(self):
-    return {"train": (100, 0),
-            "dev": (100, 0),
-            "test": (100, 0)}
+    return {"train": (100, 0), "dev": (100, 0), "test": (100, 0)}
 
   @property
   def image_dim(self):
@@ -112,9 +116,7 @@ class ImageCelebaPcmlDev(ImageCelebaPcml):
 
   @property
   def example_split_config(self):
-    return {"train": (100, 0),
-            "dev": (100, 0),
-            "test": (100, 0)}
+    return {"train": (100, 0), "dev": (100, 0), "test": (100, 0)}
 
   @property
   def image_dim(self):
@@ -126,9 +128,7 @@ class ImageCelebaPcmlMedium(ImageCelebaPcml):
 
   @property
   def example_split_config(self):
-    return {"train": (10000, 0),
-            "dev": (1000, 10000),
-            "test": (1000, 11000)}
+    return {"train": (10000, 0), "dev": (1000, 10000), "test": (1000, 11000)}
 
   @property
   def image_dim(self):
@@ -146,9 +146,11 @@ class ImageCelebaAttributes(ImageCelebaPcml):
     return "image_celeba_pcml"
 
   def example_reading_spec(self):
-    data_fields, di2dec = super(ImageCelebaAttributes, self).example_reading_spec()
+    data_fields, di2dec = super(ImageCelebaAttributes,
+                                self).example_reading_spec()
     data_fields["attributes"] = tf.FixedLenFeature((40,), dtype=tf.int64)
-    di2dec["targets"] = tf.contrib.slim.tfexample_decoder.Tensor(tensor_key="attributes")
+    di2dec["targets"] = tf.contrib.slim.tfexample_decoder.Tensor(
+        tensor_key="attributes")
     return data_fields, di2dec
 
   def preprocess_example(self, example, mode, hparams):
@@ -158,35 +160,37 @@ class ImageCelebaAttributes(ImageCelebaPcml):
     example.pop("landmarks", None)
     example.pop("attributes", None)
     example["targets"] = tf.slice(example["targets"], [0], [12])
-    
+
     # HACK: Re-scale from [-1,1] to [0,1]
-    example["image"] = (tf.cast(example["image"], tf.float32) - tf.constant([128.0])) / tf.constant([256.0])
+    example["image"] = (tf.cast(example["image"], tf.float32) -
+                        tf.constant([128.0])) / tf.constant([256.0])
     #example["image"] = (tf.cast(example["image"], tf.float32)) / tf.constant([256.0])
     example["targets"] = tf.cast(example["targets"], tf.float32)
-    example["targets"] = (example["targets"] + tf.constant([1.0], dtype=tf.float32))
-    example["targets"] = (example["targets"] / tf.constant([2.0], dtype=tf.float32))
+    example["targets"] = (example["targets"] +
+                          tf.constant([1.0], dtype=tf.float32))
+    example["targets"] = (example["targets"] /
+                          tf.constant([2.0], dtype=tf.float32))
 
     return example
-  
-  
+
+
 # ========
 
 from pcml.operations.tfrecord2bigtable import BigTableSelection
 from tensor2tensor.data_generators.problem import default_model_hparams
+
 
 @registry.register_problem
 class CelebaBigTableDev(ImageCelebaPcml):
 
   @property
   def selection(self):
-    return BigTableSelection(
-        project="clarify",
-        instance="clarify-cbt-instance",
-        table="clarify-cbt-devtable",
-        prefix="train",
-        column_family="tfexample",
-        column_qualifier="example"
-    )
+    return BigTableSelection(project="clarify",
+                             instance="clarify-cbt-instance",
+                             table="clarify-cbt-devtable",
+                             prefix="train",
+                             column_family="tfexample",
+                             column_qualifier="example")
 
   def dataset_filename(self):
     return "image_celeba_pcml"
@@ -219,20 +223,20 @@ class CelebaBigTableDev(ImageCelebaPcml):
     _ = self.get_hparams(hparams)
 
     bigtable_client = tf.contrib.cloud.BigtableClient(
-        project_id=selection.project,
-        instance_id=selection.instance)
+        project_id=selection.project, instance_id=selection.instance)
 
     table = bigtable_client.table(selection.table)
 
-    dataset = table.parallel_scan_prefix(
-        selection.prefix,
-        columns=[(selection.column_family,
-                  selection.column_qualifier)])
+    dataset = table.parallel_scan_prefix(selection.prefix,
+                                         columns=[(selection.column_family,
+                                                   selection.column_qualifier)])
 
     dataset = dataset.map(lambda index, data: data)
 
     if preprocess:
-      dataset = self.preprocess(dataset, mode, hparams,
+      dataset = self.preprocess(dataset,
+                                mode,
+                                hparams,
                                 interleave=shuffle_files)
 
     dataset = dataset.take(max_records)
@@ -246,12 +250,13 @@ class CelebaBigTableDev(ImageCelebaPcml):
 
   def serving_input_fn(self, hparams, decode_hparams=None, use_tpu=False):
     """Input fn for serving export, starting from serialized example."""
-    
+
     raise ValueError()
-    
+
     mode = tf.estimator.ModeKeys.PREDICT
-    serialized_example = tf.placeholder(
-        dtype=tf.string, shape=[None], name="serialized_example")
+    serialized_example = tf.placeholder(dtype=tf.string,
+                                        shape=[None],
+                                        name="serialized_example")
     dataset = tf.data.Dataset.from_tensor_slices(serialized_example)
     dataset = dataset.map(self.decode_example)
     dataset = dataset.map(lambda ex: self.preprocess_example(ex, mode, hparams))
@@ -262,8 +267,9 @@ class CelebaBigTableDev(ImageCelebaPcml):
                                               hparams.max_length)
       batch_size = 1 if not decode_hparams else getattr(decode_hparams,
                                                         "batch_size", 1)
-      dataset = dataset.padded_batch(
-          batch_size, padded_shapes, drop_remainder=False)
+      dataset = dataset.padded_batch(batch_size,
+                                     padded_shapes,
+                                     drop_remainder=False)
       dataset = dataset.map(
           functools.partial(data_reader.pad_batch, batch_multiple=batch_size))
     else:

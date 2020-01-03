@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Subprocess command utilities."""
 
 from __future__ import absolute_import
@@ -32,7 +31,6 @@ def _maybe_decode(raw):
     return raw.decode()
 
   return raw.encode('ascii', 'ignore').decode('ascii')
-
 
 
 def run_and_output(command, cwd=None, env=None):
@@ -59,9 +57,10 @@ def run_and_output(command, cwd=None, env=None):
 
   try:
 
-    output = subprocess.check_output(
-        command, cwd=cwd, env=env,
-        stderr=subprocess.STDOUT).decode("utf-8")
+    output = subprocess.check_output(command,
+                                     cwd=cwd,
+                                     env=env,
+                                     stderr=subprocess.STDOUT).decode("utf-8")
 
     output = _maybe_decode(output)
 
@@ -72,11 +71,8 @@ def run_and_output(command, cwd=None, env=None):
     output = _maybe_decode(e.output)
 
     tf.logging.info(
-        "\n=======\nCommand failed, subprocess output:\n%s\n=======",
-        output)
+        "\n=======\nCommand failed, subprocess output:\n%s\n=======", output)
 
     raise
 
   return output
-
-

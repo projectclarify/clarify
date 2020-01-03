@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests of Cloud BigTable operation(s)."""
 
 from __future__ import absolute_import
@@ -22,7 +21,7 @@ import tensorflow as tf
 
 class TestBigTableOperation(tf.test.TestCase):
   """Tests of Cloud BigTable operations."""
-  
+
   def test_tfrecords_to_cbt(self):
     """Test of tfrecords_to_cbt utility."""
     # TODO: Create a small dummy TFRecords set using t2t and load

@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """AffectNet problem definition tests."""
 
 from __future__ import absolute_import
@@ -27,10 +26,7 @@ class TestAffectnetProblem(tf.test.TestCase):
 
   def test_registry_lookups(self):
 
-    problem_names = [
-      "affectnet_base",
-      "affectnet_tiny"
-    ]
+    problem_names = ["affectnet_base", "affectnet_tiny"]
 
     for problem_name in problem_names:
       _ = registry.problem(problem_name)
