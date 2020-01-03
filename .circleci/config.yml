@@ -1,11 +1,10 @@
 version: 2
 jobs:
   pcml-tests:
-    docker:
-      - image: tensorflow/tensorflow:1.14.0-py3
+    machine: true
     steps:
       - checkout
-      #- setup_remote_docker: 
+      #- setup_remote_docker
       #   docker_layer_caching: true 
       - run:
          name: Build the test container locally
