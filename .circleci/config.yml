@@ -11,7 +11,7 @@ jobs:
          command: 'python tools/environments/build.py --build_mode=local --static_image_id=test-container --container_type=workspace'
       - run:
          name: Non-authenticated tests
-         command: 'docker run -it -w test-container /build sh tools/testing/test_local.sh'
+         command: 'docker run -it -w /build test-container sh tools/testing/test_local.sh'
 workflows:
   version: 2
   build_and_test:
