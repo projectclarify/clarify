@@ -4,16 +4,15 @@ USER root
 
 ADD ./ /build
 
-RUN pip install --upgrade pip
-
 RUN sudo usermod -aG sudo jovyan
 RUN echo "jovyan:Docker!" | chpasswd
 
 RUN sh /build/tools/environments/install_base.sh
+RUN sh /build/tools/environments/install_tf.sh
 RUN sh /build/tools/environments/install_bazel.sh
-RUN sh /build/tools/environments/install_tf_serving.sh
 
 RUN rm -rf /home/jovyan/.cache
-RUN chown jovyan:root /home/jovyan
+RUN chown -R jovyan:root /home/jovyan
+RUN chown -R jovyan:root /build
 
 user jovyan

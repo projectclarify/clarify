@@ -17,7 +17,21 @@ Non-owners (including reviewers and approvers) - circle tests run automatically,
 
 ### Local testing:
 
-During local development in order to run tests that interact with cloud resources users will need to authenticate using a service account credential. For non-admin project members, these will be provided in the root of a user’s workspace directory. These credentials can be activated using the `gcloud auth activate-service account` command. Upon authenticating, tests can be run using either Bazel or language-specific test methods but given tests of PRs will be performed using Bazel every PR should pass `bazel test //...` from the project root before being submitted. Some may find development easier by running tests directly which is fine but Bazel is what we use to ensure test reproducibility. Non project members will need to authenticate to a GCP project with credentials that permit tests to be run.
+During local development in order to run tests that interact with cloud resources users will need to authenticate using a service account credential. For non-admin project members, these will be provided in the root of a user’s workspace directory. These credentials can be activated using the `gcloud auth activate-service account` command.
+
+Upon authenticating, tests can be run using either Bazel or language-specific test methods but given tests of PRs will be performed using Bazel every PR should pass `bazel test //...` from the project root before being submitted. Some may find development easier by running tests directly which is fine but Bazel is what we use to ensure test reproducibility. Non project members will need to authenticate to a GCP project with credentials that permit tests to be run.
+
+Tests that do not require authentication, i.e. those first-round tests that run on CircleCI, can be run via `sh tools/testing/test_local.sh`.
+
+It is possible that tests will pass on your local but not on our remote test systems. To debug this you can run these tests locally (in the same containers as are run remotely) on a machine with Docker, e.g.
+
+```bash
+
+python tools/environments/build.py --build_mode=local --static_image_id=test-container --container_type=workspace
+
+docker run -it test-container /bin/bash -c "source ~/.bashrc; cd /build; sh tools/testing/test_local.sh"
+
+``
 
 ### Remote testing:
 

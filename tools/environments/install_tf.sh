@@ -9,7 +9,12 @@ curl https://storage.googleapis.com/tensorflow-serving-apt/tensorflow-serving.re
 
 sudo apt-get update && sudo apt-get install tensorflow-model-server
 
-pip install tensorflow_serving_api
+pip install --upgrade pip
+pip3 install --upgrade pip3
 
-python -c 'from tensorflow_serving.apis import predict_pb2'
-python -c 'from tensorflow_serving.apis import prediction_service_pb2_grpc'
+#pip install tensorflow_serving_api==1.12.0
+#pip uninstall tensorflow==1.14.0
+pip install tensorflow-probability==0.7.0
+
+#python -c 'from tensorflow_serving.apis import predict_pb2'
+#python -c 'from tensorflow_serving.apis import prediction_service_pb2_grpc'
