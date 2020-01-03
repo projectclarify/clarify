@@ -14,6 +14,7 @@ pip3 install --upgrade pip3
 
 #pip install tensorflow_serving_api==1.12.0
 #pip uninstall tensorflow==1.14.0
+pip install tensor2tensor==1.14.0
 pip install tensorflow-probability==0.7.0
 
 #python -c 'from tensorflow_serving.apis import predict_pb2'

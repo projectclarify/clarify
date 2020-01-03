@@ -47,21 +47,6 @@ py_test(
 )
 
 py_library(
-    name = "bazel_utils",
-    srcs = ["bazel_utils.py"],
-    deps = ["//pcml/utils:fs_utils"],
-)
-
-py_test(
-    name = "bazel_utils_test",
-    srcs = ["bazel_utils_test.py"],
-    deps = [
-        "//pcml/utils:bazel_utils",
-        requirement("tensorflow"),
-    ],
-)
-
-py_library(
     name = "cbt_utils",
     srcs = ["cbt_utils.py"],
     deps = [

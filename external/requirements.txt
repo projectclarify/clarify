@@ -8,7 +8,7 @@ moviepy==1.0.0
 kubernetes==9.0.0
 rfc3339==6.0
 dill==0.2.9
-tensorflow_hub
+tensorflow_hub==0.7.0
 google-cloud-bigtable
 google-cloud-pubsub
 firebase-admin
@@ -17,11 +17,11 @@ google-auth
 requests-toolbelt
 sklearn
 -e git://github.com/iitzco/faced.git@31ef0d30e1567a06113f49ff4a1202760d952df2#egg=faced
-tensor2tensor
+tensor2tensor==1.14.0
 google-cloud-logging
 pyyaml
 grpcio
-tensorflow-serving-api
+tensorflow-serving-api==1.12.0
 mock
 gast==0.2.2
 tensorflow==1.14
