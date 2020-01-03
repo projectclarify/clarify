@@ -84,7 +84,7 @@ def prepare_build_context(container_type):
     dockerfile_dest_path)
 
   # Copy tools to build context
-  src = os.path.join(ctx_dir, "../../tools")
+  src = os.path.join(ctx_dir, "../../")
 
   run_and_output(["cp", "-r", src, tmpdir])
 
