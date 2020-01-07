@@ -5,7 +5,7 @@ jobs:
     steps:
       - checkout
       - run:
-         name: Pull base runtime separately to separate logs
+         name: Pull base runtime
          command: "docker pull gcr.io/clarify/runtime-base:v0.1.0-b5f1"
       - run:
          name: Run test_local.sh in runtime-base

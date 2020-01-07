@@ -24,7 +24,23 @@
 # and writes out the pip install command.
 
 docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
-  -v /project:/home/jovyan/pcml \
-  /usr/bin/bash -c "source ~/.bashrc; ls; pwd"
+  -v /project:/home/jovyan/pcml /bin/bash -c "ls /usr/bin"
+
+docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
+  -v /project:/home/jovyan/pcml "ls"
+
+docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
+  -v /project:/home/jovyan/pcml /bin/bash -c "pwd"
+
+docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
+  -v /project:/home/jovyan/pcml /bin/bash -c "ls /home/jovyan"
+
+docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
+  -v /project:/home/jovyan/pcml /bin/bash -c "ls; pwd; source ~/.bashrc"
+
+docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
+  -v /project:/home/jovyan/pcml /bin/bash -c "ls; pwd; source ~/.bashrc; which bazel"
+
+#/usr/bin/bash -c "source ~/.bashrc; ls; pwd"
 
 #bash -c "source ~/.bashrc; pip install -r dev-requirements.txt --user; sh tools/testing/test_local.sh"
