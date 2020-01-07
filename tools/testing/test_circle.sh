@@ -11,36 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# On CircleCI, the checkout step places the code of a PR in
-# /project. This will be mounted to the container path
-# /home/jovyan/pcml.
-
-# Tests are run in the latest runtime base container which should
-# match internal users' development environment.
-
-# The pcrun wrapper is used to first pip install dev-requirements.txt
-# and to execute the subsequent command from /home/jovyan/pcml.
-# Equivalently this could be a bash -c command that sources ~/.bashrc
-# and writes out the pip install command.
+# On CircleCI, the checkout step places the code of a PR in ~/project. 
+# This will be mounted to the container path /home/jovyan/pcml.
 
 docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
-  -v /project:/home/jovyan/pcml /bin/bash -c "ls /usr/bin"
-
-docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
-  -v /project:/home/jovyan/pcml "ls"
-
-docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
-  -v /project:/home/jovyan/pcml /bin/bash -c "pwd"
-
-docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
-  -v /project:/home/jovyan/pcml /bin/bash -c "ls /home/jovyan"
-
-docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
-  -v /project:/home/jovyan/pcml /bin/bash -c "ls; pwd; source ~/.bashrc"
-
-docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
-  -v /project:/home/jovyan/pcml /bin/bash -c "ls; pwd; source ~/.bashrc; which bazel"
-
-#/usr/bin/bash -c "source ~/.bashrc; ls; pwd"
-
-#bash -c "source ~/.bashrc; pip install -r dev-requirements.txt --user; sh tools/testing/test_local.sh"
+  -v `pwd`:/home/jovyan/pcml \
+  pcrun --pip_install=true --cmd="sh tools/testing/test_local.sh"
