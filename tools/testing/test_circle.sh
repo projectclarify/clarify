@@ -14,6 +14,12 @@
 # On CircleCI, the checkout step places the code of a PR in ~/project. 
 # This will be mounted to the container path /home/jovyan/pcml.
 
+# HACK
 docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
-  -v `pwd`:/home/jovyan/pcml \
-  pcrun --pip_install=true --cmd="sh tools/testing/test_local.sh"
+  /bin/bash -c 'source ~/.bashrc; rm -rf /home/jovyan/pcml; cd /home/jovyan; git clone https://github.com/projectclarify/pcml.git; cd pcml; git checkout ${CIRCLE_SHA1}; pip install -r dev-requirements.txt --user; sh tools/testing/test_local.sh'
+
+# Future
+#docker run -it gcr.io/clarify/runtime-base:test-latest \
+#  pcrun --pip_install=true \
+#  --commit=${CIRCLE_SHA1} \
+#  --cmd="sh tools/testing/test_local.sh"
