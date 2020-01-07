@@ -23,6 +23,6 @@
 # Equivalently this could be a bash -c command that sources ~/.bashrc
 # and writes out the pip install command.
 
-docker run -it gcr.io/clarify/runtime-base \
+docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
   -v /project:/home/jovyan/pcml \
   bash -c "source ~/.bashrc; pip install -r dev-requirements.txt --user; sh tools/testing/test_local.sh"
