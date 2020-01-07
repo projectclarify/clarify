@@ -5,6 +5,9 @@ jobs:
     steps:
       - checkout
       - run:
+         name: Pull base runtime separately to separate logs
+         command: "git pull gcr.io/clarify/base-runtime:v0.1.0-b5f1"
+      - run:
          name: Run test_local.sh in runtime-base
          command: "sh tools/testing/test_circle.sh"
 workflows:
