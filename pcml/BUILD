@@ -3,9 +3,8 @@ package(default_visibility = ["//visibility:public"])
 py_library(
     name = "__init__",
     srcs = ["__init__.py"],
+    srcs_version = "PY3ONLY",
     deps = [
-        "//pcml/datasets:affectnet",
-        "//pcml/datasets:celeba",
         "//pcml/datasets:deap",
         "//pcml/datasets:fec",
         "//pcml/datasets:vggface2",

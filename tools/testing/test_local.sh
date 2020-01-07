@@ -16,7 +16,6 @@ bazel build //pcml/utils/...
 bazel test //pcml/utils:audio_utils_test --test_output=all
 bazel test //pcml/utils:augmentation_utils_test --test_output=all
 bazel test //pcml/utils:cmd_utils_test --test_output=all
-bazel test //pcml/utils:bazel_utils_test --test_output=all
 bazel test //pcml/utils:fs_utils_test --test_output=all
 bazel test //pcml/utils:video_utils_test --test_output=all
 bazel test //pcml/utils:cfg_utils_test --test_output=all
@@ -24,3 +23,5 @@ bazel test //pcml/utils:dev_utils_test --test_output=all
 
 # Requires BigTable permissions
 #bazel test //pcml/utils:cbt_utils_test
+
+bazel test //pcml/models/... --test_output=all

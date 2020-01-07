@@ -19,25 +19,6 @@ py_library(
     ],
 )
 
-py_test(
-    name = "experiment_batch_test",
-    srcs = ["experiment_batch_test.py"],
-    deps = [
-        "//pcml/launcher:experiment",
-        "//pcml/launcher:kube_test",
-        requirement("tensorflow"),
-    ],
-)
-
-py_test(
-    name = "experiment_test",
-    srcs = ["experiment_test.py"],
-    deps = [
-        "//pcml/launcher:experiment",
-        requirement("tensorflow"),
-    ],
-)
-
 py_library(
     name = "kube",
     srcs = ["kube.py"],
@@ -56,29 +37,6 @@ py_test(
         "//pcml/launcher:kube",
         "//pcml/launcher:util",
         requirement("kubernetes"),
-        requirement("tensorflow"),
-    ],
-)
-
-py_library(
-    name = "study",
-    srcs = ["study.py"],
-    deps = [
-        "//pcml/launcher:util",
-        requirement("kubernetes"),
-        requirement("tensor2tensor"),
-        requirement("tensorflow"),
-        requirement("pyyaml"),
-    ],
-)
-
-py_test(
-    name = "study_test",
-    srcs = ["study_test.py"],
-    deps = [
-        "//pcml/launcher:experiment",
-        "//pcml/launcher:study",
-        requirement("tensor2tensor"),
         requirement("tensorflow"),
     ],
 )

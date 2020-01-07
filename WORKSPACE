@@ -71,10 +71,10 @@ load(
 )
 
 container_pull(
-    name = "trainer_base",
+    name = "runtime_base",
     registry = "gcr.io",
-    repository = "clarify/clarify-base",
-    #digest = "sha256:deadbeef", # TODO: cwbeitel
+    repository = "clarify/runtime-base",
+    digest = "sha256:3647573f55ecc26f048761ecf138fad9cf04bc1771c8986c021d73b96b29e4f3"
 )
 
 http_archive(
@@ -92,14 +92,14 @@ load("@rules_python//python:pip.bzl", "pip_repositories")
 
 pip_repositories()
 
-load("@rules_python//python:pip.bzl", "pip_import")
+load("@rules_python//python:pip.bzl", "pip3_import")
 
 # Create a central repo that knows about the dependencies needed for
 # requirements.txt.
-pip_import(
+pip3_import(
     # or pip3_import
     name = "my_deps",
-    requirements = "requirements.txt",
+    requirements = "//:dev-requirements.txt",
 )
 
 # Load the central repo's install function from its `//:requirements.bzl` file,

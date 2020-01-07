@@ -10,29 +10,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""A training experiment."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+BAZEL_VERSION="2.0.0"
 
-import tensorflow as tf
+SCRIPT="bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
 
-from pcml.launcher.kube import AttachedVolume
-from pcml.launcher.kube import LocalSSD
-from pcml.launcher.kube import Resources
-from pcml.launcher.kube import Job
-from pcml.launcher.util import generate_job_name
+cd $HOME && wget https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/$SCRIPT
 
+chmod +x $SCRIPT
 
-class Experiment(Job):
-  pass
+./$SCRIPT --user
 
-
-def main(argv):
-  pass
-
-
-if __name__ == "__main__":
-  tf.logging.set_verbosity(tf.logging.DEBUG)
-  tf.app.run()
+rm $SCRIPT

@@ -7,20 +7,6 @@ py_library(
     srcs = ["__init__.py"],
 )
 
-py_binary(
-    name = "cbt_datagen",
-    srcs = ["cbt_datagen.py"],
-    deps = [
-        "//pcml/launcher:kube",
-        "//pcml/operations:extract",
-        "//pcml/utils:cbt_utils",
-        "//pcml/utils:cmd_utils",
-        "//pcml/utils:fs_utils",
-        requirement("tensor2tensor"),
-        requirement("tensorflow"),
-    ],
-)
-
 py_test(
     name = "cbt_datagen_test",
     srcs = ["cbt_datagen_test.py"],
@@ -35,8 +21,8 @@ py_test(
 )
 
 py_library(
-    name = "cbt_datagen_v2",
-    srcs = ["cbt_datagen_v2.py"],
+    name = "cbt_datagen",
+    srcs = ["cbt_datagen.py"],
     deps = [
         "//pcml/launcher:kube",
         "//pcml/operations:extract",
@@ -79,28 +65,6 @@ py_test(
 )
 
 py_library(
-    name = "embed_images",
-    srcs = ["embed_images.py"],
-    deps = [
-        "//pcml/launcher:kube",
-        requirement("tensorflow"),
-    ],
-)
-
-py_test(
-    name = "embed_images_test",
-    srcs = ["embed_images_test.py"],
-    deps = [
-        "//pcml/launcher:kube",
-        "//pcml/launcher:kube_test",
-        "//pcml/operations:embed_images",
-        "//pcml/utils:cfg_utils",
-        requirement("kubernetes"),
-        requirement("tensorflow"),
-    ],
-)
-
-py_library(
     name = "eval",
     srcs = ["eval.py"],
     deps = [
@@ -121,12 +85,6 @@ py_test(
         requirement("kubernetes"),
         requirement("tensorflow"),
     ],
-)
-
-py_library(
-    name = "export",
-    srcs = ["export.py"],
-    deps = [requirement("tensorflow")],
 )
 
 py_library(
@@ -178,64 +136,4 @@ py_test(
         requirement("kubernetes"),
         requirement("tensorflow"),
     ],
-)
-
-py_library(
-    name = "t2t_datagen",
-    srcs = ["t2t_datagen.py"],
-    deps = [
-        "//pcml/launcher:kube",
-        "//pcml/launcher:util",
-        "//pcml/utils:fs_utils",
-        requirement("tensor2tensor"),
-        requirement("tensorflow"),
-    ],
-)
-
-py_test(
-    name = "t2t_datagen_test",
-    srcs = ["t2t_datagen_test.py"],
-    deps = [
-        "//pcml/operations:t2t_datagen",
-        requirement("tensorflow"),
-    ],
-)
-
-py_library(
-    name = "t2t_datagen_v2",
-    srcs = ["t2t_datagen_v2.py"],
-    deps = [
-        "//pcml/launcher:kube",
-        "//pcml/launcher:util",
-        "//pcml/operations:tfrecord2bigtable",
-        "//pcml/utils:fs_utils",
-        requirement("numpy"),
-        requirement("tensor2tensor"),
-        requirement("tensorflow"),
-    ],
-)
-
-py_test(
-    name = "t2t_datagen_v2_test",
-    srcs = ["t2t_datagen_v2_test.py"],
-    deps = [
-        "//pcml/launcher:kube_test",
-        "//pcml/operations:t2t_datagen_v2",
-        requirement("tensorflow"),
-    ],
-)
-
-py_library(
-    name = "tfrecord2bigtable",
-    srcs = ["tfrecord2bigtable.py"],
-    deps = [
-        "//pcml/launcher:kube",
-        requirement("tensorflow"),
-    ],
-)
-
-py_test(
-    name = "tfrecord2bigtable_test",
-    srcs = ["tfrecord2bigtable_test.py"],
-    deps = [requirement("tensorflow")],
 )
