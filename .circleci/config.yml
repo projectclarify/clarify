@@ -4,14 +4,12 @@ jobs:
     machine: true
     steps:
       - checkout
-      #- setup_remote_docker
-      #   docker_layer_caching: true 
       - run:
-         name: Build the test container locally
-         command: 'python tools/environments/build.py --build_mode=local --static_image_id=test-container --container_type=workspace'
+         name: Pull base runtime
+         command: "docker pull gcr.io/clarify/runtime-base:v0.1.0-b5f1"
       - run:
-         name: Non-authenticated tests
-         command: 'docker run -it test-container /bin/bash -c "source ~/.bashrc; cd /build; sh tools/testing/test_local.sh"'
+         name: Run test_local.sh in runtime-base
+         command: "sh tools/testing/test_circle.sh"
 workflows:
   version: 2
   build_and_test:

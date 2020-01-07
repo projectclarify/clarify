@@ -8,52 +8,12 @@ py_library(
 )
 
 py_library(
-    name = "affectnet",
-    srcs = ["affectnet.py"],
-    deps = [
-        requirement("tensor2tensor"),
-        requirement("tensorflow"),
-    ],
-)
-
-py_test(
-    name = "affectnet_test",
-    srcs = ["affectnet_test.py"],
-    deps = [
-        "//pcml/datasets:affectnet",
-        requirement("tensor2tensor"),
-        requirement("tensorflow"),
-    ],
-)
-
-py_library(
     name = "base",
     srcs = ["base.py"],
     deps = [
         "//pcml/datasets:image_aug",
         "//pcml/utils:cbt_utils",
         requirement("tensor2tensor"),
-        requirement("tensorflow"),
-    ],
-)
-
-py_library(
-    name = "celeba",
-    srcs = ["celeba.py"],
-    deps = [
-        "//pcml/operations:tfrecord2bigtable",
-        requirement("tensor2tensor"),
-        requirement("tensorflow"),
-    ],
-)
-
-py_test(
-    name = "celeba_test",
-    srcs = ["celeba_test.py"],
-    deps = [
-        "//pcml/datasets:celeba",
-        "//pcml/datasets:test_utils",
-        "//pcml/utils:dev_utils",
         requirement("tensorflow"),
     ],
 )

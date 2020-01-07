@@ -10,23 +10,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""AffectNet problem definition tests."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+LIB_ROOT=/home/jovyan/lib
 
-import tensorflow as tf
+mkdir -p ${LIB_ROOT}
 
-from tensor2tensor.data_generators import image_utils
-from tensor2tensor.utils import registry
+cd ${LIB_ROOT} && git clone https://github.com/google/jax.git
 
+cd ${LIB_ROOT}/jax && git checkout 29db4203fec6b9796637034d48a62ac84fbcf43f
 
-@registry.register_problem
-class AffectnetBase(image_utils.ImageProblem):
-  pass
+python ${LIB_ROOT}/jax/build/build.py
 
-
-@registry.register_problem
-class AffectnetTiny(AffectnetBase):
-  pass
+ln -s ${LIB_ROOT}/jax/build ${LIB_ROOT}/jaxlib

@@ -14,13 +14,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from pcml.datasets import celeba
 from pcml.datasets import deap
 from pcml.datasets import vox_celeb_cbt
 from pcml.datasets import fec
-from pcml.datasets import affectnet
 from pcml.datasets import vggface2
-
-from pcml.models import modality_correspondence
-from pcml.models import dev
-from pcml.models import percep_similarity_emb
