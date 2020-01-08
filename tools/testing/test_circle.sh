@@ -1,4 +1,3 @@
-#!/bin/bash
 # coding=utf-8
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +15,5 @@
 
 # Usage: test_circle.sh ${CIRCLE_SHA1}
 
-docker run -v ~/project:/home/jovyan/pcml \
-  -it gcr.io/clarify/runtime-base:v0.1.0-799d \
-  /bin/bash -c "source ~/.bashrc && pip install -r dev-requirements.txt --user && sh tools/testing/test_local.sh"
+docker run -it gcr.io/clarify/runtime-base:v0.1.0-799d \
+    /bin/bash -c "source ~/.bashrc && git pull && git checkout $1 && pip install -r dev-requirements.txt --user && sh tools/testing/test_local.sh"
