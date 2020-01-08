@@ -15,13 +15,9 @@ FROM gcr.io/kubeflow-images-public/tensorflow-1.14.0-notebook-cpu:v0.7.0
 
 USER root
 
-WORKDIR /home/jovyan
-RUN git clone https://github.com/projectclarify/pcml.git
+ADD ./ /build
+WORKDIR /build
 
-RUN sudo usermod -aG sudo jovyan
-RUN echo "jovyan:Docker!" | chpasswd
-
-WORKDIR /home/jovyan/pcml
 RUN sh tools/environments/base/install_base.sh
 RUN sh tools/environments/base/install_tf.sh
 RUN sh tools/environments/base/install_bazel.sh
@@ -29,14 +25,21 @@ RUN sh tools/environments/base/install_jax.sh
 
 RUN echo "export PATH=$PATH:$HOME/bin" >> $HOME/.bashrc
 
+WORKDIR /home/jovyan
+RUN git clone https://github.com/projectclarify/pcml.git
+
 RUN rm -rf /home/jovyan/.cache
+RUN rm -rf /build
+
+RUN sudo usermod -aG sudo jovyan
+RUN echo "jovyan:Docker!" | chpasswd
 RUN chown -R jovyan:root /home/jovyan
 
 user jovyan
 
 WORKDIR /home/jovyan/pcml
-RUN pip install -r dev-requirements.txt --user
 
-#RUN /home/jovyan/bin/bazel build //pcml/utils/...
+#RUN pip install -r dev-requirements.txt --user
 
+RUN mkdir -p /home/jovyan/bin
 RUN ln -s /home/jovyan/pcml/tools/environments/pcrun.py /home/jovyan/bin/pcrun && chmod u+x /home/jovyan/bin/pcrun

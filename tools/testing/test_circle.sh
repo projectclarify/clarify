@@ -11,15 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# On CircleCI, the checkout step places the code of a PR in ~/project. 
-# This will be mounted to the container path /home/jovyan/pcml.
+# Provide the git commit to be tested as the first argument to the script.
 
-# HACK
-docker run -it gcr.io/clarify/runtime-base:v0.1.0-b5f1 \
-  /bin/bash -c 'source ~/.bashrc; rm -rf /home/jovyan/pcml; cd /home/jovyan; git clone https://github.com/projectclarify/pcml.git; cd pcml; git checkout ${CIRCLE_SHA1}; pip install -r dev-requirements.txt --user; sh tools/testing/test_local.sh'
+# Usage: test_circle.sh ${CIRCLE_SHA1}
 
-# Future
-#docker run -it gcr.io/clarify/runtime-base:test-latest \
-#  pcrun --pip_install=true \
-#  --commit=${CIRCLE_SHA1} \
-#  --cmd="sh tools/testing/test_local.sh"
+docker run -it gcr.io/clarify/runtime-base:v0.1.0-799d \
+  /home/jovyan/bin/pcrun --pip_install=true \
+  --checkout=$1 \
+  --cmd="sh tools/testing/test_local.sh"
