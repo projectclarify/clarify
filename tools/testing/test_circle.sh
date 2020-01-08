@@ -16,6 +16,6 @@
 
 # Usage: test_circle.sh ${CIRCLE_SHA1}
 
-docker run -it gcr.io/clarify/runtime-base:v0.1.0-799d \
-  -v ~/project:/home/jovyan/pcml \
+docker run -v ~/project:/home/jovyan/pcml \
+  -it gcr.io/clarify/runtime-base:v0.1.0-799d \
   /bin/bash -c "source ~/.bashrc && pip install -r dev-requirements.txt --user && sh tools/testing/test_local.sh"
