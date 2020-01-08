@@ -6,10 +6,11 @@ jobs:
       - checkout
       - run:
          name: Pull base runtime
-         command: "docker pull gcr.io/clarify/runtime-base:v0.1.0-b5f1"
+         command: "docker pull gcr.io/clarify/runtime-base:v0.1.0-799d"
       - run:
          name: Run test_local.sh in runtime-base
          command: "sh tools/testing/test_circle.sh"
+
 workflows:
   version: 2
   build_and_test:
