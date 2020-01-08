@@ -29,5 +29,4 @@ apt-get install -y pkg-config \
                    git \
                    vim
 
-pip3 install --upgrade pip3
 pip install --upgrade pip
