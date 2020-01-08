@@ -15,7 +15,7 @@
 
 # Usage: test_circle.sh ${CIRCLE_SHA1}
 
-export CMD="docker run -it gcr.io/clarify/runtime-base:v0.1.0-799d \"bash -c 'source ~/.bashrc && git checkout $1 && pip install -r dev-requirements.txt --user && sh tools/testing/test_local.sh'\""
+export CMD="docker run -it gcr.io/clarify/runtime-base:v0.1.0-799d \"/bin/bash -c 'source ~/.bashrc && git checkout $1 && pip install -r dev-requirements.txt --user && sh tools/testing/test_local.sh'\""
 
 echo $CMD
 
