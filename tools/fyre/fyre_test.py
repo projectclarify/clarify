@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # coding=utf-8
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,5 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-wget https://dl.google.com/go/go1.13.linux-amd64.tar.gz
-tar -C /usr/local -xzvf go1.13.linux-amd64.tar.gz
+"""Test batch run wrapper."""
+
+from absl.testing import absltest
+
+import fyre
+
+
+# Duplicate and diverge
+class BasicTest(absltest.TestCase):
+
+  def test_runs(self):
+    fyre.main(checkout=None,
+               pip_install=False,
+               cmd="ls", 
+               pcml_root="/home/jovyan/pcml")
+
+
+if __name__ == '__main__':
+  absltest.main()

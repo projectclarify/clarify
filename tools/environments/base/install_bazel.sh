@@ -13,12 +13,16 @@
 
 BAZEL_VERSION="2.0.0"
 
+export SRC=/usr/local/src
+
+cd $SRC
+
 SCRIPT="bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
 
-cd $HOME && wget https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/$SCRIPT
+wget https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/$SCRIPT
 
 chmod +x $SCRIPT
 
-./$SCRIPT --user
+./$SCRIPT
 
-rm $SCRIPT
+rm $SRC/$SCRIPT

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # coding=utf-8
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,22 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Test batch run wrapper."""
+ln -s /usr/local/src/pcml /home/jovyan/pcml
 
-from absl.testing import absltest
+echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
 
-import pcrun
-
-
-# Duplicate and diverge
-class PCRunTest(absltest.TestCase):
-
-  def test_pcrun_runs(self):
-    pcrun.main(checkout=None,
-               pip_install=False,
-               cmd="ls", 
-               pcml_root="/home/jovyan/pcml")
-
-
-if __name__ == '__main__':
-  absltest.main()
+echo "export GOPATH=/home/jovyan/go" >> ~/.bashrc

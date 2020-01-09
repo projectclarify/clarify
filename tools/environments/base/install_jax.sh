@@ -11,11 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-LIB_ROOT=/home/jovyan/lib
+export LIB_ROOT=/usr/local/src
 
-mkdir -p ${LIB_ROOT}
+cd ${LIB_ROOT}
 
-cd ${LIB_ROOT} && git clone https://github.com/google/jax.git
+git clone https://github.com/google/jax.git
 
 cd ${LIB_ROOT}/jax && git checkout 29db4203fec6b9796637034d48a62ac84fbcf43f
 

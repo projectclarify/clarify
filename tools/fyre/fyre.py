@@ -39,6 +39,10 @@ def main(checkout=None, pip_install=False, cmd=None,
 
   if checkout:
     run_and_output(
+      command=["git", "fetch", "origin"],
+      cwd=pcml_root
+    )
+    run_and_output(
       command=["git", "checkout", checkout],
       cwd=pcml_root
     )
@@ -62,7 +66,7 @@ if __name__ == '__main__':
 
   import argparse
 
-  parser = argparse.ArgumentParser(description='PCML run wrapper.')
+  parser = argparse.ArgumentParser(description='Fyre off jobs running versions of gh/pcml. 🔥')
 
   parser.add_argument('--checkout', type=str, default=None,
                       required=False,
