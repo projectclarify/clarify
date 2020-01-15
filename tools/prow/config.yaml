@@ -33,31 +33,39 @@ presubmits:
     skip_report: false
     spec:
       containers:
-        command: ["/bin/bash", "-c"]
+      - command: ["/bin/bash", "-c"]
         args:
-        - git
-        - clone
-        - https://github.com/projectclarify/pcml.git
-        - &&
-        - cd
-        - pcml
-        - &&
-        - git
-        - checkout
-        - ${PULL_PULL_SHA}
-        - &&
-        - pip
-        - install
-        - tensorflow==1.15.0
-        - --user
-        - &&
-        - pip
-        - install
-        - -r
-        - dev-requirements.txt
-        - --user
-        - &&
-        - sh tools/testing/test_local.sh
+        - mkdir
+          -p
+          ~/testing
+          &&
+          cd
+          ~/testing
+          &&
+          git
+          clone
+          https://github.com/projectclarify/pcml.git
+          &&
+          cd
+          pcml
+          &&
+          git
+          checkout
+          ${PULL_PULL_SHA}
+          &&
+          pip
+          install
+          tensorflow==1.15.0
+          --user
+          &&
+          pip
+          install
+          -r
+          dev-requirements.txt
+          --user
+          &&
+          sh
+          tools/testing/test_local.sh
         image: gcr.io/clarify/runtime-base:v0.1.0-2370
         resources:
           requests:
