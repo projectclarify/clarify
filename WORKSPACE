@@ -19,38 +19,14 @@ http_archive(
     urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.13.0/rules_docker-v0.13.0.tar.gz"],
 )
 
-# OPTIONAL: Call this to override the default docker toolchain configuration.
-# This call should be placed BEFORE the call to "container_repositories" below
-# to actually override the default toolchain configuration.
-# Note this is only required if you actually want to call
-# docker_toolchain_configure with a custom attr; please read the toolchains
-# docs in /toolchains/docker/ before blindly adding this to your WORKSPACE.
-# BEGIN OPTIONAL segment:
 load(
     "@io_bazel_rules_docker//toolchains/docker:toolchain.bzl",
     docker_toolchain_configure = "toolchain_configure",
 )
 
 docker_toolchain_configure(
-    name = "docker_config",
-    # OPTIONAL: Path to a directory which has a custom docker client config.json.
-    # See https://docs.docker.com/engine/reference/commandline/cli/#configuration-files
-    # for more details.
-    #client_config="<enter absolute path to your docker config directory here>",
-    # OPTIONAL: Path to the docker binary.
-    # Should be set explcitly for remote execution.
-    #docker_path="<enter absolute path to the docker binary (in the remote exec env) here>",
-    # OPTIONAL: Path to the gzip binary.
-    # Either gzip_path or gzip_target should be set explcitly for remote execution.
-    #gzip_path="<enter absolute path to the gzip binary (in the remote exec env) here>",
-    # OPTIONAL: Bazel target for the gzip tool.
-    # Either gzip_path or gzip_target should be set explcitly for remote execution.
-    #gzip_target="<enter absolute path (i.e., must start with repo name @...//:...) to an executable gzip target>",
-    # OPTIONAL: Path to the xz binary.
-    # Should be set explcitly for remote execution.
-    #xz_path="<enter absolute path to the xz binary (in the remote exec env) here>",
+    name = "docker_config"
 )
-# End of OPTIONAL segment.
 
 load(
     "@io_bazel_rules_docker//repositories:repositories.bzl",
@@ -59,8 +35,6 @@ load(
 
 container_repositories()
 
-# This is NOT needed when going through the language lang_image
-# "repositories" function(s).
 load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
 
 container_deps()
@@ -74,7 +48,14 @@ container_pull(
     name = "runtime_base",
     registry = "gcr.io",
     repository = "clarify/runtime-base",
-    digest = "sha256:3647573f55ecc26f048761ecf138fad9cf04bc1771c8986c021d73b96b29e4f3"
+
+    # Derived from workspace base, has dev-requirements and tf 1.15, pending
+    # build of leaner image.
+    digest = "sha256:689b51bfd966a6b6e490b3b16a02303380f45ec452d9c3cfa92d4ff31a0a412b"
+
+    # Older workspace base
+    #digest = "sha256:a53a953e6451e3f776697292c2f721faecb50af6a50ad8325d614297e8091114"
+
 )
 
 http_archive(
@@ -82,6 +63,12 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_python/releases/download/0.0.1/rules_python-0.0.1.tar.gz",
     sha256 = "aa96a691d3a8177f3215b14b0edc9641787abaaa30363a080165d06ab65e1161",
 )
+
+#git_repository(
+#  name="rules_python",
+#  commit="f641e9522d1812394d8b9de1c557daaaef1f8a44",
+#  remote = "https://github.com/bazelbuild/rules_python"
+#)
 
 load("@rules_python//python:repositories.bzl", "py_repositories")
 
@@ -137,5 +124,3 @@ http_archive(
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
 gazelle_dependencies()
-
-

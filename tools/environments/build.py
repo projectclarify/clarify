@@ -79,7 +79,7 @@ def prepare_build_context(environment):
 
   # Copy Dockerfile to build context
   dockerfile_path = os.path.join(
-    ctx_dir, environment, "Dockerfile")
+    ctx_dir, "Dockerfile.{}".format(environment))
 
   dockerfile_dest_path = os.path.join(
     tmpdir, "Dockerfile")
@@ -225,8 +225,8 @@ if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(description='Build PCML containers.')
 
-  parser.add_argument('--environment', type=str, default="base",
-                      help='a subdir of tools/environments.')
+  parser.add_argument('--environment', type=str, default="workspace",
+                      help='Which build, `workspace` or `rtbase`.')
 
   parser.add_argument('--project', type=str, default="clarify",
                       help='gcr.io project to which to push.')
@@ -243,7 +243,7 @@ if __name__ == '__main__':
 
   args = parser.parse_args()
 
-  if args.environment not in ["base", "primary"]:
+  if args.environment not in ["workspace", "rtbase"]:
     raise ValueError("Unrecognized env name {}".format(
       args.environment
     ))

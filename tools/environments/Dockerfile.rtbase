@@ -1,0 +1,43 @@
+# coding=utf-8
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#FROM ubuntu:18.04
+#FROM gcr.io/clarify/runtime-base:v0.1.0-f991
+# Has jax already built and includes bazel and go but is
+# workspace base so is configured for jovyan
+
+FROM gcr.io/clarify/runtime-base:v0.1.0-2370
+
+#USER root
+
+#RUN apt-get update \
+#  && apt-get install -y python3-pip python3-dev \
+#  && cd /usr/local/bin \
+#  && ln -s /usr/bin/python3 python \
+#  && pip3 install --upgrade pip
+
+ADD ./ /usr/local/src/clarify
+
+#RUN sh /usr/local/src/clarify/tools/environments/install/install_base.sh
+#RUN sh /usr/local/src/clarify/tools/environments/install/install_tf.sh
+#RUN sh /usr/local/src/clarify/tools/environments/install/install_bazel.sh
+#RUN sh /usr/local/src/clarify/tools/environments/install/install_golang.sh
+
+# TODO: integrate
+#RUN pip install numpy
+#RUN sh /usr/local/src/clarify/tools/environments/install/install_jax.sh
+
+#RUN export GOPATH=/home/root/go && /usr/local/go/bin/go get github.com/monzo/envoy-preflight/...
+
+RUN pip install tensorflow==1.15.0 --user
+RUN pip install -r /usr/local/src/clarify/dev-requirements.txt --user
