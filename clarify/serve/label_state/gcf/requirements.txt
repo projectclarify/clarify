@@ -1,5 +1,5 @@
 google-cloud-firestore==0.31.0
-tensorflow==1.13.1
+tensorflow==1.15.0
 numpy
 google-auth
 requests
