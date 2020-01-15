@@ -13,7 +13,6 @@
 
 # Provide the git commit to be tested as the first argument to the script.
 
-# Usage: test_circle.sh ${CIRCLE_SHA1}
+docker run -it gcr.io/clarify/runtime-base:v0.1.0-2370 \
+    /bin/bash -c "source ~/.bashrc && pip install tensorflow==1.15.0 --user && mkdir -p ~/testing && cd ~/testing && git clone https://github.com/projectclarify/pcml.git && cd pcml && git checkout $1 && pip install -r dev-requirements.txt --user && sh tools/testing/test_local.sh"
 
-docker run -it gcr.io/clarify/runtime-base:v0.1.0-799d \
-    /bin/bash -c "source ~/.bashrc && git fetch origin && git checkout $1 && pip install -r dev-requirements.txt --user && sh tools/testing/test_local.sh"

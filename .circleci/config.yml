@@ -1,19 +1,19 @@
 version: 2
 jobs:
-  pcml-tests:
+  clarify-tests:
     machine: true
     steps:
       - checkout
       - run:
          name: Pull base runtime
-         command: "docker pull gcr.io/clarify/runtime-base:v0.1.0-799d"
+         command: "docker pull gcr.io/clarify/runtime-base:v0.1.0-2370"
       - run:
          name: Run test_local.sh in runtime-base
-         command: "sh tools/testing/test_circle.sh"
+         command: "sh tools/testing/test_circle.sh ${CIRCLE_SHA1}"
 
 workflows:
   version: 2
   build_and_test:
     jobs:
-      - pcml-tests
+      - clarify-tests
 
