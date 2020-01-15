@@ -95,8 +95,17 @@ def update_config(test_infra_root, plugins_path, config_path):
 
   os.chdir(test_infra_root)
 
-  _update_config(plugins_path, "plugins")
-  _update_config(config_path, "config")
+  _update_config(
+      test_infra_root=test_infra_root,
+      path=plugins_path,
+      name="plugins"
+  )
+
+  _update_config(
+      test_infra_root=test_infra_root,
+      path=config_path,
+      name="config"
+  )
 
 
 def get_prow():

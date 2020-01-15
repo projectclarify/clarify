@@ -3,7 +3,8 @@
   <tr>
     <th>Acknowledgement</th>
     <th>Demo notebook</th>
-    <th>Build status</th>
+    <th>Circle status</th>
+    <th>Prow status</th>
     <th>Cite this</th>
   </tr>
   <tr>
@@ -11,6 +12,7 @@
     <td><a href="https://colab.research.google.com/gist/cwbeitel/9f647889b63f9db3469bc45e16709f31/project-clarify-demo-nb-q4-19.ipynb" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></img></a>
 </td>
     <td><a href="https://circleci.com/gh/projectclarify/pcml" target="_blank"><img src="https://circleci.com/gh/projectclarify/pcml.svg?style=svg"></img></a></td>
+    <td><a href="http://35.244.237.143" target="_blank"><img src="http://35.244.237.143/badge.svg?jobs=test-presubmit"></img></a></td>
     <td><a href="https://zenodo.org/badge/latestdoi/194198315" target="_blank"><img src="https://zenodo.org/badge/194198315.svg" alt="DOI"></a></td>
   </tr>
 </table>
