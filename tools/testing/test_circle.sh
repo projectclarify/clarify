@@ -15,3 +15,4 @@
 
 docker run -it gcr.io/clarify/runtime-base:v0.1.0-2370 \
     /bin/bash -c "source ~/.bashrc && mkdir -p ~/testing && cd ~/testing && git clone https://github.com/projectclarify/pcml.git && cd pcml && git checkout $1 && pip install -r dev-requirements.txt --user && sh tools/testing/test_local.sh"
+

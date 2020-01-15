@@ -30,7 +30,7 @@ bazel build //clarify/...
 # circle without auth.
 # bazel test //clarify/datasets/... --test_output=all
 
-bazel test //clarify/models/... --test_output=all
+#bazel test //clarify/models/... --test_output=all
 
 bazel test //clarify/research/... --test_output=all
 
@@ -38,7 +38,7 @@ bazel test //clarify/research/... --test_output=all
 # significantly with change to Trax.
 # bazel test //clarify/serve/... --test_output=all
 
-bazel test //clarify/tune/... --test_output=all
+#bazel test //clarify/tune/... --test_output=all
 
 bazel test //clarify/utils:audio_utils_test --test_output=all
 bazel test //clarify/utils:augmentation_utils_test --test_output=all
