@@ -1,11 +1,11 @@
 triggers:
 - repos:
-  - projectclarify/pcml
+  - projectclarify/clarify
   only_org_members: true
 
 welcome:
 - repos:
-  - pcml
+  - projectclarify/clarify
   message_template: "Welcome @{{.AuthorLogin}}! <br><br>It looks like this is your first PR to <a href='https://github.com/{{.Org}}/{{.Repo}}'>{{.Org}}/{{.Repo}}</a> 🎉.<br><br>You will be prompted by a bot to use commands during the review process. Do not be afraid to follow the prompts! It is okay to experiment. [Here is the bot commands documentation](https://go.k8s.io/bot-commands). <br><br>You can also check if {{.Org}}/{{.Repo}} has [its own contribution guidelines](https://github.com/{{.Org}}/{{.Repo}}/tree/master/CONTRIBUTING.md). <br><br>We want to make sure your contribution gets all the attention it needs! <br><br>Thank you, and welcome to Project Clarify. :smiley:"
 
 size:
@@ -17,11 +17,11 @@ size:
 
 lgtm:
 - repos:
-  - projectclarify/pcml
+  - projectclarify/clarify
   review_acts_as_lgtm: true
 
 plugins:
-  projectclarify/pcml:
+  projectclarify/clarify:
   - size
   - approve
   - assign
@@ -41,7 +41,7 @@ plugins:
   - trigger
 
 external_plugins:
-  projectclarify/pcml:
+  projectclarify/clarify:
   - name: needs-rebase
     events:
       - issue_comment

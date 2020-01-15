@@ -11,11 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Prow deployment.
-
-foo
-
-"""
+"""Prow deployment."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -46,7 +42,7 @@ def run_and_output(command, cwd=None, env=None):
 
 
 def add_hook(test_infra_root, hook_secret_path, gh_token_path, address,
-             repo_path="projectclarify/pcml"):
+             repo_path="projectclarify/clarify"):
   os.chdir(test_infra_root)
   run_and_output([
     "bazel", "run", "//experiment/add-hook", "--",
@@ -166,7 +162,7 @@ def deploy(test_infra_root, gh_token_path, namespace="default"):
            hook_secret_path=hook_secret_path,
            gh_token_path=gh_token_path,
            address=address,
-           repo_path="projectclarify/pcml")
+           repo_path="projectclarify/clarify")
 
   return test_infra_root
 
