@@ -47,7 +47,7 @@ presubmits:
           https://github.com/projectclarify/clarify.git
           &&
           cd
-          pcml
+          clarify
           &&
           git
           checkout

@@ -56,7 +56,6 @@ flags.DEFINE_string('template_service_account', None,
                     'ID of a service account to use as a template.')
 
 
-
 def run_and_output(command, cwd=None, env=None):
   
   process = subprocess.Popen(
