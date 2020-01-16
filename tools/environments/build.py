@@ -223,7 +223,7 @@ if __name__ == '__main__':
 
   import argparse
 
-  parser = argparse.ArgumentParser(description='Build PCML containers.')
+  parser = argparse.ArgumentParser(description='Build Project Clarify containers.')
 
   parser.add_argument('--environment', type=str, default="workspace",
                       help='Which build, `workspace` or `rtbase`.')

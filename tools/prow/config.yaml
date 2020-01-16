@@ -11,11 +11,11 @@ tide:
   sync_period: 1m
 
   merge_method:
-    projectclarify/pcml: squash
+    projectclarify/clarify: squash
 
   queries:
   - repos:
-    - projectclarify/pcml
+    - projectclarify/clarify
     labels:
     - lgtm
     - approved
@@ -27,7 +27,7 @@ tide:
     - needs-rebase
 
 presubmits:
-  projectclarify/pcml:
+  projectclarify/clarify:
   - name: test-presubmit
     always_run: true
     skip_report: false
@@ -44,10 +44,10 @@ presubmits:
           &&
           git
           clone
-          https://github.com/projectclarify/pcml.git
+          https://github.com/projectclarify/clarify.git
           &&
           cd
-          pcml
+          clarify
           &&
           git
           checkout
@@ -70,9 +70,10 @@ presubmits:
         resources:
           requests:
             memory: "6Gi"
+            cpu: "4"
 
 postsubmits:
-  projectclarify/pcml:
+  projectclarify/clarify:
   - name: test-postsubmit
     skip_report: false
     spec:

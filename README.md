@@ -11,7 +11,7 @@
     <td><a href="https://kubeflow.org" target="_blank"><img src="https://img.shields.io/static/v1?label=Built%20with&message=Kubeflow&color=blue"></img></a></td>
     <td><a href="https://colab.research.google.com/gist/cwbeitel/9f647889b63f9db3469bc45e16709f31/project-clarify-demo-nb-q4-19.ipynb" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></img></a>
 </td>
-    <td><a href="https://circleci.com/gh/projectclarify/pcml" target="_blank"><img src="https://circleci.com/gh/projectclarify/pcml.svg?style=svg"></img></a></td>
+    <td><a href="https://circleci.com/gh/projectclarify/clarify" target="_blank"><img src="https://circleci.com/gh/projectclarify/clarify.svg?style=svg"></img></a></td>
     <td><a href="http://35.244.237.143" target="_blank"><img src="http://35.244.237.143/badge.svg?jobs=test-presubmit"></img></a></td>
     <td><a href="https://zenodo.org/badge/latestdoi/194198315" target="_blank"><img src="https://zenodo.org/badge/194198315.svg" alt="DOI"></a></td>
   </tr>
@@ -25,7 +25,7 @@ Whitepaper: http://bit.ly/pcml-overview-doc
 
 Q1 Projects and Epics: [here](https://docs.google.com/document/d/17oJNqOqgxalwikwua6bKAfm7UoRWZdIULQNTMSdOByI/edit#bookmark=id.fea7yocss3q1)
 
-Check out the front-end platform alpha at [ai4hi.org](ai4hi.org)
+Check out the front-end platform alpha at [ai4hi.org](https://ai4hi.org)
 
 Read the [FAQ](https://medium.com/project-clarify/faq-8b886e69886b)
 

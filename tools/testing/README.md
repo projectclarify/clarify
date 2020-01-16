@@ -4,9 +4,9 @@ The nature of our project requires a test strategy that spans various languages,
 
 ### Languages:
 
-The front-end platform is primarily TypeScript with tests and depend supporting functions written in Python, see https://github.com/projectclarify/pcml/tree/master/client.
-A subset of the codebase concerned with high-throughput sampling of examples is written in Golang, https://github.com/projectclarify/pcml/tree/master/sampler
-The rest involving tensor2tensor datasets, models, means for launching training jobs on Kubernetes, and supporting utilities are written in Python, https://github.com/projectclarify/pcml/tree/master/pcml
+The front-end platform is primarily TypeScript with tests and depend supporting functions written in Python, see https://github.com/projectclarify/clarify/tree/master/client.
+A subset of the codebase concerned with high-throughput sampling of examples is written in Golang, https://github.com/projectclarify/clarify/tree/master/exp/sampler
+The rest involving tensor2tensor datasets, models, means for launching training jobs on Kubernetes, and supporting utilities are written in Python, https://github.com/projectclarify/clarify/tree/master/clarify
 
 ### Roles:
 
@@ -36,4 +36,3 @@ docker run -it test-container /bin/bash -c "source ~/.bashrc; cd /build; sh tool
 ### Remote testing:
 
 When a PR is submitted, CircleCI tests are always run including operations that don’t require special credentials as well as linting and test coverage analysis. If these pass a project owner reviews the contents of the PR and if no security or operational problems would be created by running the tests on prow applies an /ok-to-test label permitting prow tests to be run.
-

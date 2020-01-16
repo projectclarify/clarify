@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ln -s /usr/local/src/pcml /home/jovyan/pcml
+ln -s /usr/local/src/clarify /home/jovyan/clarify
 
 echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
 
