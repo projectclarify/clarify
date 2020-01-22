@@ -17,5 +17,5 @@
 from clarify.batch import job
 
 
-class TPUJob(job.Job):
+class TPUJob(job.SimpleJob):
   pass

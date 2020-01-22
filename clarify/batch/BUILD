@@ -17,7 +17,8 @@ py_test(
     name = "fyre_test",
     srcs = ["fyre_test.py"],
     deps = [
-      "//clarify/batch:fyre"
+      "//clarify/batch:fyre",
+      "//clarify/batch:jobs"
     ],
 )
 

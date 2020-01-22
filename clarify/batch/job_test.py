@@ -31,36 +31,12 @@ class JobTest(absltest.TestCase):
     container=client.V1Container(
       name="clarify",
       image="gcr.io/clarify/runtime-base:v0.1.0-2370",
-      command=["pwd"]
+      command=["echo", "hello", "world"]
     )
 
     j = job.SimpleJob(container=container)
 
     run_request = j.batch_run()
-
-    """
-
-    Looks like jobs run indefinitely because istio pod continues running.
-
-    Could run daemon to 
-
-    kubectl exec <pod> -c istio-proxy -- curl -X POST localhost:15000/quitquitquit
-
-    for any jobs 
-
-    containerStatuses[*].state.terminated.reason=completed
-
-    --
-
-    Added envoy-preflight to rtbase 
-    https://github.com/monzo/envoy-preflight
-    requires env variables to be set in order to work, incl 127.0.0.1:15000
-
-    Pods terminate with status complete albeit with delay but Job never shows
-    status complete. Despite job pod showing status complete the istio container
-    shows status running.
-
-    """
 
     pods = []
     mx = 20
@@ -78,12 +54,6 @@ class JobTest(absltest.TestCase):
       timeout=datetime.timedelta(seconds=20),
       polling_interval=datetime.timedelta(seconds=1),    
     )
-    
-    """
-    
-    TODO: As described above, test fails with timeout.
-    
-    """
 
 
 if __name__ == '__main__':

@@ -17,6 +17,8 @@
 import datetime
 from absl.testing import absltest
 
+import os
+
 from clarify.batch import fyre
 from clarify.batch import jobs
 
@@ -26,20 +28,30 @@ TODO: Currently this test does not pass when run via Bazel as the
 bazel run //:push_runtime command depends on the environment having
 $HOME defined.
 
-Also obvi needs parameterization according to workspace_root.
+Requires CLARIFY_WORKSPACE_ROOT to be defined, such as when using
+Bazel via --test_env=CLARIFY_WORKSPACE_ROOT=<path to repo root>.
+
+Requires adding --test_env=HOME, added that to bazelrc.
 
 """
 
 class FyreTest(absltest.TestCase):
+    
+  def setUp(self):
+
+    self.workspace_root = os.environ["CLARIFY_WORKSPACE_ROOT"]
 
   def test_basic(self):
 
     f = fyre.Fyre(
-      workspace_root="/home/jovyan/forks/workspace-config-0",
+      workspace_root=self.workspace_root,
       command=["echo", "hello", "world"]
     )
 
     """
+
+    Currently fails in CB's notebook container, running out of disk.
+
     create_response = f.batch_run()
 
     status_response = f.wait_for_job(
@@ -47,15 +59,12 @@ class FyreTest(absltest.TestCase):
       polling_interval=datetime.timedelta(seconds=1)
     )
 
-    Successfully starts up and runs hello world but same job termination
-    issue as described in job_test.
-
     """
 
   def test_trax_entrypoint(self):
 
     f = fyre.Fyre(
-      workspace_root="/home/jovyan/forks/workspace-config-0",
+      workspace_root=self.workspace_root,
       command=[
         "/clarify/bin/train",
         "--config_file=/clarify/configs/image_fec/mini_test.gin"
@@ -79,7 +88,7 @@ class FyreTest(absltest.TestCase):
   def test_trax_tpu(self):
 
     f = fyre.Fyre(
-      workspace_root="/home/jovyan/forks/workspace-config-0",
+      workspace_root=self.workspace_root,
       command=[
         "/clarify/bin/train",
         "--config_file=/clarify/configs/image_fec/mini_test.gin"
@@ -87,13 +96,14 @@ class FyreTest(absltest.TestCase):
       job=jobs.TPUJob
     )
 
+    """
     create_response = f.batch_run()
 
     status_response = f.wait_for_job(
       timeout=datetime.timedelta(seconds=20),
       polling_interval=datetime.timedelta(seconds=1)
     )
-
+    """
 
 if __name__ == '__main__':
   absltest.main()
