@@ -98,12 +98,18 @@ def get_default_target_namespace():
 def _create_job_request(
     job_name, container,
     namespace=get_default_target_namespace()):
-    
+
+  # =====
+  # HACK
+  ann = {"sidecar.istio.io/inject": "false"}
+  # =====
+
   # Create the Job request body
   body = client.V1Job(
     metadata=client.V1ObjectMeta(namespace=namespace, name=job_name),
     spec=client.V1JobSpec(
       template=client.V1PodTemplateSpec(
+        metadata=client.V1ObjectMeta(namespace=namespace, annotations=ann),
         spec=client.V1PodSpec(
           containers=[container],
           restart_policy="Never"
