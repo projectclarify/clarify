@@ -53,6 +53,6 @@ tensorflow-metadata==0.15.1
 tensorflow-probability==0.7.0
 tensorflow-serving-api==1.12.0
 tf-estimator-nightly==1.14.0.dev2019060501
-trax==1.1.4
+trax==1.2.2
 yapf==0.29.0
 zipp==0.6.0
