@@ -128,6 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+client/node_modules
 client/functions/node_modules
 
 docs/
