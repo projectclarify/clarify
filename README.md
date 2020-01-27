@@ -49,4 +49,4 @@ Community statistics: 24 new members for Q1, 21 (~88%) of whom are interested in
 
 Project Clarify is a citeable work.
 
-Beitel, C. 2019, pcml: An open platform for the development and trialing of the next generation of AI-first mental training experiences, v0.1.0-rc.0, Zenodo, doi:10.5281/zenodo.3567142
+Beitel, C. 2019, pcml: An open platform for the development and trialing of the next generation of AI-first mental training experiences, v0.1.0-rc.0, Zenodo, doi:10.5281/zenodo.3567142.
