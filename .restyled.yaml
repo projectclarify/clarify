@@ -1,0 +1,10 @@
+---
+image: restyled/restyler-yapf:v0.27.0
+command:
+- yapf
+- "--in-place"
+arguments: []
+include:
+- "clarify/**/*.py"
+interpreters:
+- python
