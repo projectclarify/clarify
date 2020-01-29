@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Batch run wrapper."""
 
 from absl import logging
@@ -29,7 +28,8 @@ from clarify.utils.cmd_utils import run_and_output
 
 class Fyre(object):
 
-  def __init__(self, command,
+  def __init__(self,
+               command,
                workspace_root,
                job=job.SimpleJob,
                extra_container_args={},
@@ -38,25 +38,19 @@ class Fyre(object):
     os.chdir(workspace_root)
 
     logging.info("Building workspace at {}...".format(workspace_root))
-    run_and_output(
-        ["bazel", "build", "//clarify/research/..."],
-        cwd=workspace_root
-    )
+    run_and_output(["bazel", "build", "//clarify/research/..."],
+                   cwd=workspace_root)
 
     logging.info("Baking runtime...")
-    push_output = run_and_output(
-      ["bazel", "run", "//:push_runtime"],
-      cwd=workspace_root
-    )
+    push_output = run_and_output(["bazel", "run", "//:push_runtime"],
+                                 cwd=workspace_root)
 
     runtime_image = push_output.split()[-1]
 
-    container=client.V1Container(
-      name="clarify",
-      image=runtime_image,
-      command=command,
-      **extra_container_args
-    )
+    container = client.V1Container(name="clarify",
+                                   image=runtime_image,
+                                   command=command,
+                                   **extra_container_args)
 
     self.job_object = job(container=container, **extra_job_args)
 

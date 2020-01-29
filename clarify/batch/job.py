@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Job base class."""
 
 import os
@@ -29,12 +28,10 @@ config.load_kube_config()
 configuration = kubernetes.client.Configuration()
 
 core_api_instance = kubernetes.client.CoreV1Api(
-    kubernetes.client.ApiClient(configuration)
-)
+    kubernetes.client.ApiClient(configuration))
 
 batch_api_instance = kubernetes.client.BatchV1Api(
-  kubernetes.client.ApiClient(configuration)
-)
+    kubernetes.client.ApiClient(configuration))
 
 
 def gen_timestamped_uid():
@@ -52,8 +49,8 @@ def str_if_bytes(maybe_bytes):
 def create_resource_spec(limits, requests):
 
   GKE_TPU_DESIGNATORS = [
-    "cloud-tpus.google.com/v2", "cloud-tpus.google.com/preemptible-v2",
-    "cloud-tpus.google.com/v3", "cloud-tpus.google.com/preemptible-v3"
+      "cloud-tpus.google.com/v2", "cloud-tpus.google.com/preemptible-v2",
+      "cloud-tpus.google.com/v3", "cloud-tpus.google.com/preemptible-v3"
   ]
 
   allowed_keys = ["cpu", "memory", "nvidia.com/gpu"]
@@ -61,13 +58,12 @@ def create_resource_spec(limits, requests):
   allowed_keys.extend(GKE_TPU_DESIGNATORS)
 
   # Define container resource requirements
-  resources = client.V1ResourceRequirements()  
+  resources = client.V1ResourceRequirements()
 
   def _raise_if_disallowed(key):
     if key not in allowed_keys:
       raise ValueError("Saw resource request or limit key %s "
-                       "which is not in allowed keys %s" %
-                       (key, allowed_keys))
+                       "which is not in allowed keys %s" % (key, allowed_keys))
 
   for key, value in limits.items():
     raise_if_disallowed_key(key)
@@ -81,23 +77,24 @@ def create_resource_spec(limits, requests):
 
 
 def is_running_in_k8s():
-    return os.path.isdir('/var/run/secrets/kubernetes.io/')
+  return os.path.isdir('/var/run/secrets/kubernetes.io/')
 
 
 def get_current_k8s_namespace():
-    with open('/var/run/secrets/kubernetes.io/serviceaccount/namespace', 'r') as f:
-        return f.readline()
+  with open('/var/run/secrets/kubernetes.io/serviceaccount/namespace',
+            'r') as f:
+    return f.readline()
 
 
 def get_default_target_namespace():
-    if not is_running_in_k8s():
-        return 'default'
-    return get_current_k8s_namespace()
+  if not is_running_in_k8s():
+    return 'default'
+  return get_current_k8s_namespace()
 
 
-def _create_job_request(
-    job_name, container,
-    namespace=get_default_target_namespace()):
+def _create_job_request(job_name,
+                        container,
+                        namespace=get_default_target_namespace()):
 
   # =====
   # HACK
@@ -106,17 +103,11 @@ def _create_job_request(
 
   # Create the Job request body
   body = client.V1Job(
-    metadata=client.V1ObjectMeta(namespace=namespace, name=job_name),
-    spec=client.V1JobSpec(
-      template=client.V1PodTemplateSpec(
-        metadata=client.V1ObjectMeta(namespace=namespace, annotations=ann),
-        spec=client.V1PodSpec(
-          containers=[container],
-          restart_policy="Never"
-        )
-      )
-    )
-  )
+      metadata=client.V1ObjectMeta(namespace=namespace, name=job_name),
+      spec=client.V1JobSpec(template=client.V1PodTemplateSpec(
+          metadata=client.V1ObjectMeta(namespace=namespace, annotations=ann),
+          spec=client.V1PodSpec(containers=[container],
+                                restart_policy="Never"))))
 
   return body
 
@@ -124,10 +115,7 @@ def _create_job_request(
 def _run_job(request_body):
 
   api_response = batch_api_instance.create_namespaced_job(
-    namespace=request_body.metadata.namespace,
-    body=request_body,
-    pretty=True
-  )
+      namespace=request_body.metadata.namespace, body=request_body, pretty=True)
 
   return api_response
 
@@ -142,15 +130,12 @@ class SimpleJob(object):
     job_name = gen_timestamped_uid()
     job_name = "{}-{}".format(job_name_stem, job_name)
 
-    self.request = _create_job_request(
-      job_name=job_name,
-      container=container,
-      namespace=namespace
-    )
+    self.request = _create_job_request(job_name=job_name,
+                                       container=container,
+                                       namespace=namespace)
 
   def wait_for_job(self, *args, **kwargs):
-    return _wait_for_job(job_request=self.request,
-                         *args, **kwargs)
+    return _wait_for_job(job_request=self.request, *args, **kwargs)
 
   def batch_run(self):
     return _run_job(self.request)
@@ -186,10 +171,10 @@ def _get_job_pods(job_request):
 
 
 def _wait_for_job(job_request,
-                 timeout=datetime.timedelta(seconds=(24 * 60 * 60)),
-                 polling_interval=datetime.timedelta(seconds=30),
-                 return_after_num_completions=1,
-                 max_failures=1):
+                  timeout=datetime.timedelta(seconds=(24 * 60 * 60)),
+                  polling_interval=datetime.timedelta(seconds=30),
+                  return_after_num_completions=1,
+                  max_failures=1):
 
   name = str_if_bytes(job_request.metadata.name)
   namespace = str_if_bytes(job_request.metadata.namespace)

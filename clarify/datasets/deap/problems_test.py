@@ -131,10 +131,8 @@ class TestDeapUtils(tf.test.TestCase):
       assert std.max() <= case["voc"] / 2
 
   def test_deap_problem_generates(self):
-    helper = T2TDevHelper("multi_modal_dev_model",
-                          "deap_problem_base",
-                          "multi_modal_dev_model_tiny",
-                          None)
+    helper = T2TDevHelper("multi_modal_dev_model", "deap_problem_base",
+                          "multi_modal_dev_model_tiny", None)
     helper.datagen()
     dataset = helper.problem.dataset("train", data_dir=helper.data_dir)
     example = dataset.make_one_shot_iterator().next()
