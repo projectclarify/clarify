@@ -38,7 +38,7 @@ import './feedback-radar.js'
 export class ViewInteractive extends connect(store)(PageViewElement) {
 
   @property({type: String})
-  _navSection = "pre-session";    
+  _navSection = "pre-session";
 
   @property({type: Boolean})
   _leftToggleActive = true;
@@ -268,7 +268,7 @@ export class ViewInteractive extends connect(store)(PageViewElement) {
           height: 150px;
           display: flex;
           flex-direction: row;
-          justify-content: center; 
+          justify-content: center;
         }
 
         .session-step-center-bottom {
@@ -480,7 +480,7 @@ export class ViewInteractive extends connect(store)(PageViewElement) {
   protected renderSessionButtons() {
 
     return html`${this._sessionComplete ? html`
-        <paper-button class="inverted-primary" @click="${this._completeSession}" raised @click="${this._nextStep}">Continue</paper-button>      
+        <paper-button class="inverted-primary" @click="${this._completeSession}" raised @click="${this._nextStep}">Continue</paper-button>
     `:html`
         ${this.renderSessionInProgressButtons()}
     `}`
@@ -532,7 +532,7 @@ export class ViewInteractive extends connect(store)(PageViewElement) {
 
   renderInitialInstructions() {
       return html`
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ut risus vel sapien porttitor aliquam. Duis non dolor urna. Vestibulum consectetur, sem nec volutpat vehicula, nibh est egestas tortor, a facilisis elit massa vitae ipsum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam vulputate nunc risus, a venenatis quam posuere in. Cras auctor urna non leo euismod, tincidunt fermentum mi bibendum.</p>        
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ut risus vel sapien porttitor aliquam. Duis non dolor urna. Vestibulum consectetur, sem nec volutpat vehicula, nibh est egestas tortor, a facilisis elit massa vitae ipsum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam vulputate nunc risus, a venenatis quam posuere in. Cras auctor urna non leo euismod, tincidunt fermentum mi bibendum.</p>
         `
   }
 
@@ -555,7 +555,7 @@ export class ViewInteractive extends connect(store)(PageViewElement) {
                     
                     ${this.renderInitialInstructions()}
 
-                  </div>    
+                  </div>
 
                </div>
 
@@ -701,7 +701,7 @@ export class ViewInteractive extends connect(store)(PageViewElement) {
 
       this._leftToggleActive = !this._leftToggleActive;
       console.log(this._leftToggleActive);
-      /* update the variable that determines whether the nav is shown open or closed 
+      /* update the variable that determines whether the nav is shown open or closed
          then preferably animate the transition between the two.
       */
 
@@ -760,9 +760,9 @@ export class ViewInteractive extends connect(store)(PageViewElement) {
       let y = Math.cos( r ) * - 12;
       let mid = ( alpha > 180 ) ? 1 : 0;
       
-      let anim = 'M 0 0 v -12 A 12 12 1 ' 
-        + mid + ' 1 ' 
-        +  x  + ' ' 
+      let anim = 'M 0 0 v -12 A 12 12 1 '
+        + mid + ' 1 '
+        +  x  + ' '
         +  y  + ' z';
 
       interior!.setAttribute( 'd', anim );

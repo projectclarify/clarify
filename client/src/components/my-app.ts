@@ -405,12 +405,12 @@ export class MyApp extends connect(store)(LitElement) {
         <app-toolbar class="toolbar-top" light="${this._toolbarLight}">
           <button class="menu-btn" title="Menu" @click="${this._menuButtonClicked}"><clarify-icon></clarify-icon></button>
           <div main-title>${this.appTitle}</div>
-          ${this._user ? 
+          ${this._user ?
             html`
             ${this._toolbarLight ? html`
-              <button class="secondary-light-toolbar-button" title="Dashboard" @click="${this._navDashView}" inverted="${!this._toolbarLight}">Dashboard</button>     
+              <button class="secondary-light-toolbar-button" title="Dashboard" @click="${this._navDashView}" inverted="${!this._toolbarLight}">Dashboard</button>
               `: html`
-              <button class="secondary-light-toolbar-button" title="Dashboard" @click="${this._navDashView}" inverted="${!this._toolbarLight}">Exit session</button>     
+              <button class="secondary-light-toolbar-button" title="Dashboard" @click="${this._navDashView}" inverted="${!this._toolbarLight}">Exit session</button>
               `}
             <div class="account-dropdown-toggle" style="background-image: url('${this._user.photoURL}')" alt="account" title="account"  @click="${this._toggleAccountDropdown}" noink></div>
             <!--<button class="logout-btn" title="Logout" @click="${this._logoutButtonClicked}">Sign out</button>-->
@@ -471,11 +471,11 @@ export class MyApp extends connect(store)(LitElement) {
       </main>
 
       <footer>
-        <a class="footer-link" href="/terms-of-service">terms</a> 
+        <a class="footer-link" href="/terms-of-service">terms</a>
         <a class="footer-divider">/</a>
-        <a class="footer-link" href="/privacy-policy">privacy</a> 
+        <a class="footer-link" href="/privacy-policy">privacy</a>
         <a class="footer-divider">/</a>
-        <a class="footer-link" href="https://neuroscape.ucsf.edu/" target="_blank">neuroscape</a> 
+        <a class="footer-link" href="https://neuroscape.ucsf.edu/" target="_blank">neuroscape</a>
       </footer>
 
       <snack-bar ?active="${this._snackbarOpened}">

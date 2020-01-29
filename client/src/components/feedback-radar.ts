@@ -43,7 +43,7 @@ interface AVDataPacket {
     // flattened
     videoData: string;
 
-    // Single channel of raw audio data corresponding to 
+    // Single channel of raw audio data corresponding to
     // video data
     audioData: string;
 
@@ -111,7 +111,7 @@ export class FeedbackRadar extends connect(store)(LitElement) {
   targetAreaChartRef = null;
 
   @property({ type: Object })
-  currentAreaChartRef = null; 
+  currentAreaChartRef = null;
 
   @property({ type: String })
   lastStateDataTimestamp = "foo";
@@ -592,7 +592,7 @@ export class FeedbackRadar extends connect(store)(LitElement) {
                 "timestamp": Date.now(),
                 "duration": this.audioSecondsPerPacket
             }
-        }    
+        }
   }
 
   async continuouslyCaptureFrames() {
@@ -614,7 +614,7 @@ export class FeedbackRadar extends connect(store)(LitElement) {
         canvas.width = width;
         canvas.height = height;
         context.drawImage(video, 0, 0, width, height);
-        let videoData = canvas.toDataURL('image/jpeg'); 
+        let videoData = canvas.toDataURL('image/jpeg');
 
         packetTemplate["videoData"] = videoData;
         packetTemplate["meta"]["timestamp"] = Date.now()
