@@ -28,7 +28,7 @@ tide:
 
 presubmits:
   projectclarify/clarify:
-  - name: test-presubmit
+  - name: bazel-test-local
     always_run: true
     skip_report: false
     spec:
