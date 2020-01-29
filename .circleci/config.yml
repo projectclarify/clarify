@@ -11,9 +11,40 @@ jobs:
     - run:
         name: Python style check (yapf diff)
         command: python tools/testing/check_yapf.py --path=clarify
+  test_ui:
+    docker:
+      - image: circleci/node:10.16.3
+    steps:
+      - checkout
+      - run:
+          name: update-npm
+          command: 'sudo npm install -g npm@latest'
+      - restore_cache:
+          key: dependency-cache-{{ checksum "client/package-lock.json" }}
+      - run:
+          name: install
+          command: cd client && npm install . && cd ../
+      - save_cache:
+          key: dependency-cache-{{ checksum "client/package-lock.json" }}
+          paths:
+            - client/node_modules
+      - run:
+          name: test
+          command: cd client && npm test
+      - run:
+          name: code-coverage
+          command: 'echo todo ./node_modules/.bin/nyc report --reporter=text-lcov'
+      - store_artifacts:
+          path: test_results.xml
+          prefix: tests
+      #- store_artifacts:
+      #    path: coverage
+      #    prefix: coverage
+      - store_test_results:
+          path: test-results.xml
 workflows:
   version: 2
   workflow:
     jobs:
     - build
-
+    - test_ui
