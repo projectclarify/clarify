@@ -122,15 +122,15 @@ export class SubjectivesDataViz extends connect(store)(LitElement) {
 				return yScale(d[1]);
 			})
 			.attr("r", 5)
-            .attr("class", "data-point")	
+            .attr("class", "data-point")
 
     svg.append("g")
-        .attr("class", "x axis")	
+        .attr("class", "x axis")
         .attr("transform", "translate(0," + (h - padding) + ")")
         .call(xAxis);
     
     svg.append("g")
-        .attr("class", "y axis")	
+        .attr("class", "y axis")
         .attr("transform", "translate(" + padding + ", 0)")
         .call(yAxis);
 

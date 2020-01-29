@@ -47,7 +47,7 @@ export class ViewDashboard extends connect(store)(PageViewElement) {
         .dashboard-nav {
           display: flex;
           flex-direction: row;
-          justify-content: center; 
+          justify-content: center;
           width: 100%;
           position: fixed;
           top: 64px;
@@ -94,7 +94,7 @@ export class ViewDashboard extends connect(store)(PageViewElement) {
   protected render() {
     return html`
 
-    <div class="dashboard-nav">        
+    <div class="dashboard-nav">
 
         <div class="dashboard-nav-item" active="${this._dashView == 'navigator'}" @click="${this.handleNavClick}" navid="navigator">Navigator</div>
         <div class="dashboard-nav-item" active="${this._dashView == 'exercises'}" @click="${this.handleNavClick}" navid="exercises">Exercises</div>

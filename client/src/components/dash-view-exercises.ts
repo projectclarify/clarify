@@ -122,7 +122,7 @@ export class DashViewExercises extends connect(store)(PageViewElement) {
 
         <div class="exercise-card-container">
 
-            <exercise-card 
+            <exercise-card
                 category="vocational"
                 iconText="Dw"
                 subcategory="deep-work"
@@ -130,7 +130,7 @@ export class DashViewExercises extends connect(store)(PageViewElement) {
                 description="Engage in a deep work session while being provided ML-enabled feedback">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="vocational"
                 iconText="Lw"
                 subcategory="light-work"
@@ -154,7 +154,7 @@ export class DashViewExercises extends connect(store)(PageViewElement) {
 
         <div class="exercise-card-container">
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Mi"
                 subcategory="mindfulness"
@@ -162,7 +162,7 @@ export class DashViewExercises extends connect(store)(PageViewElement) {
                 description="Pay attention to breath and notice when you become distracted">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Oa"
                 subcategory="open-awareness"
@@ -170,7 +170,7 @@ export class DashViewExercises extends connect(store)(PageViewElement) {
                 description="Maintain non-reactive open awareness of thought stream">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Bm"
                 subcategory="body-scan"
@@ -178,7 +178,7 @@ export class DashViewExercises extends connect(store)(PageViewElement) {
                 description="Develop greater mind-body awareness by scanning yours mindfully">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Bm"
                 subcategory="body-scan"
@@ -186,7 +186,7 @@ export class DashViewExercises extends connect(store)(PageViewElement) {
                 description="Pracitce mindfulness and body awareness at the same time.">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Vi"
                 subcategory="visualization"
@@ -194,7 +194,7 @@ export class DashViewExercises extends connect(store)(PageViewElement) {
                 description="Pratice culitvating and strengthening feelings of gratitude.">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Vi"
                 subcategory="visualization"
@@ -202,7 +202,7 @@ export class DashViewExercises extends connect(store)(PageViewElement) {
                 description="Pratice culitvating and strengthening feelings of gratitude.">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Oa"
                 subcategory="open-awareness"
@@ -210,7 +210,7 @@ export class DashViewExercises extends connect(store)(PageViewElement) {
                 description="Pratice a state non-reactive open awareness through noting.">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="So"
                 subcategory="social"
@@ -234,7 +234,7 @@ export class DashViewExercises extends connect(store)(PageViewElement) {
 
         <div class="exercise-card-container">
 
-            <exercise-card 
+            <exercise-card
                 category="emotional"
                 iconText="La"
                 subcategory="emotion-labeling"
@@ -257,7 +257,7 @@ export class DashViewExercises extends connect(store)(PageViewElement) {
 
         <div class="exercise-card-container">
 
-            <exercise-card 
+            <exercise-card
                 category="motivation"
                 iconText="Mo"
                 subcategory="motivation-journaling"

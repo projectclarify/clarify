@@ -48,7 +48,7 @@ export class ViewArticleMachineLearning extends connect(store)(ViewArticleBase) 
             height: 20px;
         }
 
-        .article-hero-heading { 
+        .article-hero-heading {
             font-size: 40px;
         }
  
@@ -123,7 +123,7 @@ export class ViewArticleMachineLearning extends connect(store)(ViewArticleBase) 
 
         <div class="article-large-width-image-container">
             <div class="article-large-width-image">
-                ${embeddingSpace}            
+                ${embeddingSpace}
             </div>
         </div>
         
@@ -138,7 +138,7 @@ export class ViewArticleMachineLearning extends connect(store)(ViewArticleBase) 
 
         <div class="article-large-width-image-container">
             <div class="article-large-width-image">
-                ${knn}            
+                ${knn}
             </div>
         </div>
 
@@ -157,7 +157,7 @@ export class ViewArticleMachineLearning extends connect(store)(ViewArticleBase) 
 
         <div class="article-large-width-image-container">
             <div class="article-large-width-image">
-                ${sslArchitecture}            
+                ${sslArchitecture}
             </div>
         </div>
 
@@ -183,7 +183,7 @@ export class ViewArticleMachineLearning extends connect(store)(ViewArticleBase) 
 
         <div class="article-large-width-image-container">
             <div class="article-large-width-image">
-                ${percepSimilarity}            
+                ${percepSimilarity}
             </div>
         </div>
 

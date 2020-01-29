@@ -79,7 +79,7 @@ export class ViewArticleProjectClarify extends PageViewElement {
         <h2 class="article-section-title">Finding the right exercises to boost effectiveness and quality of life</h2>
         <p>The focus of Project Clarify is on boosting the <a href="https://en.wikipedia.org/wiki/Effectiveness" target="_blank">workplace effectiveness</a> and <a href="https://en.wikipedia.org/wiki/Quality_of_life" target="_blank">quality of life</a> of adult <a href="https://en.wikipedia.org/wiki/Knowledge_worker" target="_blank">knowledge workers</a> initially through machine learning enabled emotional intelligence training.</p>
         <p>It is well established that the brain is amenable to significant change even in adulthood (a phenomenon termed <a href="http://dbm.neuro.uni-jena.de/pdf-files/Draganski-Nature.pdf" target="_blank">neuroplasticity</a>, see <a href="https://en.wikipedia.org/wiki/Neuroplasticity" target="_blank">also</a>).
-        Eastern contemplative traditions have pursued improvements in both emotional and cognitive awareness and regulation for millennia. 
+        Eastern contemplative traditions have pursued improvements in both emotional and cognitive awareness and regulation for millennia.
         Pioneering work in the contemplative neurosciences has begun to <a href="https://en.wikipedia.org/wiki/Research_on_meditation" target="_blank">establish</a> the effectiveness of some of these types of practices. </p>
         <p class="large-quote">“There is also growing evidence that mindfulness training improves adults’ ability to regulate attention and executive function, including orienting attention and monitoring conflict (<a href="https://link.springer.com/article/10.3758/CABN.7.2.109" target="_blank">Jha, Krompinger, & Baime, 2007</a>) and inhibiting emotionally charged but irrelevant information (<a href="https://link.springer.com/article/10.1007/s11031-007-9076-7" target="_blank">Ortner, Kilner, & Zelazo, 2007</a>) … In adults, meditation practice can also induce present-oriented forms of self-awareness (<a href="https://academic.oup.com/scan/article/2/4/313/1676557" target="_blank">Farb et al., 2007</a>) that likely enhance motivation and learning (<a href="https://www.tandfonline.com/doi/abs/10.1080/00461520902832376" target="_blank">Roeser & Peck, 2009</a>).” - <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1750-8606.2012.00240.x" target="_blank">Davidson, et al. 2012</a></p>
         <p>Classical contemplative training proceeds slowly, is challenging to measure, and challenging to engage with without expert instruction.</p>
@@ -208,7 +208,7 @@ export class ViewArticleProjectClarify extends PageViewElement {
   _scrollToScrollTarget(e: Event) {
 
     // Get the name of the scroll target from the `scrollTarget` attribute of the
-    // .scrollspy-item container (including in the case where e.target is 
+    // .scrollspy-item container (including in the case where e.target is
     // scrollspy-item-text instead of scrollspy-item...)
     let target = e.target;
 
@@ -237,7 +237,7 @@ export class ViewArticleProjectClarify extends PageViewElement {
 
     let scrollThresholds = this._scrollThresholds;
 
-    if(Object.keys(scrollThresholds).length == 0){ 
+    if(Object.keys(scrollThresholds).length == 0){
       console.log("updating scroll thresholds");
       this._updateScrollThresholdPositions();
       scrollThresholds = this._scrollThresholds;

@@ -68,7 +68,7 @@ export class ViewLogin extends connect(store)(PageViewElement) {
 
   protected renderLoginPage() {
     return html`
-    ${this._viewStateUserNotCrowd ? 
+    ${this._viewStateUserNotCrowd ?
     html`
 
       <section class="article-hero">

@@ -50,7 +50,7 @@ export class ViewArticleScalingTpuInput extends connect(store)(ViewArticleBase) 
             height: 20px;
         }
 
-        .article-hero-heading { 
+        .article-hero-heading {
             font-size: 40px;
         }
  

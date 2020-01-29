@@ -133,7 +133,7 @@ export class ViewArticleBase extends PageViewElement {
   _scrollToScrollTarget(e: Event) {
 
     // Get the name of the scroll target from the `scrollTarget` attribute of the
-    // .scrollspy-item container (including in the case where e.target is 
+    // .scrollspy-item container (including in the case where e.target is
     // scrollspy-item-text instead of scrollspy-item...)
     let target = e.target;
 
@@ -162,7 +162,7 @@ export class ViewArticleBase extends PageViewElement {
 
     let scrollThresholds = this._scrollThresholds;
 
-    if(Object.keys(scrollThresholds).length == 0){ 
+    if(Object.keys(scrollThresholds).length == 0){
       console.log("updating scroll thresholds");
       this._updateScrollThresholdPositions();
       scrollThresholds = this._scrollThresholds;
