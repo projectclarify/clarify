@@ -1,5 +1,7 @@
+// Tester for multithreaded go run in python
 package main
 
+// Comment in import is the C definition used of the python object passed in
 import (
 	/*
 		typedef struct {
@@ -9,17 +11,19 @@ import (
 	*/
 	"C"
 	"fmt"
+	"sync"
 )
-import "sync"
 
 //export Main
 func Main(testObj C.obj) {
 
-	testObj.t1 = recurseFibParallel(testObj.t1) //replace with recurseFib for non-parallel version
+	// Replace with recurseFib for non-parallel version
+	testObj.t1 = recurseFibParallel(testObj.t1)
 	testObj.t2 = recurseFibParallel(testObj.t2)
 	fmt.Println(testObj)
 }
 
+// Recursively solves for the nth fib number in paralell
 func recurseFibParallel(val C.long) C.long {
 	if val == 1 || val == 0 {
 		return val
@@ -42,6 +46,7 @@ func recurseFibParallel(val C.long) C.long {
 	return val1 + val2
 }
 
+// Recursively solves for the nth fib number not in parallel
 func recurseFib(val C.long) C.long {
 	if val == 1 || val == 0 {
 		return val
