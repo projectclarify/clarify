@@ -147,3 +147,6 @@ go/main
 
 exp/.DS_Store
 exp/golang-experiments/.DS_Store
+
+hc/vendor
+
