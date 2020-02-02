@@ -1,5 +1,6 @@
-from ctypes import *
-
+from ctypes import c_long
+from ctypes import Structure
+from ctypes import cdll
 
 class TestClass(Structure):
   _fields_ = [("t1", c_long), ("t2", c_long)]
