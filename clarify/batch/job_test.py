@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Test of base Job object."""
 
 import time
@@ -28,11 +27,10 @@ class JobTest(absltest.TestCase):
 
   def test_job_basic(self):
 
-    container=client.V1Container(
-      name="clarify",
-      image="gcr.io/clarify/runtime-base:v0.1.0-2370",
-      command=["echo", "hello", "world"]
-    )
+    container = client.V1Container(
+        name="clarify",
+        image="gcr.io/clarify/runtime-base:v0.1.0-2370",
+        command=["echo", "hello", "world"])
 
     j = job.SimpleJob(container=container)
 
@@ -51,8 +49,8 @@ class JobTest(absltest.TestCase):
     self.assertTrue(pods)
 
     status = j.wait_for_job(
-      timeout=datetime.timedelta(seconds=20),
-      polling_interval=datetime.timedelta(seconds=1),    
+        timeout=datetime.timedelta(seconds=20),
+        polling_interval=datetime.timedelta(seconds=1),
     )
 
 

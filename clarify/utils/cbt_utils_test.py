@@ -118,7 +118,6 @@ class TestCBTUtils(tf.test.TestCase):
 
     self.assertEqual(recv_meta[train_meta_key].as_dict(), sent_meta.as_dict())
 
-
   """
   def test_generate_av_correspondence_examples(self):
 
@@ -282,6 +281,7 @@ class TestCBTUtils(tf.test.TestCase):
 
     self.assertTrue(num_records_loaded > 0)
   """
+
 
 if __name__ == "__main__":
   tf.test.main()

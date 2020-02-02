@@ -1,19 +1,19 @@
 version: 2
 jobs:
-  clarify-tests:
-    machine: true
+  build:
+    docker:
+    - image: circleci/python:3.7-node-browsers-legacy
     steps:
-      - checkout
-      - run:
-         name: Pull base runtime
-         command: "docker pull gcr.io/clarify/runtime-base:v0.1.0-2370"
-      - run:
-         name: Run test_local.sh in runtime-base
-         command: "sh tools/testing/test_circle.sh ${CIRCLE_SHA1}"
-
+    - checkout
+    - run:
+        name: Get yapf
+        command: pip install yapf && export PATH=$PATH:$HOME/.local/bin
+    - run:
+        name: Python style check (yapf diff)
+        command: python tools/testing/check_yapf.py --path=clarify
 workflows:
   version: 2
-  build_and_test:
+  workflow:
     jobs:
-      - clarify-tests
+    - build
 

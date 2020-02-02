@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Test batch run wrapper."""
 
 import datetime
@@ -21,7 +20,6 @@ import os
 
 from clarify.batch import fyre
 from clarify.batch import jobs
-
 """
 
 TODO: Currently this test does not pass when run via Bazel as the
@@ -35,19 +33,17 @@ Requires adding --test_env=HOME, added that to bazelrc.
 
 """
 
+
 class FyreTest(absltest.TestCase):
-    
+
   def setUp(self):
 
     self.workspace_root = os.environ["CLARIFY_WORKSPACE_ROOT"]
 
   def test_basic(self):
 
-    f = fyre.Fyre(
-      workspace_root=self.workspace_root,
-      command=["echo", "hello", "world"]
-    )
-
+    f = fyre.Fyre(workspace_root=self.workspace_root,
+                  command=["echo", "hello", "world"])
     """
 
     Currently fails in CB's notebook container, running out of disk.
@@ -63,14 +59,11 @@ class FyreTest(absltest.TestCase):
 
   def test_trax_entrypoint(self):
 
-    f = fyre.Fyre(
-      workspace_root=self.workspace_root,
-      command=[
-        "/clarify/bin/train",
-        "--config_file=/clarify/configs/image_fec/mini_test.gin"
-      ]
-    )
-
+    f = fyre.Fyre(workspace_root=self.workspace_root,
+                  command=[
+                      "/clarify/bin/train",
+                      "--config_file=/clarify/configs/image_fec/mini_test.gin"
+                  ])
     """
     create_response = f.batch_run()
 
@@ -87,15 +80,12 @@ class FyreTest(absltest.TestCase):
 
   def test_trax_tpu(self):
 
-    f = fyre.Fyre(
-      workspace_root=self.workspace_root,
-      command=[
-        "/clarify/bin/train",
-        "--config_file=/clarify/configs/image_fec/mini_test.gin"
-      ],
-      job=jobs.TPUJob
-    )
-
+    f = fyre.Fyre(workspace_root=self.workspace_root,
+                  command=[
+                      "/clarify/bin/train",
+                      "--config_file=/clarify/configs/image_fec/mini_test.gin"
+                  ],
+                  job=jobs.TPUJob)
     """
     create_response = f.batch_run()
 
@@ -104,6 +94,7 @@ class FyreTest(absltest.TestCase):
       polling_interval=datetime.timedelta(seconds=1)
     )
     """
+
 
 if __name__ == '__main__':
   absltest.main()

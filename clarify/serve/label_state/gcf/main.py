@@ -178,7 +178,7 @@ def label_state(data, context):
   # ========
   # NOTE: This is currently mocked data.
   image_data = np.zeros((28, 28, 1)).astype(np.float32)
-  out = np.random.random((1,2048))
+  out = np.random.random((1, 2048))
   # ========
 
   #out = model.eager_embed_single_image(image_data)
