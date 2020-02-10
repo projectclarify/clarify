@@ -13,7 +13,7 @@ import { PageViewElement } from './page-view-element.js';
 import { connect } from 'pwa-helpers/connect-mixin.js';
 
 // This element is connected to the Redux store.
-import { store, RootState } from '../store.js';
+import { store } from '../store.js';
 
 import '/node_modules/@polymer/paper-input/paper-input.js';
 import '/node_modules/@polymer/paper-button/paper-button.js';
@@ -31,11 +31,6 @@ import { SharedStyles } from './shared-styles.js';
 
 @customElement('view-login')
 export class ViewLogin extends connect(store)(PageViewElement) {
-  @property({type: Number})
-  private _clicks = 0;
-
-  @property({type: Number})
-  private _value = 0;
 
   @property({type: Boolean})
   private _viewStateUserNotCrowd = true
@@ -47,10 +42,6 @@ export class ViewLogin extends connect(store)(PageViewElement) {
     return [
       SharedStyles
     ];
-  }
-
-  protected _toggleLoginViewState(){
-    this._viewStateUserNotCrowd = !this._viewStateUserNotCrowd;
   }
 
   protected _handleCrowdLogin() {
@@ -104,10 +95,6 @@ export class ViewLogin extends connect(store)(PageViewElement) {
     return html`${this._user ? html`${this.renderLoggedIn()}` : html`${this.renderLoginPage()}` }`;
   }
 
-  private _crowdLoginButtonClicked() {
-
-  }
-
   private _toggleLoginViewState() {
     this._viewStateUserNotCrowd = !this._viewStateUserNotCrowd;
   }
@@ -122,12 +109,12 @@ export class ViewLogin extends connect(store)(PageViewElement) {
     firebase.auth().signInWithPopup(provider);
   }
 
+  /*
   // This is called every time something is updated in the store.
   stateChanged(state: RootState) {
-    this._clicks = state.counter!.clicks;
-    this._value = state.counter!.value;
     this._user = state.user!.currentUser;
   }
+  */
 
   handleDemoAccess() {
       console.log("handling demo access")

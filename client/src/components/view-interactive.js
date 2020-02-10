@@ -242,7 +242,7 @@ let ViewInteractive = class ViewInteractive extends connect(store)(PageViewEleme
           height: 150px;
           display: flex;
           flex-direction: row;
-          justify-content: center; 
+          justify-content: center;
         }
 
         .session-step-center-bottom {
@@ -448,7 +448,7 @@ let ViewInteractive = class ViewInteractive extends connect(store)(PageViewEleme
     }
     renderSessionButtons() {
         return html `${this._sessionComplete ? html `
-        <paper-button class="inverted-primary" @click="${this._completeSession}" raised @click="${this._nextStep}">Continue</paper-button>      
+        <paper-button class="inverted-primary" @click="${this._completeSession}" raised @click="${this._nextStep}">Continue</paper-button>
     ` : html `
         ${this.renderSessionInProgressButtons()}
     `}`;
@@ -495,7 +495,7 @@ let ViewInteractive = class ViewInteractive extends connect(store)(PageViewEleme
     }
     renderInitialInstructions() {
         return html `
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ut risus vel sapien porttitor aliquam. Duis non dolor urna. Vestibulum consectetur, sem nec volutpat vehicula, nibh est egestas tortor, a facilisis elit massa vitae ipsum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam vulputate nunc risus, a venenatis quam posuere in. Cras auctor urna non leo euismod, tincidunt fermentum mi bibendum.</p>        
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ut risus vel sapien porttitor aliquam. Duis non dolor urna. Vestibulum consectetur, sem nec volutpat vehicula, nibh est egestas tortor, a facilisis elit massa vitae ipsum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam vulputate nunc risus, a venenatis quam posuere in. Cras auctor urna non leo euismod, tincidunt fermentum mi bibendum.</p>
         `;
     }
     renderSession() {
@@ -517,7 +517,7 @@ let ViewInteractive = class ViewInteractive extends connect(store)(PageViewEleme
                     
                     ${this.renderInitialInstructions()}
 
-                  </div>    
+                  </div>
 
                </div>
 

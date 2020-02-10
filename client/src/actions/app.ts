@@ -111,12 +111,6 @@ const loadPage: ActionCreator<ThunkResult> = (page: string) => (dispatch) => {
         dispatch(updateDashboardActive(false));
       });
       break;
-    case 'hack':
-      import('../components/view-article-hackathons.js').then((_module) => {
-        dispatch(updateLoadingAnimationState(false));
-        dispatch(updateDashboardActive(false));
-      });
-      break;
     case 'machine-learning':
       import('../components/view-article-machine-learning.js').then((_module) => {
         dispatch(updateLoadingAnimationState(false));

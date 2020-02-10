@@ -42,7 +42,7 @@ let ViewArticleScalingTpuInput = class ViewArticleScalingTpuInput extends connec
             height: 20px;
         }
 
-        .article-hero-heading { 
+        .article-hero-heading {
             font-size: 40px;
         }
  

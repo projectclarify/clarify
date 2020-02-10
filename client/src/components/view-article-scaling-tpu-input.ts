@@ -8,12 +8,11 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 */
 
-import { css, html, property, customElement } from 'lit-element';
-import { PageViewElement } from './page-view-element.js';
+import { css, html, customElement } from 'lit-element';
 import { connect } from 'pwa-helpers/connect-mixin.js';
 
 // This element is connected to the Redux store.
-import { store, RootState } from '../store.js';
+import { store } from '../store.js';
 
 import { mouseIcon } from './my-icons.js';
 
@@ -22,8 +21,6 @@ import '/node_modules/@polymer/paper-button/paper-button.js';
 // These are the shared styles needed by this element.
 import { SharedStyles } from './shared-styles.js';
 import { ButtonSharedStyles } from './button-shared-styles.js';
-
-import { conventionalLabeling, embeddingSpace, knn, sslArchitecture, percepSimilarity } from './ml-images.js';
 
 import { ViewArticleBase } from './view-article-base.js';
 

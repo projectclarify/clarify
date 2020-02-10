@@ -118,7 +118,7 @@ let DashViewExercises = class DashViewExercises extends connect(store)(PageViewE
 
         <div class="exercise-card-container">
 
-            <exercise-card 
+            <exercise-card
                 category="vocational"
                 iconText="Dw"
                 subcategory="deep-work"
@@ -126,7 +126,7 @@ let DashViewExercises = class DashViewExercises extends connect(store)(PageViewE
                 description="Engage in a deep work session while being provided ML-enabled feedback">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="vocational"
                 iconText="Lw"
                 subcategory="light-work"
@@ -150,7 +150,7 @@ let DashViewExercises = class DashViewExercises extends connect(store)(PageViewE
 
         <div class="exercise-card-container">
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Mi"
                 subcategory="mindfulness"
@@ -158,7 +158,7 @@ let DashViewExercises = class DashViewExercises extends connect(store)(PageViewE
                 description="Pay attention to breath and notice when you become distracted">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Oa"
                 subcategory="open-awareness"
@@ -166,7 +166,7 @@ let DashViewExercises = class DashViewExercises extends connect(store)(PageViewE
                 description="Maintain non-reactive open awareness of thought stream">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Bm"
                 subcategory="body-scan"
@@ -174,7 +174,7 @@ let DashViewExercises = class DashViewExercises extends connect(store)(PageViewE
                 description="Develop greater mind-body awareness by scanning yours mindfully">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Bm"
                 subcategory="body-scan"
@@ -182,7 +182,7 @@ let DashViewExercises = class DashViewExercises extends connect(store)(PageViewE
                 description="Pracitce mindfulness and body awareness at the same time.">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Vi"
                 subcategory="visualization"
@@ -190,7 +190,7 @@ let DashViewExercises = class DashViewExercises extends connect(store)(PageViewE
                 description="Pratice culitvating and strengthening feelings of gratitude.">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Vi"
                 subcategory="visualization"
@@ -198,7 +198,7 @@ let DashViewExercises = class DashViewExercises extends connect(store)(PageViewE
                 description="Pratice culitvating and strengthening feelings of gratitude.">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="Oa"
                 subcategory="open-awareness"
@@ -206,7 +206,7 @@ let DashViewExercises = class DashViewExercises extends connect(store)(PageViewE
                 description="Pratice a state non-reactive open awareness through noting.">
                 </exercise-card>
 
-            <exercise-card 
+            <exercise-card
                 category="meditation"
                 iconText="So"
                 subcategory="social"
@@ -230,7 +230,7 @@ let DashViewExercises = class DashViewExercises extends connect(store)(PageViewE
 
         <div class="exercise-card-container">
 
-            <exercise-card 
+            <exercise-card
                 category="emotional"
                 iconText="La"
                 subcategory="emotion-labeling"
@@ -253,7 +253,7 @@ let DashViewExercises = class DashViewExercises extends connect(store)(PageViewE
 
         <div class="exercise-card-container">
 
-            <exercise-card 
+            <exercise-card
                 category="motivation"
                 iconText="Mo"
                 subcategory="motivation-journaling"

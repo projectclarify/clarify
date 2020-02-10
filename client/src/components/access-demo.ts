@@ -1,5 +1,5 @@
 
-import { LitElement, css, html, property, customElement } from 'lit-element';
+import { LitElement, css, html, customElement } from 'lit-element';
 
 import { SharedStyles } from './shared-styles.js';
 import { ButtonSharedStyles } from './button-shared-styles.js';

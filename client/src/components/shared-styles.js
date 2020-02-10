@@ -422,7 +422,7 @@ export const SharedStyles = css `
     text-align: center;
     padding-left: 10%;
     padding-right: 10%;
-  }  
+  }
 
   b {
     color: var(--app-primary-color);

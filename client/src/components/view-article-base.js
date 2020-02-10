@@ -109,7 +109,7 @@ export class ViewArticleBase extends PageViewElement {
     }
     _scrollToScrollTarget(e) {
         // Get the name of the scroll target from the `scrollTarget` attribute of the
-        // .scrollspy-item container (including in the case where e.target is 
+        // .scrollspy-item container (including in the case where e.target is
         // scrollspy-item-text instead of scrollspy-item...)
         let target = e.target;
         if (target.className == "scrollspy-item-text") {

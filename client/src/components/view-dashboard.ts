@@ -13,16 +13,11 @@ import { PageViewElement } from './page-view-element.js';
 import { connect } from 'pwa-helpers/connect-mixin.js';
 
 // This element is connected to the Redux store.
-import { store, RootState } from '../store.js';
-
-// These are the actions needed by this element.
-import { navigate } from '../actions/app.js';
+import { store } from '../store.js';
 
 // These are the shared styles needed by this element.
 import { SharedStyles } from './shared-styles.js';
 import { ButtonSharedStyles } from './button-shared-styles.js';
-import { moduleItemIcon } from './my-icons.js';
-
 import "/node_modules/@polymer/iron-collapse/iron-collapse.js";
 
 import "./dash-view-navigator.js";
@@ -111,10 +106,6 @@ export class ViewDashboard extends connect(store)(PageViewElement) {
       </div>
 
     `;
-  }
-
-  stateChanged(state: RootState) {
-
   }
 
 }

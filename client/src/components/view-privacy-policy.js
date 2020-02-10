@@ -18,13 +18,6 @@ import { PageViewElement } from './page-view-element.js';
 import { connect } from 'pwa-helpers/connect-mixin.js';
 // This element is connected to the Redux store.
 import { store } from '../store.js';
-// These are the actions needed by this element.
-import { checkout } from '../actions/shop.js';
-// We are lazy loading its reducer.
-import shop, { cartQuantitySelector } from '../reducers/shop.js';
-store.addReducers({
-    shop
-});
 // These are the shared styles needed by this element.
 import { SharedStyles } from './shared-styles.js';
 import { ButtonSharedStyles } from './button-shared-styles.js';
@@ -119,14 +112,6 @@ let ViewPrivacyPolicy = class ViewPrivacyPolicy extends connect(store)(PageViewE
       </section>
 
     `;
-    }
-    _checkoutButtonClicked() {
-        store.dispatch(checkout());
-    }
-    // This is called every time something is updated in the store.
-    stateChanged(state) {
-        this._quantity = cartQuantitySelector(state);
-        this._error = state.shop.error;
     }
 };
 ViewPrivacyPolicy = __decorate([

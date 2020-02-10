@@ -42,7 +42,7 @@ let ViewArticleMachineLearning = class ViewArticleMachineLearning extends connec
             height: 20px;
         }
 
-        .article-hero-heading { 
+        .article-hero-heading {
             font-size: 40px;
         }
  
@@ -116,7 +116,7 @@ let ViewArticleMachineLearning = class ViewArticleMachineLearning extends connec
 
         <div class="article-large-width-image-container">
             <div class="article-large-width-image">
-                ${embeddingSpace}            
+                ${embeddingSpace}
             </div>
         </div>
         
@@ -131,7 +131,7 @@ let ViewArticleMachineLearning = class ViewArticleMachineLearning extends connec
 
         <div class="article-large-width-image-container">
             <div class="article-large-width-image">
-                ${knn}            
+                ${knn}
             </div>
         </div>
 
@@ -150,7 +150,7 @@ let ViewArticleMachineLearning = class ViewArticleMachineLearning extends connec
 
         <div class="article-large-width-image-container">
             <div class="article-large-width-image">
-                ${sslArchitecture}            
+                ${sslArchitecture}
             </div>
         </div>
 
@@ -176,7 +176,7 @@ let ViewArticleMachineLearning = class ViewArticleMachineLearning extends connec
 
         <div class="article-large-width-image-container">
             <div class="article-large-width-image">
-                ${percepSimilarity}            
+                ${percepSimilarity}
             </div>
         </div>
 

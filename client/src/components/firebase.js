@@ -18,7 +18,7 @@ store.addReducers({
 });
 // Initialize Firebase
 var config = {
-    apiKey: "AIzaSyAU4BL4cX5zV-C5mQgjJY5Fv2NC0KFYM_Y",
+    apiKey: "AIzaSyAxPkTg8Vh3ipChKln_AQN79cN1f1Beqtg",
     authDomain: "clarify-32fcf.firebaseapp.com",
     databaseURL: "https://clarify-32fcf.firebaseio.com",
     projectId: "clarify",

@@ -8,21 +8,12 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 */
 
-import { html, css, property, customElement } from 'lit-element';
+import { html, css, customElement } from 'lit-element';
 import { PageViewElement } from './page-view-element.js';
 import { connect } from 'pwa-helpers/connect-mixin.js';
 
 // This element is connected to the Redux store.
-import { store, RootState } from '../store.js';
-
-// These are the actions needed by this element.
-import { checkout } from '../actions/shop.js';
-
-// We are lazy loading its reducer.
-import shop, { cartQuantitySelector } from '../reducers/shop.js';
-store.addReducers({
-  shop
-});
+import { store } from '../store.js';
 
 // These are the shared styles needed by this element.
 import { SharedStyles } from './shared-styles.js';
@@ -126,13 +117,4 @@ export class ViewTermsOfService extends connect(store)(PageViewElement) {
     `;
   }
 
-  private _checkoutButtonClicked() {
-    store.dispatch(checkout());
-  }
-
-  // This is called every time something is updated in the store.
-  stateChanged(state: RootState) {
-    this._quantity = cartQuantitySelector(state);
-    this._error = state.shop!.error;
-  }
 }

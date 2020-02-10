@@ -31,8 +31,6 @@ import { SharedStyles } from './shared-styles.js';
 let ViewLogin = class ViewLogin extends connect(store)(PageViewElement) {
     constructor() {
         super(...arguments);
-        this._clicks = 0;
-        this._value = 0;
         this._viewStateUserNotCrowd = true;
         this._user = '';
     }
@@ -40,9 +38,6 @@ let ViewLogin = class ViewLogin extends connect(store)(PageViewElement) {
         return [
             SharedStyles
         ];
-    }
-    _toggleLoginViewState() {
-        this._viewStateUserNotCrowd = !this._viewStateUserNotCrowd;
     }
     _handleCrowdLogin() {
         console.log("Crowd login button clicked.");
@@ -90,8 +85,6 @@ let ViewLogin = class ViewLogin extends connect(store)(PageViewElement) {
     render() {
         return html `${this._user ? html `${this.renderLoggedIn()}` : html `${this.renderLoginPage()}`}`;
     }
-    _crowdLoginButtonClicked() {
-    }
     _toggleLoginViewState() {
         this._viewStateUserNotCrowd = !this._viewStateUserNotCrowd;
     }
@@ -103,22 +96,16 @@ let ViewLogin = class ViewLogin extends connect(store)(PageViewElement) {
         var provider = new firebase.auth.GithubAuthProvider();
         firebase.auth().signInWithPopup(provider);
     }
+    /*
     // This is called every time something is updated in the store.
-    stateChanged(state) {
-        this._clicks = state.counter.clicks;
-        this._value = state.counter.value;
-        this._user = state.user.currentUser;
+    stateChanged(state: RootState) {
+      this._user = state.user!.currentUser;
     }
+    */
     handleDemoAccess() {
         console.log("handling demo access");
     }
 };
-__decorate([
-    property({ type: Number })
-], ViewLogin.prototype, "_clicks", void 0);
-__decorate([
-    property({ type: Number })
-], ViewLogin.prototype, "_value", void 0);
 __decorate([
     property({ type: Boolean })
 ], ViewLogin.prototype, "_viewStateUserNotCrowd", void 0);
