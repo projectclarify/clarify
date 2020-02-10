@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Image Facial Expression Correspondence (image-FEC)."""
 
 from trax import layers as tl
@@ -19,7 +18,9 @@ from trax.models.resnet import IdentityBlock
 
 
 # Forked from trax, just to help get set up
-def ImageFEC(d_hidden=64, n_output_classes=1001, mode='train',
+def ImageFEC(d_hidden=64,
+             n_output_classes=1001,
+             mode='train',
              norm=tl.BatchNorm,
              non_linearity=tl.Relu):
   """ResNet.
@@ -38,14 +39,16 @@ def ImageFEC(d_hidden=64, n_output_classes=1001, mode='train',
 
   # A ConvBlock configured with the given norm, non-linearity and mode.
   def Resnet50ConvBlock(filter_multiplier=1, strides=(2, 2)):
-    filters = (
-        [filter_multiplier * dim for dim in [d_hidden, d_hidden, 4 * d_hidden]])
+    filters = ([
+        filter_multiplier * dim for dim in [d_hidden, d_hidden, 4 * d_hidden]
+    ])
     return ConvBlock(3, filters, strides, norm, non_linearity, mode)
 
   # Same as above for IdentityBlock.
   def Resnet50IdentityBlock(filter_multiplier=1):
-    filters = (
-        [filter_multiplier * dim for dim in [d_hidden, d_hidden, 4 * d_hidden]])
+    filters = ([
+        filter_multiplier * dim for dim in [d_hidden, d_hidden, 4 * d_hidden]
+    ])
     return IdentityBlock(3, filters, norm, non_linearity, mode)
 
   return tl.Serial(

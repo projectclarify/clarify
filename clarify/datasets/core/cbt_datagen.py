@@ -26,7 +26,6 @@ from tensor2tensor.utils import registry
 from tensor2tensor.data_generators import problem
 
 from clarify.utils import cbt_utils
-
 """
 from pcml.launcher.kube import Resources
 from pcml.launcher.kube import PCMLJob
@@ -35,6 +34,7 @@ from pcml.launcher.kube import gen_timestamped_uid
 from pcml.utils.cmd_utils import run_and_output
 from pcml.utils.fs_utils import get_pcml_root
 """
+
 
 class CBTDatagenJob(PCMLJob):
 
@@ -63,17 +63,17 @@ class CBTDatagenJob(PCMLJob):
     self.job_name_prefix = job_name_prefix
 
     super(CBTDatagenJob, self).__init__(job_name=job_name,
-                                          command=command,
-                                          command_args=command_args,
-                                          namespace="kubeflow",
-                                          image=image,
-                                          num_local_ssd=1,
-                                          resources=Resources(limits={
-                                              "cpu": num_cpu,
-                                              "memory": memory
-                                          }),
-                                          *args,
-                                          **kwargs)
+                                        command=command,
+                                        command_args=command_args,
+                                        namespace="kubeflow",
+                                        image=image,
+                                        num_local_ssd=1,
+                                        resources=Resources(limits={
+                                            "cpu": num_cpu,
+                                            "memory": memory
+                                        }),
+                                        *args,
+                                        **kwargs)
 
 
 def log_flags(flags):

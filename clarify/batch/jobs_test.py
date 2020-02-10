@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Test of Job subclasses."""
 
 import datetime
@@ -26,7 +25,6 @@ from clarify.batch import jobs
 class TPUJobTest(absltest.TestCase):
 
   def test_tpu_job_basic(self):
-
     """
     
     TODO: Add one of allowed TPU designations to either
@@ -40,19 +38,18 @@ class TPUJobTest(absltest.TestCase):
     
     """
 
-    container=client.V1Container(
-      name="clarify",
-      image="gcr.io/clarify/runtime-base:v0.1.0-2370",
-      command=["pwd"]
-    )
+    container = client.V1Container(
+        name="clarify",
+        image="gcr.io/clarify/runtime-base:v0.1.0-2370",
+        command=["pwd"])
 
     j = jobs.TPUJob(container=container)
 
     run_request = j.batch_run()
 
     status = j.wait_for_job(
-      timeout=datetime.timedelta(seconds=20),
-      polling_interval=datetime.timedelta(seconds=1),    
+        timeout=datetime.timedelta(seconds=20),
+        polling_interval=datetime.timedelta(seconds=1),
     )
 
 
