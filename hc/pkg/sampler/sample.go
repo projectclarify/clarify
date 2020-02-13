@@ -26,7 +26,6 @@ package sample
 import (
 	//#include "samplerConfig.h"
 	"C"
-
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -59,6 +58,11 @@ func RunSampler(config SamplerConfig) {
 	sampler := newSampler(config)
 	summer = make(chan int)
 	sampler.Run(10)
+}
+
+// NewSamplerConfig returns sampler config with correct values, needed for calls from Go
+func NewSamplerConfig(seed int, count int) SamplerConfig {
+	return SamplerConfig{C.long(seed), C.long(count)}
 }
 
 func newSampler(config SamplerConfig) *sampler {

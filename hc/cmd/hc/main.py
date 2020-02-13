@@ -7,7 +7,7 @@ class sampler_config(Structure):
 
 
 lib = cdll.LoadLibrary("./sampler_main.so")
-obj = sampler_config(42, 10)
+obj = sampler_config(42, 20)
 
 lib.RunSampler.argtypes = [sampler_config]
 lib.RunSampler(obj)

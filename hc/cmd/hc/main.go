@@ -14,7 +14,6 @@ package main
 
 //sampler "github.com/projectclarify/clarify/hc/pkg/sampler/sample"
 import (
-	//#include "../../pkg/sampler/samplerConfig.h"
 	"C"
 	"flag"
 
@@ -22,10 +21,12 @@ import (
 )
 
 func main() {
+	seed := flag.Int("seed", 42, "RNG Seed")
+	count := flag.Int("count", 10, "Job Count")
 	flag.Parse()
 
 	var config sampler.SamplerConfig
-	config = sampler.SamplerConfig{42, 10}
+	config = sampler.NewSamplerConfig(*seed, *count)
 
 	sampler.RunSampler(config)
 }

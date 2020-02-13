@@ -1,4 +1,4 @@
-	typedef struct {
-			long RngSeed;
-			long JobCount;
-	} SamplerConfig;
+typedef struct {
+	long RngSeed;
+	long JobCount;
+} SamplerConfig;
