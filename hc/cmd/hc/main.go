@@ -14,17 +14,18 @@ package main
 
 //sampler "github.com/projectclarify/clarify/hc/pkg/sampler/sample"
 import (
+	//#include "../../pkg/sampler/samplerConfig.h"
+	"C"
 	"flag"
-	"fmt"
-	"os"
 
 	sampler "../../pkg/sampler"
 )
 
 func main() {
 	flag.Parse()
-	if err := sampler.RunSampler(); err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
-	}
+
+	var config sampler.SamplerConfig
+	config = sampler.SamplerConfig{42, 10}
+
+	sampler.RunSampler(config)
 }

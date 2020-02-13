@@ -24,6 +24,9 @@ package sample
 */
 
 import (
+	//#include "samplerConfig.h"
+	"C"
+
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -33,13 +36,11 @@ import (
 	bigtable "cloud.google.com/go/bigtable"
 )
 
-type samplerConfiguration struct {
-	rngSeed  int
-	jobCount int
-}
+//SamplerConfig to be used by external go files
+type SamplerConfig C.SamplerConfig
 
 type sampler struct {
-	config        samplerConfiguration
+	config        SamplerConfig
 	arrayToSample []int
 }
 
@@ -53,14 +54,14 @@ var summer chan int
 var tbl *bigtable.Table
 
 // RunSampler to be called from python with config
-func RunSampler() error {
-	config := samplerConfiguration{42, 10}
+//export RunSampler
+func RunSampler(config SamplerConfig) {
 	sampler := newSampler(config)
 	summer = make(chan int)
-	return sampler.Run(10)
+	sampler.Run(10)
 }
 
-func newSampler(config samplerConfiguration) *sampler {
+func newSampler(config SamplerConfig) *sampler {
 
 	sampler := &sampler{config, []int{1, 2, 3, 4, 5, 6, 7, 8}}
 
@@ -78,30 +79,32 @@ func (s *sampler) Run(threadiness int) error {
 	//glog.Infof("Starting %v workers", threadiness)
 
 	tbl = cbtutil.NewConnection()
-	jobChan := make(chan sampleJob, s.config.jobCount)
+	jobChan := make(chan sampleJob, s.config.JobCount)
 
 	for i := 0; i < threadiness; i++ {
 		wg.Add(1)
 		go s.worker(jobChan)
 	}
 
-	source := rand.NewSource(int64(s.config.rngSeed))
+	source := rand.NewSource(int64(s.config.RngSeed))
 	rng := rand.New(source)
-	for i := 0; i < s.config.jobCount; i++ {
-		jobChan <- sampleJob{rng.Intn(len(s.arrayToSample)), "job" + strconv.Itoa(i)}
+
+	var i C.long
+	for i = 0; i < s.config.JobCount; i++ {
+		jobChan <- sampleJob{rng.Intn(len(s.arrayToSample)), "job" + strconv.Itoa(int(i))}
 	}
 
 	//glog.Info("Started workers")
 	sum := 0
-	for i := 0; i < s.config.jobCount; i++ {
+	for i = 0; i < s.config.JobCount; i++ {
 		sum += <-summer
 	}
 	close(jobChan)
 	wg.Wait()
 	fmt.Println("Real Sum:" + strconv.Itoa(sum))
 	btSum := 0
-	for i := 0; i < s.config.jobCount; i++ {
-		btSum += cbtutil.ReadVal(tbl, "job"+strconv.Itoa(i))
+	for i = 0; i < s.config.JobCount; i++ {
+		btSum += cbtutil.ReadVal(tbl, "job"+strconv.Itoa(int(i)))
 	}
 	fmt.Println("Big Table Sum:" + strconv.Itoa(btSum))
 	//glog.Info("Shutting down workers")
