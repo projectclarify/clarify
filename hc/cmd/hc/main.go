@@ -12,23 +12,19 @@
 
 package main
 
+//sampler "github.com/projectclarify/clarify/hc/pkg/sampler/sample"
 import (
+	"flag"
+	"fmt"
+	"os"
 
-    "flag"
-    "fmt"
-    "os"
-
-    sampler "github.com/projectclarify/clarify/hc/pkg/sampler/sample"
-
+	sampler "../../pkg/sampler"
 )
 
 func main() {
-
-    flag.Parse()
-
-    if err := sampler.Run(); err != nil {
-        fmt.Fprintf(os.Stderr, "%v\n", err)
-        os.Exit(1)
-    }
-
+	flag.Parse()
+	if err := sampler.RunSampler(); err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
 }
