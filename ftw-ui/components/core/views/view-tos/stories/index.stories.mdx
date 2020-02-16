@@ -1,0 +1,55 @@
+import { Story, Preview, Meta, Props, html } from '@open-wc/demoing-storybook';
+
+import '../view-tos.js';
+
+<Meta 
+  title="ViewTos"
+  parameters={{
+    component: "view-tos",
+    options: { selectedPanel: "storybookjs/knobs/panel" }
+  }}
+/>
+
+# ViewTos
+
+A component for...
+
+## Features:
+
+- a
+- b
+- ...
+
+## How to use
+
+### Installation
+
+```bash
+yarn add view-tos
+```
+
+```js
+import 'view-tos/view-tos.js';
+```
+
+<Preview withToolbar>
+  <Story name="Simple">
+    {html`
+      <view-tos></view-tos>
+    `}
+  </Story>
+</Preview>
+
+## API
+
+<Props of="view-tos" />
+
+## Variations
+
+###### Custom Title
+
+<Story name="Custom Title">
+  {html`
+    <view-tos .title=${'Hello World'}></view-tos>
+  `}
+</Story>

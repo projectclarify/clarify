@@ -1,0 +1,55 @@
+import { Story, Preview, Meta, Props, html } from '@open-wc/demoing-storybook';
+
+import '../view-sessions-base.js';
+
+<Meta 
+  title="ViewSessionsBase"
+  parameters={{
+    component: "view-sessions-base",
+    options: { selectedPanel: "storybookjs/knobs/panel" }
+  }}
+/>
+
+# ViewSessionsBase
+
+A component for...
+
+## Features:
+
+- a
+- b
+- ...
+
+## How to use
+
+### Installation
+
+```bash
+yarn add view-sessions-base
+```
+
+```js
+import 'view-sessions-base/view-sessions-base.js';
+```
+
+<Preview withToolbar>
+  <Story name="Simple">
+    {html`
+      <view-sessions-base></view-sessions-base>
+    `}
+  </Story>
+</Preview>
+
+## API
+
+<Props of="view-sessions-base" />
+
+## Variations
+
+###### Custom Title
+
+<Story name="Custom Title">
+  {html`
+    <view-sessions-base .title=${'Hello World'}></view-sessions-base>
+  `}
+</Story>

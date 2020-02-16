@@ -1,0 +1,55 @@
+import { Story, Preview, Meta, Props, html } from '@open-wc/demoing-storybook';
+
+import '../activity-step-base.js';
+
+<Meta 
+  title="ActivityStepBase"
+  parameters={{
+    component: "activity-step-base",
+    options: { selectedPanel: "storybookjs/knobs/panel" }
+  }}
+/>
+
+# ActivityStepBase
+
+A component for...
+
+## Features:
+
+- a
+- b
+- ...
+
+## How to use
+
+### Installation
+
+```bash
+yarn add activity-step-base
+```
+
+```js
+import 'activity-step-base/activity-step-base.js';
+```
+
+<Preview withToolbar>
+  <Story name="Simple">
+    {html`
+      <activity-step-base></activity-step-base>
+    `}
+  </Story>
+</Preview>
+
+## API
+
+<Props of="activity-step-base" />
+
+## Variations
+
+###### Custom Title
+
+<Story name="Custom Title">
+  {html`
+    <activity-step-base .title=${'Hello World'}></activity-step-base>
+  `}
+</Story>

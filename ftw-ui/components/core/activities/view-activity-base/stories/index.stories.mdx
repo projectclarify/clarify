@@ -1,0 +1,55 @@
+import { Story, Preview, Meta, Props, html } from '@open-wc/demoing-storybook';
+
+import '../view-activity-base.js';
+
+<Meta 
+  title="ViewActivityBase"
+  parameters={{
+    component: "view-activity-base",
+    options: { selectedPanel: "storybookjs/knobs/panel" }
+  }}
+/>
+
+# ViewActivityBase
+
+A component for...
+
+## Features:
+
+- a
+- b
+- ...
+
+## How to use
+
+### Installation
+
+```bash
+yarn add view-activity-base
+```
+
+```js
+import 'view-activity-base/view-activity-base.js';
+```
+
+<Preview withToolbar>
+  <Story name="Simple">
+    {html`
+      <view-activity-base></view-activity-base>
+    `}
+  </Story>
+</Preview>
+
+## API
+
+<Props of="view-activity-base" />
+
+## Variations
+
+###### Custom Title
+
+<Story name="Custom Title">
+  {html`
+    <view-activity-base .title=${'Hello World'}></view-activity-base>
+  `}
+</Story>

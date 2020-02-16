@@ -1,0 +1,55 @@
+import { Story, Preview, Meta, Props, html } from '@open-wc/demoing-storybook';
+
+import '../ftw-ui.js';
+
+<Meta 
+  title="FtwUi"
+  parameters={{
+    component: "ftw-ui",
+    options: { selectedPanel: "storybookjs/knobs/panel" }
+  }}
+/>
+
+# FtwUi
+
+A component for...
+
+## Features:
+
+- a
+- b
+- ...
+
+## How to use
+
+### Installation
+
+```bash
+yarn add ftw-ui
+```
+
+```js
+import 'ftw-ui/ftw-ui.js';
+```
+
+<Preview withToolbar>
+  <Story name="Simple">
+    {html`
+      <ftw-ui></ftw-ui>
+    `}
+  </Story>
+</Preview>
+
+## API
+
+<Props of="ftw-ui" />
+
+## Variations
+
+###### Custom Title
+
+<Story name="Custom Title">
+  {html`
+    <ftw-ui .title=${'Hello World'}></ftw-ui>
+  `}
+</Story>

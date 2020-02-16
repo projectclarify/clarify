@@ -1,0 +1,55 @@
+import { Story, Preview, Meta, Props, html } from '@open-wc/demoing-storybook';
+
+import '../view-privacy.js';
+
+<Meta 
+  title="ViewPrivacy"
+  parameters={{
+    component: "view-privacy",
+    options: { selectedPanel: "storybookjs/knobs/panel" }
+  }}
+/>
+
+# ViewPrivacy
+
+A component for...
+
+## Features:
+
+- a
+- b
+- ...
+
+## How to use
+
+### Installation
+
+```bash
+yarn add view-privacy
+```
+
+```js
+import 'view-privacy/view-privacy.js';
+```
+
+<Preview withToolbar>
+  <Story name="Simple">
+    {html`
+      <view-privacy></view-privacy>
+    `}
+  </Story>
+</Preview>
+
+## API
+
+<Props of="view-privacy" />
+
+## Variations
+
+###### Custom Title
+
+<Story name="Custom Title">
+  {html`
+    <view-privacy .title=${'Hello World'}></view-privacy>
+  `}
+</Story>

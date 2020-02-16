@@ -1,0 +1,55 @@
+import { Story, Preview, Meta, Props, html } from '@open-wc/demoing-storybook';
+
+import '../view-login.js';
+
+<Meta 
+  title="ViewLogin"
+  parameters={{
+    component: "view-login",
+    options: { selectedPanel: "storybookjs/knobs/panel" }
+  }}
+/>
+
+# ViewLogin
+
+A component for...
+
+## Features:
+
+- a
+- b
+- ...
+
+## How to use
+
+### Installation
+
+```bash
+yarn add view-login
+```
+
+```js
+import 'view-login/view-login.js';
+```
+
+<Preview withToolbar>
+  <Story name="Simple">
+    {html`
+      <view-login></view-login>
+    `}
+  </Story>
+</Preview>
+
+## API
+
+<Props of="view-login" />
+
+## Variations
+
+###### Custom Title
+
+<Story name="Custom Title">
+  {html`
+    <view-login .title=${'Hello World'}></view-login>
+  `}
+</Story>
