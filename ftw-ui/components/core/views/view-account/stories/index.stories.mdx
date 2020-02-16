@@ -1,0 +1,55 @@
+import { Story, Preview, Meta, Props, html } from '@open-wc/demoing-storybook';
+
+import '../view-account.js';
+
+<Meta 
+  title="ViewAccount"
+  parameters={{
+    component: "view-account",
+    options: { selectedPanel: "storybookjs/knobs/panel" }
+  }}
+/>
+
+# ViewAccount
+
+A component for...
+
+## Features:
+
+- a
+- b
+- ...
+
+## How to use
+
+### Installation
+
+```bash
+yarn add view-account
+```
+
+```js
+import 'view-account/view-account.js';
+```
+
+<Preview withToolbar>
+  <Story name="Simple">
+    {html`
+      <view-account></view-account>
+    `}
+  </Story>
+</Preview>
+
+## API
+
+<Props of="view-account" />
+
+## Variations
+
+###### Custom Title
+
+<Story name="Custom Title">
+  {html`
+    <view-account .title=${'Hello World'}></view-account>
+  `}
+</Story>
