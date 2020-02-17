@@ -42,6 +42,10 @@ jobs:
         uses: actions/download-artifact@master
         with:
           name: dist
+      - name: Set project
+        uses: w9jds/firebase-action@master
+        with:
+          args: use --add clarify
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
         with:
