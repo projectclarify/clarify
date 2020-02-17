@@ -42,6 +42,7 @@ jobs:
         uses: actions/download-artifact@master
         with:
           name: dist
+          path: ftw-ui/dist
       - name: Set project
         uses: w9jds/firebase-action@master
         env:
