@@ -44,6 +44,9 @@ jobs:
           name: dist
       - name: Set project
         uses: w9jds/firebase-action@master
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          PROJECT_PATH: ftw-ui
         with:
           args: use --add clarify
       - name: Deploy to Firebase
