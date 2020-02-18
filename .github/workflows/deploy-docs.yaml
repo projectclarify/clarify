@@ -24,7 +24,7 @@ jobs:
       - name: Install Dependencies
         run: cd docs && yarn install
       - name: Build
-        run: cd docs && npm run build:docs
+        run: cd docs && yarn docs:build
       - name: Archive Production Artifact
         uses: actions/upload-artifact@master
         with:
