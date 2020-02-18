@@ -4,7 +4,6 @@
     <th>Acknowledgement</th>
     <th>Demo notebook</th>
     <th>Circle status</th>
-    <th>Prow status</th>
     <th>Cite this</th>
   </tr>
   <tr>
@@ -12,7 +11,6 @@
     <td><a href="https://colab.research.google.com/gist/cwbeitel/9f647889b63f9db3469bc45e16709f31/project-clarify-demo-nb-q4-19.ipynb" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></img></a>
 </td>
     <td><a href="https://circleci.com/gh/projectclarify/clarify" target="_blank"><img src="https://circleci.com/gh/projectclarify/clarify.svg?style=svg"></img></a></td>
-    <td><a href="http://34.98.93.95" target="_blank"><img src="http://34.98.93.95/badge.svg?jobs=test-presubmit"></img></a></td>
     <td><a href="https://zenodo.org/badge/latestdoi/194198315" target="_blank"><img src="https://zenodo.org/badge/194198315.svg" alt="DOI"></a></td>
   </tr>
 </table>
@@ -25,7 +23,7 @@ Whitepaper: http://bit.ly/pcml-overview-doc
 
 Q1 Projects and Epics: [here](https://docs.google.com/document/d/17oJNqOqgxalwikwua6bKAfm7UoRWZdIULQNTMSdOByI/edit#bookmark=id.fea7yocss3q1)
 
-Check out the front-end platform alpha at [ai4hi.org](https://ai4hi.org)
+Read the developer docs: [docs.cl4rify.org](https://docs.cl4rify.org)
 
 Read the [FAQ](https://medium.com/project-clarify/faq-8b886e69886b)
 
