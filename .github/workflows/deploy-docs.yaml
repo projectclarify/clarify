@@ -1,8 +1,8 @@
-name: FTW Deploy Study
+name: Deploy docs
 on:
   push:
     branches:
-      - 'studies/**'
+      - 'master'
 jobs:
   notify-start:
     name: Notify start
@@ -22,14 +22,14 @@ jobs:
         uses: actions/checkout@master
         id: deploy
       - name: Install Dependencies
-        run: cd ftw-ui && yarn install
+        run: cd docs && yarn install
       - name: Build
-        run: cd ftw-ui && npm run build
+        run: cd docs && npm run build:docs
       - name: Archive Production Artifact
         uses: actions/upload-artifact@master
         with:
-          name: dist
-          path: ftw-ui/dist
+          name: docs
+          path: docs/_site
   deploy:
     name: Deploy
     needs: build
@@ -41,22 +41,22 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@master
         with:
-          name: dist
-          path: ftw-ui/dist
+          name: docs
+          path: docs/_site
       - name: Set project
         uses: w9jds/firebase-action@master
         env:
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-          PROJECT_PATH: ftw-ui
+          PROJECT_PATH: docs
         with:
           args: use --add clarify
-      #- name: Deploy to Firebase
-      #  uses: w9jds/firebase-action@master
-      #  with:
-      #    args: deploy --only hosting
-      #  env:
-      #    GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-      #    PROJECT_PATH: ftw-ui
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only hosting:clarify-docs
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          PROJECT_PATH: docs
   notify-complete:
     runs-on: ubuntu-latest
     needs: deploy

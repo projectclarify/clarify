@@ -130,8 +130,6 @@ dmypy.json
 
 ftw-ui/node_modules
 
-docs/
-
 manuscript.aux
 manuscript.log
 manuscript.out
@@ -146,3 +144,8 @@ go/main
 
 exp/.DS_Store
 exp/golang-experiments/.DS_Store
+
+docs/node_modules
+docs/_site
+
+
