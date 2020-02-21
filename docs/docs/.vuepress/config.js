@@ -6,18 +6,31 @@ const sidebar = [
     collapsable: true,
     children: [
       '/project-overview/',
-      '/community/',
-    ],
-  },
+      {
+        title: 'Community',
+	collapsable: true,
+	children: [
+	  ['/community/', 'Overview']
+	]
+      },
+      {
+        title: 'Design and proposals',
+        collapsable: true,
+        children: [
+          ['/community/proposals/', 'Overview'],
+          '/community/proposals/ftw',
+        ],
+      },
+  ]},
   {
     title: 'Contributor Guide',
     collapsable: true,
     children: [
-      '/design-overview/',
-      '/oss-dev/',
-      '/dev-fx/',
-      '/dev-ml/',
-      '/dev-platform/'
+      '/contributing/',
+      '/contributing/oss-dev/',
+      '/contributing/dev-fx/',
+      '/contributing/dev-ml/',
+      '/contributing/dev-platform/'
     ],
   },
   {
@@ -51,11 +64,11 @@ module.exports = {
     sidebar: {
       '/project-overview/': sidebar,
       '/community/': sidebar,
-      '/design-overview/': sidebar,
-      '/oss-dev/': sidebar,
-      '/dev-fx/': sidebar,
-      '/dev-ml/': sidebar,
-      '/dev-platform/': sidebar,
+      '/contributing/': sidebar,
+      '/contributing/oss-dev/': sidebar,
+      '/contributing/dev-fx/': sidebar,
+      '/contributing/dev-ml/': sidebar,
+      '/contributing/dev-platform/': sidebar,
       '/obj-docs/': sidebar,
       '/obj-docs/clarify/': sidebar,
       '/obj-docs/ftw-ui/': sidebar,
