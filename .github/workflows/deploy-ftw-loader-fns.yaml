@@ -6,6 +6,7 @@ on:
 env:
   GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
   GCP_ZONE: ${{ secrets.GCP_ZONE }}
+
 jobs:
   deploy-loader-functions:
     name: Deploy ftw loader functions
@@ -19,4 +20,5 @@ jobs:
         service_account_email: ${{ secrets.SA_EMAIL }}
         service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
     - name: Deploy core loader functions
-      run: python ftw/loader_fns/deploy.py --all
+      run: python ftw/ftw_meta/deploy.py --all
+

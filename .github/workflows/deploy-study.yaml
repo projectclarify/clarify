@@ -2,6 +2,7 @@ name: FTW Deploy Study
 on:
   push:
     branches:
+      - 'ftw-user-ingress-fns'
       - 'studies/**'
 jobs:
   notify-start:
@@ -22,14 +23,14 @@ jobs:
         uses: actions/checkout@master
         id: deploy
       - name: Install Dependencies
-        run: cd ftw-ui && yarn install
+        run: cd ftw/ftw_ui && yarn install
       - name: Build
-        run: cd ftw-ui && npm run build
+        run: cd ftw/ftw_ui && yarn run build:firebase
       - name: Archive Production Artifact
         uses: actions/upload-artifact@master
         with:
-          name: dist
-          path: ftw-ui/dist
+          name: build
+          path: ftw/ftw_ui/build
   deploy:
     name: Deploy
     needs: build
@@ -41,22 +42,22 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@master
         with:
-          name: dist
-          path: ftw-ui/dist
+          name: build
+          path: ftw/ftw_ui/build
       - name: Set project
         uses: w9jds/firebase-action@master
         env:
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-          PROJECT_PATH: ftw-ui
+          PROJECT_PATH: ftw/ftw_ui
         with:
           args: use --add clarify
-      #- name: Deploy to Firebase
-      #  uses: w9jds/firebase-action@master
-      #  with:
-      #    args: deploy --only hosting
-      #  env:
-      #    GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-      #    PROJECT_PATH: ftw-ui
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          PROJECT_PATH: ftw/ftw_ui
   notify-complete:
     runs-on: ubuntu-latest
     needs: deploy

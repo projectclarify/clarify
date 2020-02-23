@@ -148,4 +148,7 @@ exp/golang-experiments/.DS_Store
 docs/node_modules
 docs/_site
 
+ftw/ftw_ui/node_modules
+ftw/ftw_ui/dist
+ftw/ftw_ui/build
 
