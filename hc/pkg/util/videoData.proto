@@ -1,0 +1,22 @@
+syntax = "proto3";
+package util;
+
+message VideoToRead {
+    int32 id = 1;
+    int32 frameCount = 2;
+    int32 xRes = 3;
+    int32 yRes = 4;
+    repeated frame frames = 5;
+}
+
+message VideoToWrite {
+    int32 id = 1;
+    int32 frameCount = 2;
+    int32 xRes = 3;
+    int32 yRes = 4;
+    repeated frame frames = 5;
+}
+
+message frame {
+    repeated int32 vals = 6  [packed=true];
+}

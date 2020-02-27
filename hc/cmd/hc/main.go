@@ -22,11 +22,12 @@ import (
 
 func main() {
 	seed := flag.Int("seed", 42, "RNG Seed")
-	count := flag.Int("count", 10, "Job Count")
+	//count := flag.Int("count", 10, "Job Count")
 	flag.Parse()
 
 	var config sampler.SamplerConfig
-	config = sampler.NewSamplerConfig(*seed, *count)
+	config = sampler.NewSamplerConfig(*seed)
+	//config = sampler.NewSamplerConfig(*seed, *count)
 
 	sampler.RunSampler(config)
 }

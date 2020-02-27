@@ -16,7 +16,6 @@ package cbtutil
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	bigtable "cloud.google.com/go/bigtable"
 	bttest "cloud.google.com/go/bigtable/bttest"
@@ -50,26 +49,25 @@ func NewConnection() *bigtable.Table {
 	return tbl
 }
 
-//WriteVal writes val to tbl at specified row
-func WriteVal(tbl *bigtable.Table, rowID string, val int) {
+//WriteVal writes byte array to tbl at specified row
+func WriteVal(tbl *bigtable.Table, rowID string, val []byte) {
 	ctx := context.Background()
 	mut := bigtable.NewMutation()
-	mut.Set("vals", "vals1", bigtable.Now(), []byte(strconv.Itoa(val)))
+	mut.Set("vals", "videoObj", bigtable.Now(), val)
 	err := tbl.Apply(ctx, rowID, mut)
 	try(err)
 }
 
-//ReadVal reads val at specified row
-func ReadVal(tbl *bigtable.Table, rowID string) int {
+//ReadVal reads byte array at specified row
+func ReadVal(tbl *bigtable.Table, rowID string) []byte {
 	ctx := context.Background()
 	row, err := tbl.ReadRow(ctx, rowID)
 	try(err)
 
-	var retVal = 0
+	var retVal = []byte{}
 	for _, column := range row["vals"] {
-		val, err := strconv.Atoi(string(column.Value))
-		try(err)
-		fmt.Println(column.Column + ":" + strconv.Itoa(val))
+		val := column.Value
+		fmt.Println(column.Column + ":" + string(val))
 		retVal = val
 	}
 	return retVal
