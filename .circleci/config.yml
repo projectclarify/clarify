@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  check_yapf:
     docker:
     - image: circleci/python:3.7-node-browsers-legacy
     steps:
@@ -11,9 +11,50 @@ jobs:
     - run:
         name: Python style check (yapf diff)
         command: python tools/testing/check_yapf.py --path=clarify
+  test_ui:
+    docker:
+      - image: circleci/node:10.16.3
+    steps:
+      - checkout
+      - run:
+          name: get key
+          command: wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+      - run:
+          name: set repo
+          command: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+      - run:
+          name: update
+          command: sudo apt-get update
+      - run:
+          name: install chrome
+          command: sudo apt-get install -y google-chrome-stable
+      - run:
+          name: update-npm
+          command: 'sudo npm install -g npm@latest'
+      - restore_cache:
+          key: dependency-cache-{{ checksum "ftw-ui/yarn.lock" }}
+      - run:
+          name: install
+          command: cd ftw-ui && yarn install && cd ../
+      - save_cache:
+          key: dependency-cache-{{ checksum "ftw-ui/yarn.lock" }}
+          paths:
+            - ftw-ui/node_modules
+      - run:
+          name: test
+          command: cd ftw-ui && npm run test
+      - run:
+          name: lint
+          command: cd ftw-ui && npm run lint
+      - run:
+          name: build
+          command: cd ftw-ui && npm run build
+      - run:
+          name: storybook build
+          command: cd ftw-ui && npm run storybook:build
 workflows:
   version: 2
   workflow:
     jobs:
-    - build
-
+    - check_yapf
+    - test_ui

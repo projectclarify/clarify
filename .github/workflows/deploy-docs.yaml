@@ -1,0 +1,81 @@
+name: Deploy docs
+on:
+  push:
+    branches:
+      - 'master'
+jobs:
+  notify-start:
+    name: Notify start
+    runs-on: ubuntu-latest
+    steps:
+      - name: Slack notify triggered study deployment
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: pullreminders/slack-action@master
+        with:
+          args: \'{\"channel\":\"CTZV73MMK\",\"text\":\"A study deployment was initiated.\"}\'
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@master
+        id: deploy
+      - name: Install Dependencies
+        run: cd docs && yarn install
+      - name: Build
+        run: cd docs && yarn docs:build
+      - name: Archive Production Artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: docs
+          path: docs/_site
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@master
+        id: deploy
+      - name: Download Artifact
+        uses: actions/download-artifact@master
+        with:
+          name: docs
+          path: docs/_site
+      - name: Set project
+        uses: w9jds/firebase-action@master
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          PROJECT_PATH: docs
+        with:
+          args: use --add clarify
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only hosting:clarify-docs
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          PROJECT_PATH: docs
+  notify-complete:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Notify slack
+        if: success()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: pullreminders/slack-action@master
+        with:
+          args: \'{\"channel\":\"CTZV73MMK\",\"text\":\"A study deployment succeeded, here's the URL.\"}\'
+  notify-deployment-failed:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Notify slack
+        if: failure()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: pullreminders/slack-action@master
+        with:
+          args: \'{\"channel\":\"CTZV73MMK\",\"text\":\"A study deployment failed.\"}\'

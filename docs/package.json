@@ -1,0 +1,19 @@
+{
+  "name": "project-clarify-docs",
+  "version": "0.0.1",
+  "description": "Documentation for Project Clarify",
+  "main": "index.js",
+  "author": "Project Clarify Contributors",
+  "license": "Apache 2.0",
+  "private": false,
+  "devDependencies": {
+    "vuepress": "^1.3.0"
+  },
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
+  },
+  "dependencies": {
+    "@github/clipboard-copy-element": "^1.1.2"
+  }
+}
