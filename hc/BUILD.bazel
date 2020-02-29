@@ -1,0 +1,5 @@
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
+# gazelle:prefix github.com/projectclarify/clarify/hc
+# gazelle:exclude vendor
+gazelle(name = "gazelle")

@@ -1,0 +1,228 @@
+#!/usr/bin/env python
+# coding=utf-8
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import os
+import subprocess
+import logging
+import tempfile
+
+DEMO_MODEL_PATH = "gs://clarify-public/models/fec-train-j1030-0136-3a8f/output"
+
+PLEASE_AUTH_MSG = """
+    
+Please authenticate by running `!gcloud auth login`.
+
+"""
+
+BEFORE_CONTINUING_MSG = """
+  
+! Before continuing, reset the runtime via Runtime > Restart runtime. !
+  
+"""
+
+VERSIONS = {
+  "fx_demo_v0": "e5252a37fcdd4ccabdd9ef564ece0385365b577d"
+}
+
+
+def _run(cmd, cwd="/content/clarify"):
+  return subprocess.check_output(cmd, cwd=cwd).decode("utf-8")
+
+
+def _active_account():
+  return _run(["gcloud", "auth", "list", "--filter=status:ACTIVE"],
+               cwd="/")
+
+
+def _maybe_remove_stale_codebase():
+
+  contents = _run(["ls"], cwd="/content")
+
+  if "clarify" in contents:
+    logging.info("Removing stale codebase version...")
+    _run(["rm", "-rf", "/content/clarify"])
+
+
+def _obtain_codebase(commit):
+
+  _maybe_remove_stale_codebase()
+
+  logging.info("Obtaining codebase...")
+  repo_address = "https://github.com/projectclarify/clarify.git"
+  _run(["git", "clone", "--quiet", repo_address], cwd="/content")
+
+  if commit:
+    logging.info("Checking out relevant version...")
+    _run(["git", "checkout", "--quiet", "-b", "demo", commit])
+    # Otherwise just use the master branch.
+
+
+def _pip_install():
+
+  pip_packages = _run(["pip", "list"])
+  if "dill" in pip_packages:
+    _run(["pip", "uninstall", "-y", "dill"])
+
+  logging.info("Configuring dependencies, this will take a couple minutes...")
+  _run(["pip", "install", "-e", ".[tensorflow,tests]"])
+
+  _run(["pip", "install", "gtts"])
+
+
+def _ensure_ckpt(ckpt):
+  # TODO: This is a hack to deal with checkpoints not downloading by way of
+  # tensorflow; only really need to obtain the exported model so could update
+  # this.
+
+  logging.info("Ensuring local copy of ckpt...")
+
+  local_ckpt_parent_path = "/tmp/clarify-fx-demo-v0/" # <- ends with a slash
+  local_ckpt_dir_path = os.path.join(local_ckpt_parent_path, "output")
+
+  def _have_ckpt():
+    return "checkpoint" in _run(["ls", local_ckpt_parent_path])
+
+  def _obtain_ckpt():
+    logging.info("Obtaining model parameters, this could also take a minute...")
+    _run(["gsutil", "-mq", "cp", "-r", ckpt, local_ckpt_parent_path])
+
+  if not os.path.exists(local_ckpt_parent_path) or not _have_ckpt():
+    _run(["mkdir", "-p", local_ckpt_parent_path])
+    _obtain_ckpt()
+
+  logging.info("Finished ensuring local copy of ckpt.")
+
+
+# HACK: This file does not have the same path across codebase versions but will
+# probably be phasing out tfserving.
+TFSERVING_INSTALL = """#!/usr/bin/bash
+
+sudo apt-get update
+sudo apt-get install -y curl
+
+echo "deb [arch=amd64] http://storage.googleapis.com/tensorflow-serving-apt stable tensorflow-model-server tensorflow-model-server-universal" | sudo tee /etc/apt/sources.list.d/tensorflow-serving.list
+
+curl https://storage.googleapis.com/tensorflow-serving-apt/tensorflow-serving.release.pub.gpg | sudo apt-key add -
+
+sudo apt-get update && sudo apt-get install tensorflow-model-server
+
+pip install tensorflow_serving_api
+
+python -c 'from tensorflow_serving.apis import predict_pb2'
+python -c 'from tensorflow_serving.apis import prediction_service_pb2_grpc'
+
+"""
+
+def _write_install_sh_and_install(install_string, noun=None):
+
+  if noun:
+    logging.info("Installing {}...".format(noun))
+
+  d = tempfile.mkdtemp()
+  installer_path = os.path.join(d, "installer.sh")
+  with open(installer_path, "w") as f:
+    f.write(install_string)
+  _run(["sh", installer_path])
+
+  if noun:
+    logging.info("Done installing {}.".format(noun))
+
+
+def _install_tfserving():
+  _write_install_sh_and_install(install_string=TFSERVING_INSTALL,
+                                noun="TFServing")
+
+
+# HACK: This file does not have the same path across codebase versions.
+BAZEL_INSTALL = """#!/usr/bin/bash
+
+BAZEL_VERSION="2.0.0"
+
+export SRC=/usr/local/src
+
+cd $SRC
+
+SCRIPT="bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
+
+wget https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/$SCRIPT
+
+chmod +x $SCRIPT
+
+./$SCRIPT
+
+rm $SRC/$SCRIPT
+
+"""
+
+def _install_bazel():
+  _write_install_sh_and_install(install_string=BAZEL_INSTALL, noun="Bazel")
+
+
+def _install_golang():
+  _run(["wget", "https://dl.google.com/go/go1.13.linux-amd64.tar.gz"])
+  _run(["tar", "-C", "/usr/local", "-xzvf", "go1.13.linux-amd64.tar.gz"])
+  _run(["ln", "-s", "/usr/local/go/bin/go", "/usr/local/bin/go"])
+
+
+def auto_setup(commit=None, include_v0_ckpt=False):
+
+  if include_v0_ckpt:
+    if not _active_account():
+      logging.info(PLEASE_AUTH_MSG)
+      return
+
+  _obtain_codebase(commit=commit)
+
+  _pip_install()
+
+  if include_v0_ckpt:
+    _ensure_ckpt(ckpt=DEMO_MODEL_PATH)
+
+  _install_tfserving()
+
+  _install_bazel()
+
+  _install_golang()
+
+  logging.info("Setup complete.")
+
+  logging.info(BEFORE_CONTINUING_MSG)
+
+
+if __name__ == '__main__':
+
+  import argparse
+
+  logging.getLogger().setLevel(logging.INFO)
+
+  parser = argparse.ArgumentParser(description='Notebook setup util.')
+
+  parser.add_argument('--version', type=str, default=None,
+                      help='A version shorthand key into VERSIONS.')
+
+  parser.add_argument('--include_v0_ckpt', type=bool, default=False,
+                      help='Temporary. Whether to pull v0 ckpt.')
+
+  # TODO: Add argument to generalize workspace root.
+
+  args = parser.parse_args()
+
+  include_v0_ckpt = args.include_v0_ckpt
+  version = args.version
+
+  if version:
+    if version in VERSIONS:
+      version = VERSIONS[version]
+
+  auto_setup(commit=version, include_v0_ckpt=include_v0_ckpt)

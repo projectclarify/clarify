@@ -2,17 +2,16 @@ load("@my_deps//:requirements.bzl", "requirement")
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 load("@io_bazel_rules_docker//container:container.bzl", "container_push")
 load("@io_bazel_rules_docker//container:container.bzl", "container_image")
-
 load("@bazel_gazelle//:def.bzl", "gazelle")
 
 # gazelle:prefix github.com/projectclarify/pcml/sampler
 gazelle(name = "gazelle")
 
 filegroup(
-  name = "dev-requirements.txt",
-  srcs = [
-    "dev-requirements.txt"
-  ]
+    name = "dev-requirements.txt",
+    srcs = [
+        "dev-requirements.txt",
+    ],
 )
 
 py_library(
@@ -32,12 +31,12 @@ pkg_tar(
     strip_prefix = "/bazel-out/k8-fastbuild/bin",
     package_dir = "/usr/local/src/clarify-pkg/",
     srcs = glob([
-        "bazel-out/k8-fastbuild/bin/clarify/research/**/*"
+        "bazel-out/k8-fastbuild/bin/clarify/research/**/*",
     ]),
     mode = "0755",
     symlinks = {
-      "/clarify/bin/train" : "/usr/local/src/clarify-pkg/clarify/research/train"
-    }
+        "/clarify/bin/train": "/usr/local/src/clarify-pkg/clarify/research/train",
+    },
 )
 
 pkg_tar(
@@ -45,22 +44,22 @@ pkg_tar(
     strip_prefix = "/bazel-out/k8-fastbuild/bin/configs",
     package_dir = "/usr/local/src/clarify-configs",
     srcs = glob([
-        "configs/**/*"
+        "configs/**/*",
     ]),
     mode = "0755",
     symlinks = {
-      "/clarify/configs" : "/usr/local/src/clarify-configs/configs"
-    }
+        "/clarify/configs": "/usr/local/src/clarify-configs/configs",
+    },
 )
 
 container_image(
     name = "runtime",
     base = "@runtime_base//image",
     tars = [
-      ":clarify_pkg_tar",
-      ":clarify_configs_pkg_tar"
+        ":clarify_pkg_tar",
+        ":clarify_configs_pkg_tar",
     ],
-    cmd = ["pwd"]
+    cmd = ["pwd"],
 )
 
 container_push(

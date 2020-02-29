@@ -1,0 +1,13 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["sample.go"],
+    importpath = "github.com/projectclarify/clarify/hc/pkg/sampler",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_golang_glog//:go_default_library",
+        "@com_github_projectclarify_clarify//util:go_default_library",
+        "@com_github_projectclarify_clarify//util/cbtutil:go_default_library",
+    ],
+)

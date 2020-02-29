@@ -1,4 +1,3 @@
-
 package(default_visibility = ["//visibility:public"])
 
 load("@my_deps//:requirements.bzl", "requirement")
@@ -18,5 +17,5 @@ py_binary(
         "//clarify/research/vid_fec:__init__",
         requirement("trax"),
         requirement("absl-py"),
-    ]
+    ],
 )

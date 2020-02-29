@@ -25,7 +25,7 @@ load(
 )
 
 docker_toolchain_configure(
-    name = "docker_config"
+    name = "docker_config",
 )
 
 load(
@@ -51,11 +51,10 @@ container_pull(
 
     # Derived from workspace base, has dev-requirements and tf 1.15, pending
     # build of leaner image.
-    digest = "sha256:689b51bfd966a6b6e490b3b16a02303380f45ec452d9c3cfa92d4ff31a0a412b"
+    digest = "sha256:689b51bfd966a6b6e490b3b16a02303380f45ec452d9c3cfa92d4ff31a0a412b",
 
     # Older workspace base
     #digest = "sha256:a53a953e6451e3f776697292c2f721faecb50af6a50ad8325d614297e8091114"
-
 )
 
 http_archive(
@@ -121,6 +120,6 @@ http_archive(
     sha256 = "86c6d481b3f7aedc1d60c1c211c6f76da282ae197c3b3160f54bd3a8f847896f",
 )
 
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 
 gazelle_dependencies()

@@ -1,4 +1,3 @@
-
 package(default_visibility = ["//visibility:public"])
 
 py_library(
@@ -11,5 +10,5 @@ py_library(
 py_library(
     name = "test_config",
     srcs = ["test_config.py"],
-    srcs_version = "PY3ONLY"
+    srcs_version = "PY3ONLY",
 )
